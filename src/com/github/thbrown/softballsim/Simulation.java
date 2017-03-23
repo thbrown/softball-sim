@@ -1,5 +1,7 @@
 package com.github.thbrown.softballsim;
 
+import com.main.thbrown.softballsim.lineup.BattingLineup;
+
 public class Simulation {
 
 	private BattingLineup lineup;
@@ -20,7 +22,7 @@ public class Simulation {
 
 			// Game
 			int gameScore = 0;
-			for(int inning = 0; Main.INNINGS_PER_GAME > inning; inning++) {
+			for(int inning = 0; SoftballSim.INNINGS_PER_GAME > inning; inning++) {
 
 				// Inning
 				int outs = 0;
@@ -33,22 +35,22 @@ public class Simulation {
 						outs++;
 					}
 
-					if(Main.VERBOSE) {
+					if(SoftballSim.VERBOSE) {
 						String message = 
-								padRight(p.name,Main.NAME_PADDING) + 
+								padRight(p.name,SoftballSim.NAME_PADDING) + 
 								"\t hit:" + mapBasesToHitType(bases) + 
 								"\t outs:" + outs + 
 								"\t score:" + gameScore;
 						System.out.println(message);
 					}
 				}
-				if(Main.VERBOSE) {
+				if(SoftballSim.VERBOSE) {
 					System.out.println("--------------");
 				}
 				clearBases();
 
 			}
-			if(Main.VERBOSE) {
+			if(SoftballSim.VERBOSE) {
 				System.out.println("Runs Scrored: " + gameScore);
 				System.out.println("=============================================================");
 			}
@@ -61,14 +63,14 @@ public class Simulation {
 	}
 
 	private int hit(int bases) {
-		int scoreOnHit = 0;
-		for(int i = 0 ; i < bases; i++) {
-			scoreOnHit += this.third ? 1 : 0;
+		int runsResultingFromHit = 0;
+		for (int i = 0; i < bases; i++) {
+			runsResultingFromHit += this.third ? 1 : 0;
 			this.third = this.second;
 			this.second = this.first;
-			this.first = (i==0) ? true : false;
+			this.first = (i == 0) ? true : false;
 		}
-		return scoreOnHit;
+		return runsResultingFromHit;
 	}
 
 	private void clearBases() {
@@ -85,7 +87,7 @@ public class Simulation {
 		case 3:  return "triple";
 		case 4:  return "homerun";
 		default: 
-			String message = "Somethin is wrong, bases must be between 0 and 4 inclusive." +
+			String message = "Something is wrong, bases must be between 0 and 4 inclusive." +
 					"Value was " + bases;
 			throw new IllegalArgumentException(message);
 		}

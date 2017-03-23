@@ -1,14 +1,16 @@
-package com.github.thbrown.softballsim;
+package com.main.thbrown.softballsim.lineup;
 
 import java.util.List;
 
-public class OrdinaryBattingLineup {
+import com.github.thbrown.softballsim.Player;
+
+public class OrdinaryBattingLineup implements BattingLineup {
 
 	private List<Player> players;
 
 	private int hitterIndex = 0;
 
-	OrdinaryBattingLineup(List<Player> players) {
+	public OrdinaryBattingLineup(List<Player> players) {
 		this.players = players;
 		if(players.size() <= 0) {
 			String message = "You must include at least one player in the lineup.";
@@ -24,5 +26,15 @@ public class OrdinaryBattingLineup {
 
 	public void reset() {
 		hitterIndex = 0;
+	}
+	
+	@Override
+	public String toString() {
+		StringBuilder result = new StringBuilder();
+		result.append("Players").append("\n");;
+		for(Player p : players) {
+			result.append("\t").append(p).append("\n");
+		}
+		return result.toString();
 	}
 }
