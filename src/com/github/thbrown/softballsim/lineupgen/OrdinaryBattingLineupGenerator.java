@@ -13,11 +13,10 @@ import java.util.Scanner;
 
 import com.github.thbrown.softballsim.PermutationGeneratorUtil;
 import com.github.thbrown.softballsim.Player;
-import com.main.thbrown.softballsim.lineup.BattingLineup;
-import com.main.thbrown.softballsim.lineup.OrdinaryBattingLineup;
+import com.github.thbrown.softballsim.lineup.BattingLineup;
+import com.github.thbrown.softballsim.lineup.OrdinaryBattingLineup;
 
-// TODO - Rename this to be OrdinaryBattingLineupGenerator
-public class OrdinaryBatteryLineupGenerator implements LineupGenerator {
+public class OrdinaryBattingLineupGenerator implements LineupGenerator {
 
 	private Queue<BattingLineup> allPossibleLineups = new LinkedList<>();
 
@@ -33,7 +32,7 @@ public class OrdinaryBatteryLineupGenerator implements LineupGenerator {
 		// Read in batter data from the supplied directory
 		File folder = new File(statsPath);
 		File[] listOfFiles = folder.listFiles(m -> m.isFile());
-		if(listOfFiles == null) {
+		if (listOfFiles == null) {
 			throw new IllegalArgumentException("No files were found in " + statsPath);
 		}
 		for (int i = 0; i < listOfFiles.length; i++) {
@@ -63,33 +62,40 @@ public class OrdinaryBatteryLineupGenerator implements LineupGenerator {
 					String line = in.next();
 					String[] s = line.split(",");
 					String key = s[0];
-					
-					// Validata data
-					for(int i = 1; i < s.length; i++) {
-						if(!s[i].equals("0") && !s[i].equals("1") && !s[i].equals("2") && !s[i].equals("3") && !s[i].equals("4")) {
-							throw new IllegalArgumentException("Invalid data value: " + s[i]);
+
+					// Validate data
+					for (int i = 1; i < s.length; i++) {
+						if (!s[i].equals("0") && !s[i].equals("1")
+								&& !s[i].equals("2") && !s[i].equals("3")
+								&& !s[i].equals("4")) {
+							throw new IllegalArgumentException(
+									"Invalid data value: " + s[i]);
 						}
 					}
-					
-					if(data.containsKey(key)) {
-						data.put(key,data.get(key) + line.replace(key+",","") + ",");
+
+					if (data.containsKey(key)) {
+						data.put(key,
+								data.get(key) + line.replace(key + ",", "")
+										+ ",");
 					} else {
-						data.put(key,line.replace(key+",","") + ",");
+						data.put(key, line.replace(key + ",", "") + ",");
 					}
-				} 
+				}
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			} finally {
 				in.close();
 			}
 		} catch (Exception e) {
-			System.out.println("WARNING: There was a problem while processing " + filePath + ". This file will be skipped. Problem: " + e.getMessage());
+			System.out.println("WARNING: There was a problem while processing "
+					+ filePath + ". This file will be skipped. Problem: "
+					+ e.getMessage());
 		}
 	}
 
 	// FIXME: This is brittle and has a bad format
 	private void collect(List<Player> players) {
-		for(String key : data.keySet()) {
+		for (String key : data.keySet()) {
 			String name = key.split(",")[0];
 			String line = data.get(key);
 			String[] s = line.split(",");
@@ -104,5 +110,4 @@ public class OrdinaryBatteryLineupGenerator implements LineupGenerator {
 							(int)Arrays.stream(s).filter(e -> e.equals("BB")).count()));
 		}
 	}
-
 }

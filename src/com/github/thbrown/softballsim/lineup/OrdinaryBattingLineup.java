@@ -1,4 +1,4 @@
-package com.main.thbrown.softballsim.lineup;
+package com.github.thbrown.softballsim.lineup;
 
 import java.util.List;
 

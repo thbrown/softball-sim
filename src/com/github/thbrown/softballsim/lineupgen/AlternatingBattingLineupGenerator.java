@@ -14,8 +14,8 @@ import java.util.Scanner;
 
 import com.github.thbrown.softballsim.PermutationGeneratorUtil;
 import com.github.thbrown.softballsim.Player;
-import com.main.thbrown.softballsim.lineup.AlternatingBattingLineup;
-import com.main.thbrown.softballsim.lineup.BattingLineup;
+import com.github.thbrown.softballsim.lineup.AlternatingBattingLineup;
+import com.github.thbrown.softballsim.lineup.BattingLineup;
 
 public class AlternatingBattingLineupGenerator implements LineupGenerator {
 
@@ -53,7 +53,7 @@ public class AlternatingBattingLineupGenerator implements LineupGenerator {
 	@Override
 	public BattingLineup getNextLienup() {
 		return allPossibleLineups.poll();
-	}	
+	}
 
 	Map<String, String> data = new HashMap<>();
 
@@ -63,28 +63,29 @@ public class AlternatingBattingLineupGenerator implements LineupGenerator {
 			Scanner in = null;
 			try {
 				in = new Scanner(new FileReader(string));
-				in.useDelimiter(System.lineSeparator());
+				in.useDelimiter("\n"); //System.lineSeparator());
 				while (in.hasNext()) {
 					String line = in.next();
 					String[] s = line.split(",");
 					String key = s[0] + "," + s[1];
-					
-					// Validata data
+
+					// Validate data
 					if(!s[1].equals("A") && !s[1].equals("B")) {
 						throw new RuntimeException("Expected each player to be in either group A or B");
 					}
 					for(int i = 2; i < s.length; i++) {
-						if(!s[i].equals("0") && !s[i].equals("1") && !s[i].equals("2") && !s[i].equals("3") && !s[i].equals("4")) {
+						String hit = s[i].trim();
+						if(!(hit.equals("0") || hit.equals("1") || hit.equals("2") || hit.equals("3") || hit.equals("4"))) {
 							throw new IllegalArgumentException("Invalid data value: " + s[i]);
 						}
 					}
-					
+
 					if(data.containsKey(key)) {
 						data.put(key,data.get(key) + line.replace(key+",","") + ",");
 					} else {
 						data.put(key,line.replace(key+",","") + ",");
 					}
-				} 
+				}
 			} catch (FileNotFoundException e) {
 				throw e;
 			} finally {
@@ -93,7 +94,7 @@ public class AlternatingBattingLineupGenerator implements LineupGenerator {
 		} catch (Exception e) {
 			System.out.println("WARNING: There was a problem while processing " + string + ". This file will be skipped. Problem: " + e.getMessage());
 		}
-		
+
 	}
 
 	// FIXME: This is brittle and has a bad format
@@ -122,7 +123,7 @@ public class AlternatingBattingLineupGenerator implements LineupGenerator {
 								(int)Arrays.stream(s).filter(e -> e.equals("2")).count(),
 								(int)Arrays.stream(s).filter(e -> e.equals("3")).count(),
 								(int)Arrays.stream(s).filter(e -> e.equals("4")).count(),
-								(int)Arrays.stream(s).filter(e -> e.equals("BB")).count()));	
+								(int)Arrays.stream(s).filter(e -> e.equals("BB")).count()));
 			}
 		}
 	}

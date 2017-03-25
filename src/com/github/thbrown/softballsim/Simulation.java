@@ -1,6 +1,6 @@
 package com.github.thbrown.softballsim;
 
-import com.main.thbrown.softballsim.lineup.BattingLineup;
+import com.github.thbrown.softballsim.lineup.BattingLineup;
 
 public class Simulation {
 

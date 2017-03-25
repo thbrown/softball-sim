@@ -4,10 +4,10 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.github.thbrown.softballsim.lineup.BattingLineup;
 import com.github.thbrown.softballsim.lineupgen.AlternatingBattingLineupGenerator;
 import com.github.thbrown.softballsim.lineupgen.LineupGenerator;
-import com.github.thbrown.softballsim.lineupgen.OrdinaryBatteryLineupGenerator;
-import com.main.thbrown.softballsim.lineup.BattingLineup;
+import com.github.thbrown.softballsim.lineupgen.OrdinaryBattingLineupGenerator;
 
 public class SoftballSim {
 	// Config -- TODO convert these to flags w/ defaults
@@ -20,7 +20,7 @@ public class SoftballSim {
 	// Register all new batting lineups here
 	public static final Map<Integer, LineupGeneratorFactory> LINEUP_TYPES = new HashMap<>();
 	static {
-		LINEUP_TYPES.put(0, () -> new OrdinaryBatteryLineupGenerator());
+		LINEUP_TYPES.put(0, () -> new OrdinaryBattingLineupGenerator());
 		LINEUP_TYPES.put(1, () -> new AlternatingBattingLineupGenerator());
 	}
 
