@@ -16,6 +16,7 @@ import com.github.thbrown.softballsim.Player;
 import com.main.thbrown.softballsim.lineup.BattingLineup;
 import com.main.thbrown.softballsim.lineup.OrdinaryBattingLineup;
 
+// TODO - Rename this to be OrdinaryBattingLineupGenerator
 public class OrdinaryBatteryLineupGenerator implements LineupGenerator {
 
 	private Queue<BattingLineup> allPossibleLineups = new LinkedList<>();
