@@ -8,12 +8,10 @@ Usage:
 Assumes input file(s) in `./stats`. See the `stats` directory in this repository for example files.
 
 Available lineup generators:
-0 - OrdinaryBatteryLineupGenerator
-Expects file format like:
-`Hermione Granger,A,3,4,2,4`
-1 - AlternatingBattingLineupGenerator
-Expects file format like:
-`Bashful,4,0,0,0` 
+*  0 - OrdinaryBatteryLineupGenerator
+   *  Expects file format like: `Hermione Granger,A,3,4,2,4`
+*  1 - AlternatingBattingLineupGenerator
+   *  Expects file format like: `Bashful,4,0,0,0` 
 		
 ## Notes
 
