@@ -27,8 +27,8 @@ public class SoftballSim {
 	public static void main(String[] args) {
 		
 		// User input validation stuff
-		if(args.length == 0) {
-			System.out.println("usage: java " + getApplicationName() + " lineupGeneratorNumber");
+		if (args.length == 0) {
+			System.out.println("usage: java " + getApplicationName() + " <lineupGeneratorNumber>");
 			System.out.println("\tExpecting input files in " + STATS_FILE_PATH);
 			printAvailableLineupTypes();
 			System.exit(0);
@@ -43,7 +43,7 @@ public class SoftballSim {
 		}
 		
 		LineupGeneratorFactory generatorFactory = LINEUP_TYPES.get(selection);
-		if(generatorFactory  == null) {
+		if (generatorFactory  == null) {
 			System.out.println("Invalid lineup type selected. Was " + selection);
 			printAvailableLineupTypes();
 			System.exit(1);
@@ -61,13 +61,13 @@ public class SoftballSim {
 		System.out.println("*********************************************************************");
 
 		BattingLineup lineup;
-		while ((lineup = generator.getNextLienup()) != null){
+		while ((lineup = generator.getNextLienup()) != null) {
 			System.out.print(".");
 
 			Simulation s = new Simulation(lineup);
 			double result = s.run(GAMES_TO_SIMULATE);
 
-			if(result > bestResult) {
+			if (result > bestResult) {
 				bestResult = result;
 				bestLineup = lineup;
 			}
@@ -90,6 +90,4 @@ public class SoftballSim {
 		// TODO: get simple class name from Thread.currentThread().getStackTrace()[2].getClassName());
 		return "SoftballSim";
 	}
-	
-
 }
