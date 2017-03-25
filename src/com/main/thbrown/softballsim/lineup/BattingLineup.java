@@ -10,7 +10,7 @@ public interface BattingLineup {
 	public Player getNextBatter();
 	
 	/**
-	 * This hook runs after a game has completed. Use this make sure that first player is up to bat
+	 * This hook runs after a game has completed. Use this to ensure that the first player is up to bat
 	 * at the beginning of the next simulated game.
 	 */
 	public void reset();
