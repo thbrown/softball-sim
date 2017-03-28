@@ -3,7 +3,8 @@ Command line Monte Carlo simulation tool for making sure you choose the best lin
 softball or baseball team.
 
 Usage:
-`java SoftballSim lineupGeneratorNumber`
+`ant`
+`java -jar SoftballSim <lineupGeneratorNumber>`
 
 Assumes input file(s) in `./stats`. See the `stats` directory in this repository for example files.
 
