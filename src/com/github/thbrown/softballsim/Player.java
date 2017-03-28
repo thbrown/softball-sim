@@ -52,7 +52,8 @@ public class Player {
   }
 
   private String getSluggingPercentage() {
-    double result = (double) (singles * 1 + doubles * 2 + triples * 3 + homeRuns * 4) / plateAppearances;
+    double result = (double) (singles * 1 + doubles * 2 + triples * 3 + homeRuns * 4)
+        / plateAppearances;
     return String.format(java.util.Locale.US, "%.3f", result);
   }
 }
