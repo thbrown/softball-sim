@@ -34,9 +34,9 @@ public class Player {
     plateApperanceDistribution.putIfAbsent(homeRuns + triples + doubles, 2);
     plateApperanceDistribution.putIfAbsent(homeRuns + triples + doubles + singles + walks, 1);
     plateApperanceDistribution.putIfAbsent(plateAppearances, 0);
-    // System.out.println(String.format("%s, %d, %d, %d, %d, %d", this, singles,
-    // doubles, triples,
-    // homeRuns, plateAppearances));
+    System.out.println(String.format(
+        "%s\t 1B: %d\t 2B: %d\t 3B: %d\t HR: %d\t BB: %d\t PA: %d",
+        this, singles, doubles, triples, homeRuns, walks, plateAppearances));
   }
 
   public int hit() {
@@ -46,7 +46,8 @@ public class Player {
 
   @Override
   public String toString() {
-    return this.name + " " + getAverage() + " " + getSluggingPercentage();
+    return Simulation.padRight(this.name, 12) + Simulation.padRight(getAverage(), 8)
+        + getSluggingPercentage();
   }
 
   private String getAverage() {

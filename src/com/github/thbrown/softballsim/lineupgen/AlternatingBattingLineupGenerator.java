@@ -51,7 +51,7 @@ public class AlternatingBattingLineupGenerator implements LineupGenerator {
   }
 
   @Override
-  public BattingLineup getNextLienup() {
+  public BattingLineup getNextLineup() {
     return allPossibleLineups.poll();
   }
 

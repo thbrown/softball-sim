@@ -4,7 +4,8 @@ softball or baseball team.
 
 Usage:
 `ant`
-`java -jar SoftballSim <lineupGeneratorNumber>`
+`java -jar SoftballSim <lineupType (string) OR lineupType ordinal (int)>`
+`java -jar SoftballSim ordinary`
 
 Assumes input file(s) in `./stats`. See the `stats` directory in this repository for example files.
 
