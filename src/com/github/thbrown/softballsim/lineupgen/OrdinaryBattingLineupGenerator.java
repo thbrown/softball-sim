@@ -60,6 +60,9 @@ public class OrdinaryBattingLineupGenerator implements LineupGenerator {
 				in.useDelimiter(System.lineSeparator());
 				while (in.hasNext()) {
 					String line = in.next();
+					if(line.trim().isEmpty()) {
+						continue;
+					}
 					String[] s = line.split(",");
 					String key = s[0];
 
@@ -102,7 +105,7 @@ public class OrdinaryBattingLineupGenerator implements LineupGenerator {
 			players.add(
 					new Player(
 							name,
-							s.length,
+							(int)Arrays.stream(s).filter(e -> e.equals("0")).count(),
 							(int)Arrays.stream(s).filter(e -> e.equals("1")).count(),
 							(int)Arrays.stream(s).filter(e -> e.equals("2")).count(),
 							(int)Arrays.stream(s).filter(e -> e.equals("3")).count(),

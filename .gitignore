@@ -16,3 +16,7 @@ hs_err_pid*
 .project
 .metadata
 .settings
+
+stats
+MANIFEST.MF
+SoftbalSim

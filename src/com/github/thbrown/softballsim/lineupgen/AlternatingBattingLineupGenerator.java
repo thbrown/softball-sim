@@ -63,9 +63,12 @@ public class AlternatingBattingLineupGenerator implements LineupGenerator {
 			Scanner in = null;
 			try {
 				in = new Scanner(new FileReader(string));
-				in.useDelimiter("\n"); //System.lineSeparator());
+				in.useDelimiter(System.lineSeparator());
 				while (in.hasNext()) {
 					String line = in.next();
+					if(line.trim().isEmpty()) {
+						continue;
+					}
 					String[] s = line.split(",");
 					String key = s[0] + "," + s[1];
 
@@ -92,6 +95,7 @@ public class AlternatingBattingLineupGenerator implements LineupGenerator {
 				in.close();
 			}
 		} catch (Exception e) {
+			e.printStackTrace();
 			System.out.println("WARNING: There was a problem while processing " + string + ". This file will be skipped. Problem: " + e.getMessage());
 		}
 
@@ -108,7 +112,7 @@ public class AlternatingBattingLineupGenerator implements LineupGenerator {
 				groupA.add(
 						new Player(
 								name,
-								s.length,
+								(int)Arrays.stream(s).filter(e -> e.equals("0")).count(),
 								(int)Arrays.stream(s).filter(e -> e.equals("1")).count(),
 								(int)Arrays.stream(s).filter(e -> e.equals("2")).count(),
 								(int)Arrays.stream(s).filter(e -> e.equals("3")).count(),
@@ -118,7 +122,7 @@ public class AlternatingBattingLineupGenerator implements LineupGenerator {
 				groupB.add(
 						new Player(
 								name,
-								s.length,
+								(int)Arrays.stream(s).filter(e -> e.equals("0")).count(),
 								(int)Arrays.stream(s).filter(e -> e.equals("1")).count(),
 								(int)Arrays.stream(s).filter(e -> e.equals("2")).count(),
 								(int)Arrays.stream(s).filter(e -> e.equals("3")).count(),

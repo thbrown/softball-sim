@@ -62,7 +62,6 @@ public class SoftballSim {
 
 		BattingLineup lineup;
 		while ((lineup = generator.getNextLienup()) != null) {
-			System.out.print(".");
 
 			Simulation s = new Simulation(lineup);
 			double result = s.run(GAMES_TO_SIMULATE);

@@ -57,7 +57,7 @@ public class AlternatingBattingLineup implements BattingLineup {
 		for (Player p : groupA) {
 			result.append("\t").append(p).append("\n");;
 		}
-		result.append("GroupB").append("\n");;
+		result.append("GroupB").append("\n");
 		for(Player p : groupB) {
 			result.append("\t").append(p).append("\n");;
 		}
