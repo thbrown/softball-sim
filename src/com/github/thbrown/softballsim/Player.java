@@ -33,6 +33,7 @@ public class Player {
     plateApperanceDistribution.putIfAbsent(homeRuns + triples + doubles, 2);
     plateApperanceDistribution.putIfAbsent(homeRuns + triples + doubles + singles + walks, 1);
     plateApperanceDistribution.putIfAbsent(plateAppearances, 0);
+    System.out.println(String.format("%s, %d, %d, %d, %d, %d", this, singles, doubles, triples, homeRuns, plateAppearances));
   }
 
   public int hit() {
@@ -51,7 +52,8 @@ public class Player {
   }
 
   private String getSluggingPercentage() {
-    double result = (double) (singles * 1 + doubles * 2 + triples * 3 + homeRuns * 4) / plateAppearances;
+    double result = (double) (singles * 1 + doubles * 2 + triples * 3 + homeRuns * 4)
+        / plateAppearances;
     return String.format(java.util.Locale.US, "%.3f", result);
   }
 }
