@@ -19,7 +19,8 @@ public class Player {
 
   TreeMap<Integer, Integer> plateApperanceDistribution = new TreeMap<>();
 
-  public Player(String name, int outs, int singles, int doubles, int triples, int homeRuns, int walks) {
+  public Player(String name, int outs, int singles, int doubles, int triples, int homeRuns,
+      int walks) {
     this.name = name;
     this.singles = singles;
     this.doubles = doubles;
@@ -33,7 +34,9 @@ public class Player {
     plateApperanceDistribution.putIfAbsent(homeRuns + triples + doubles, 2);
     plateApperanceDistribution.putIfAbsent(homeRuns + triples + doubles + singles + walks, 1);
     plateApperanceDistribution.putIfAbsent(plateAppearances, 0);
-    System.out.println(String.format("%s, %d, %d, %d, %d, %d", this, singles, doubles, triples, homeRuns, plateAppearances));
+    // System.out.println(String.format("%s, %d, %d, %d, %d, %d", this, singles,
+    // doubles, triples,
+    // homeRuns, plateAppearances));
   }
 
   public int hit() {

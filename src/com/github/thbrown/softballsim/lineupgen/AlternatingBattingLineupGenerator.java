@@ -29,7 +29,7 @@ public class AlternatingBattingLineupGenerator implements LineupGenerator {
     // Read in batter data from the supplied directory
     File folder = new File(statsPath);
     File[] listOfFiles = folder.listFiles(m -> m.isFile());
-    if(listOfFiles == null) {
+    if (listOfFiles == null) {
       throw new IllegalArgumentException("No files were found in " + statsPath);
     }
     for (int i = 0; i < listOfFiles.length; i++) {
@@ -42,8 +42,8 @@ public class AlternatingBattingLineupGenerator implements LineupGenerator {
     List<List<Player>> groupALineups = PermutationGeneratorUtil.permute(groupA);
     List<List<Player>> groupBLineups = PermutationGeneratorUtil.permute(groupB);
 
-    for(List<Player> groupAPermutation : groupALineups) {
-      for(List<Player> groupBPermutation : groupBLineups) {
+    for (List<Player> groupAPermutation : groupALineups) {
+      for (List<Player> groupBPermutation : groupBLineups) {
         // TODO: need to account for both groupA bat first and groupB bat first
         allPossibleLineups.add(new AlternatingBattingLineup(groupAPermutation, groupBPermutation));
       }
@@ -66,27 +66,28 @@ public class AlternatingBattingLineupGenerator implements LineupGenerator {
         in.useDelimiter(System.lineSeparator());
         while (in.hasNext()) {
           String line = in.next();
-          if(line.trim().isEmpty()) {
+          if (line.trim().isEmpty()) {
             continue;
           }
           String[] s = line.split(",");
           String key = s[0] + "," + s[1];
 
           // Validate data
-          if(!s[1].equals("A") && !s[1].equals("B")) {
+          if (!s[1].equals("A") && !s[1].equals("B")) {
             throw new RuntimeException("Expected each player to be in either group A or B");
           }
-          for(int i = 2; i < s.length; i++) {
+          for (int i = 2; i < s.length; i++) {
             String hit = s[i].trim();
-            if(!(hit.equals("0") || hit.equals("1") || hit.equals("2") || hit.equals("3") || hit.equals("4"))) {
+            if (!(hit.equals("0") || hit.equals("1") || hit.equals("2") || hit.equals("3") || hit
+                .equals("4"))) {
               throw new IllegalArgumentException("Invalid data value: " + s[i]);
             }
           }
 
-          if(data.containsKey(key)) {
-            data.put(key,data.get(key) + line.replace(key+",","") + ",");
+          if (data.containsKey(key)) {
+            data.put(key, data.get(key) + line.replace(key + ",", "") + ",");
           } else {
-            data.put(key,line.replace(key+",","") + ",");
+            data.put(key, line.replace(key + ",", "") + ",");
           }
         }
       } catch (FileNotFoundException e) {
@@ -96,38 +97,39 @@ public class AlternatingBattingLineupGenerator implements LineupGenerator {
       }
     } catch (Exception e) {
       e.printStackTrace();
-      System.out.println("WARNING: There was a problem while processing " + string + ". This file will be skipped. Problem: " + e.getMessage());
+      System.out.println("WARNING: There was a problem while processing " + string
+          + ". This file will be skipped. Problem: " + e.getMessage());
     }
 
   }
 
   // FIXME: This is brittle and has a bad format
   private void collect(List<Player> groupA, List<Player> groupB) {
-    for(String key : data.keySet()) {
+    for (String key : data.keySet()) {
       String name = key.split(",")[0];
       String gender = key.split(",")[1];
       String line = data.get(key);
       String[] s = line.split(",");
-      if(gender.equals("A")) {
+      if (gender.equals("A")) {
         groupA.add(
             new Player(
                 name,
-                (int)Arrays.stream(s).filter(e -> e.equals("0")).count(),
-                (int)Arrays.stream(s).filter(e -> e.equals("1")).count(),
-                (int)Arrays.stream(s).filter(e -> e.equals("2")).count(),
-                (int)Arrays.stream(s).filter(e -> e.equals("3")).count(),
-                (int)Arrays.stream(s).filter(e -> e.equals("4")).count(),
-                (int)Arrays.stream(s).filter(e -> e.equals("BB")).count()));
+                (int) Arrays.stream(s).filter(e -> e.equals("0")).count(),
+                (int) Arrays.stream(s).filter(e -> e.equals("1")).count(),
+                (int) Arrays.stream(s).filter(e -> e.equals("2")).count(),
+                (int) Arrays.stream(s).filter(e -> e.equals("3")).count(),
+                (int) Arrays.stream(s).filter(e -> e.equals("4")).count(),
+                (int) Arrays.stream(s).filter(e -> e.equals("BB")).count()));
       } else {
         groupB.add(
             new Player(
                 name,
-                (int)Arrays.stream(s).filter(e -> e.equals("0")).count(),
-                (int)Arrays.stream(s).filter(e -> e.equals("1")).count(),
-                (int)Arrays.stream(s).filter(e -> e.equals("2")).count(),
-                (int)Arrays.stream(s).filter(e -> e.equals("3")).count(),
-                (int)Arrays.stream(s).filter(e -> e.equals("4")).count(),
-                (int)Arrays.stream(s).filter(e -> e.equals("BB")).count()));
+                (int) Arrays.stream(s).filter(e -> e.equals("0")).count(),
+                (int) Arrays.stream(s).filter(e -> e.equals("1")).count(),
+                (int) Arrays.stream(s).filter(e -> e.equals("2")).count(),
+                (int) Arrays.stream(s).filter(e -> e.equals("3")).count(),
+                (int) Arrays.stream(s).filter(e -> e.equals("4")).count(),
+                (int) Arrays.stream(s).filter(e -> e.equals("BB")).count()));
       }
     }
   }

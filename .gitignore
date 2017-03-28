@@ -16,12 +16,8 @@ hs_err_pid*
 .project
 .metadata
 .settings
-<<<<<<< HEAD
 
 stats
 MANIFEST.MF
 SoftbalSim
-=======
-stats/
 /bin/
->>>>>>> 2d5b3cf035948d6671deeb3804c29cfe0a2c6961

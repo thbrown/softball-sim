@@ -61,7 +61,7 @@ public class OrdinaryBattingLineupGenerator implements LineupGenerator {
         in.useDelimiter(System.lineSeparator());
         while (in.hasNext()) {
           String line = in.next();
-          if(line.trim().isEmpty()) {
+          if (line.trim().isEmpty()) {
             continue;
           }
           String[] s = line.split(",");
@@ -80,7 +80,7 @@ public class OrdinaryBattingLineupGenerator implements LineupGenerator {
           if (data.containsKey(key)) {
             data.put(key,
                 data.get(key) + line.replace(key + ",", "")
-                + ",");
+                    + ",");
           } else {
             data.put(key, line.replace(key + ",", "") + ",");
           }
@@ -92,10 +92,10 @@ public class OrdinaryBattingLineupGenerator implements LineupGenerator {
       }
     } catch (Exception e) {
       System.out
-      .println(String
-          .format(
-              "WARNING: There was a problem while processing %s. This file will be skipped."
-                  + " Problem: %s",
+          .println(String
+              .format(
+                  "WARNING: There was a problem while processing %s. This file will be skipped."
+                      + " Problem: %s",
                   filePath, e.getMessage()));
     }
   }
@@ -109,12 +109,12 @@ public class OrdinaryBattingLineupGenerator implements LineupGenerator {
       players.add(
           new Player(
               name,
-              (int)Arrays.stream(s).filter(e -> e.equals("0")).count(),
-              (int)Arrays.stream(s).filter(e -> e.equals("1")).count(),
-              (int)Arrays.stream(s).filter(e -> e.equals("2")).count(),
-              (int)Arrays.stream(s).filter(e -> e.equals("3")).count(),
-              (int)Arrays.stream(s).filter(e -> e.equals("4")).count(),
-              (int)Arrays.stream(s).filter(e -> e.equals("BB")).count()));
+              (int) Arrays.stream(s).filter(e -> e.equals("0")).count(),
+              (int) Arrays.stream(s).filter(e -> e.equals("1")).count(),
+              (int) Arrays.stream(s).filter(e -> e.equals("2")).count(),
+              (int) Arrays.stream(s).filter(e -> e.equals("3")).count(),
+              (int) Arrays.stream(s).filter(e -> e.equals("4")).count(),
+              (int) Arrays.stream(s).filter(e -> e.equals("BB")).count()));
     }
   }
 
