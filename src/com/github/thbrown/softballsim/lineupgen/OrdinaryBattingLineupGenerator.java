@@ -43,6 +43,7 @@ public class OrdinaryBattingLineupGenerator implements LineupGenerator {
 
     // Find all batting lineup permutations
     List<List<Player>> lineups = PermutationGeneratorUtil.permute(players);
+    System.out.println("Possible lineups: " + lineups.size());
 
     for (List<Player> lineup : lineups) {
       allPossibleLineups.add(new OrdinaryBattingLineup(lineup));

@@ -15,7 +15,7 @@ public class Simulation {
   }
 
   public double run(int numberOfGamesToSimulate) {
-    int totalScore = 0;
+    double totalScore = 0;
 
     // Full Simulation
     for (int i = 0; i < numberOfGamesToSimulate; i++) {
@@ -48,17 +48,16 @@ public class Simulation {
           System.out.println("--------------");
         }
         clearBases();
-
       }
       if (SoftballSim.VERBOSE) {
-        System.out.println("Runs Scrored: " + gameScore);
+        System.out.println("Runs Scored: " + gameScore);
         System.out.println("=============================================================");
       }
       totalScore += gameScore;
       lineup.reset();
 
     }
-    return (double) totalScore / numberOfGamesToSimulate;
+    return totalScore / numberOfGamesToSimulate;
   }
 
   private int updateRunsAndBasesAfterHit(int bases) {

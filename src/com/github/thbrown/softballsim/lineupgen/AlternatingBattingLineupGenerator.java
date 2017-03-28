@@ -42,6 +42,7 @@ public class AlternatingBattingLineupGenerator implements LineupGenerator {
     // Find all batting lineup permutations
     List<List<Player>> groupALineups = PermutationGeneratorUtil.permute(groupA);
     List<List<Player>> groupBLineups = PermutationGeneratorUtil.permute(groupB);
+    System.out.println("Possible lineups: " + groupALineups.size() * groupBLineups.size());
 
     for (List<Player> groupAPermutation : groupALineups) {
       for (List<Player> groupBPermutation : groupBLineups) {

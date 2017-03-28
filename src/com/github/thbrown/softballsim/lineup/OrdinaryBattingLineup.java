@@ -32,7 +32,6 @@ public class OrdinaryBattingLineup implements BattingLineup {
   public String toString() {
     StringBuilder result = new StringBuilder();
     result.append("Players").append("\n");
-    ;
     for (Player p : players) {
       result.append("\t").append(p).append("\n");
     }
