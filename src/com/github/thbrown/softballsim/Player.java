@@ -10,24 +10,23 @@ public class Player {
 
   String name;
 
-  private int plateAppearances;
   private int singles;
   private int doubles;
   private int triples;
   private int homeRuns;
   private int walks;
+  private int plateAppearances;
 
   TreeMap<Integer, Integer> plateApperanceDistribution = new TreeMap<>();
 
-  public Player(String name, int outs, int singles, int doubles, int triples, int homeRuns,
-      int walks) {
-    this.name = name;
-    this.singles = singles;
-    this.doubles = doubles;
-    this.triples = triples;
-    this.homeRuns = homeRuns;
-    this.walks = walks;
-    this.plateAppearances = singles + doubles + triples + homeRuns + walks + outs;
+  private Player(Player.Builder builder) {
+    this.name = builder.name;
+    this.singles = builder.singles;
+    this.doubles = builder.doubles;
+    this.triples = builder.triples;
+    this.homeRuns = builder.homeRuns;
+    this.walks = builder.walks;
+    this.plateAppearances = singles + doubles + triples + homeRuns + walks + builder.outs;
 
     plateApperanceDistribution.putIfAbsent(homeRuns, 4);
     plateApperanceDistribution.putIfAbsent(homeRuns + triples, 3);
@@ -59,5 +58,54 @@ public class Player {
     double result = (double) (singles * 1 + doubles * 2 + triples * 3 + homeRuns * 4)
         / plateAppearances;
     return String.format(java.util.Locale.US, "%.3f", result);
+  }
+
+  public static class Builder {
+    private String name;
+
+    private int singles;
+    private int doubles;
+    private int triples;
+    private int homeRuns;
+    private int walks;
+    private int outs;
+
+    public Builder(String name) {
+      this.name = name;
+    }
+
+    public Player build() {
+      return new Player(this);
+    }
+
+    public Builder singles(int singles) {
+      this.singles = singles;
+      return this;
+    }
+
+    public Builder doubles(int doubles) {
+      this.doubles = doubles;
+      return this;
+    }
+
+    public Builder triples(int triples) {
+      this.triples = triples;
+      return this;
+    }
+
+    public Builder homeRuns(int homeRuns) {
+      this.homeRuns = homeRuns;
+      return this;
+    }
+
+    public Builder walks(int walks) {
+      this.walks = walks;
+      return this;
+    }
+
+    public Builder outs(int outs) {
+      this.outs = outs;
+      return this;
+    }
   }
 }

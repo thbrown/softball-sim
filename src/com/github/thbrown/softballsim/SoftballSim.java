@@ -20,7 +20,7 @@ public class SoftballSim {
     // Args
     validateArgs(args);
     LineupGenerator generator = getLineupGenerator(args[0]);
-    generator.readInDataFromFile(STATS_FILE_PATH);
+    generator.readDataFromFile(STATS_FILE_PATH);
 
     // More fun simulation stuff
     double bestResult = 0;

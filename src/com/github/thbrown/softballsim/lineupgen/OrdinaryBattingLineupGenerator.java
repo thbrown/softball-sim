@@ -1,15 +1,15 @@
 package com.github.thbrown.softballsim.lineupgen;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.Scanner;
+import java.util.function.BiFunction;
 
 import com.github.thbrown.softballsim.PermutationGeneratorUtil;
 import com.github.thbrown.softballsim.Player;
@@ -26,96 +26,68 @@ public class OrdinaryBattingLineupGenerator implements LineupGenerator {
   }
 
   @Override
-  public void readInDataFromFile(String statsPath) {
+  public void readDataFromFile(String statsPath) {
     List<Player> players = new LinkedList<>();
 
-    // Read in batter data from the supplied directory
-    File folder = new File(statsPath);
-    File[] listOfFiles = folder.listFiles(m -> m.isFile());
-    if (listOfFiles == null) {
-      throw new IllegalArgumentException("No files were found in " + statsPath);
-    }
-    for (int i = 0; i < listOfFiles.length; i++) {
-      System.out.println("Processing file " + listOfFiles[i].getName());
-      read(statsPath + File.separator + listOfFiles[i].getName());
-    }
-    collect(players);
+    Map<String, String> nameAndGroupToHitData =
+        LineupGeneratorUtil.readFilesFromPath(statsPath, read);
+    collect(nameAndGroupToHitData, players);
 
     // Find all batting lineup permutations
     List<List<Player>> lineups = PermutationGeneratorUtil.permute(players);
-    System.out.println("Possible lineups: " + lineups.size());
-
     for (List<Player> lineup : lineups) {
       allPossibleLineups.add(new OrdinaryBattingLineup(lineup));
     }
   }
 
-  Map<String, String> data = new HashMap<>();
+  // FIXME: Format is brittle.
+  private static BiFunction<String, Map<String, String>, Void> read =
+      (filename, nameAndGroupToHitData) -> {
+        try {
+          Scanner in = null;
+          try {
+            in = new Scanner(new FileReader(filename));
+            in.useDelimiter(System.lineSeparator());
 
-  // FIXME: This is brittle and has a bad format
-  private void read(String filePath) {
-    try {
-      Scanner in = null;
-      try {
-        in = new Scanner(new FileReader(filePath));
-        in.useDelimiter(System.lineSeparator());
-        while (in.hasNext()) {
-          String line = in.next();
-          if (line.trim().isEmpty()) {
-            continue;
-          }
-          String[] s = line.split(",");
-          String key = s[0];
+            while (in.hasNext()) {
+              String line = in.next().trim();
+              if (line.isEmpty()) {
+                continue;
+              }
+              String[] splitLine = line.split(",");
+              LineupGeneratorUtil.validateHitValues(Arrays.copyOfRange(splitLine, 1,
+                  splitLine.length));
 
-          // Validate data
-          for (int i = 1; i < s.length; i++) {
-            if (!s[i].equals("0") && !s[i].equals("1")
-                && !s[i].equals("2") && !s[i].equals("3")
-                && !s[i].equals("4")) {
-              throw new IllegalArgumentException(
-                  "Invalid data value: " + s[i]);
+              // Name
+              String key = splitLine[0];
+              // Hits
+              String value = line.replace(key, "");
+
+              if (nameAndGroupToHitData.containsKey(key)) {
+                nameAndGroupToHitData.put(key,
+                    nameAndGroupToHitData.get(key) + value);
+              } else {
+                nameAndGroupToHitData.put(key, value);
+              }
             }
+          } catch (FileNotFoundException e) {
+            e.printStackTrace();
+          } finally {
+            in.close();
           }
-
-          if (data.containsKey(key)) {
-            data.put(key,
-                data.get(key) + line.replace(key + ",", "")
-                    + ",");
-          } else {
-            data.put(key, line.replace(key + ",", "") + ",");
-          }
+        } catch (Exception e) {
+          System.out.println("WARNING: There was a problem while processing " + filename
+              + ". This file will be skipped. Problem: " + e.getMessage());
         }
-      } catch (FileNotFoundException e) {
-        e.printStackTrace();
-      } finally {
-        in.close();
-      }
-    } catch (Exception e) {
-      System.out
-          .println(String
-              .format(
-                  "WARNING: There was a problem while processing %s. This file will be skipped."
-                      + " Problem: %s",
-                  filePath, e.getMessage()));
+        return null;
+      };
+
+  // FIXME: Format is brittle.
+  private void collect(Map<String, String> nameAndGroupToHitData, List<Player> players) {
+    for (Entry<String, String> entry : nameAndGroupToHitData.entrySet()) {
+      String name = entry.getKey();
+      String[] hitLine = entry.getValue().split(",");
+      players.add(LineupGeneratorUtil.createPlayer(name, hitLine));
     }
   }
-
-  // FIXME: This is brittle and has a bad format
-  private void collect(List<Player> players) {
-    for (String key : data.keySet()) {
-      String name = key.split(",")[0];
-      String line = data.get(key);
-      String[] s = line.split(",");
-      players.add(
-          new Player(
-              name,
-              (int) Arrays.stream(s).filter(e -> e.equals("0")).count(),
-              (int) Arrays.stream(s).filter(e -> e.equals("1")).count(),
-              (int) Arrays.stream(s).filter(e -> e.equals("2")).count(),
-              (int) Arrays.stream(s).filter(e -> e.equals("3")).count(),
-              (int) Arrays.stream(s).filter(e -> e.equals("4")).count(),
-              (int) Arrays.stream(s).filter(e -> e.equals("BB")).count()));
-    }
-  }
-
 }

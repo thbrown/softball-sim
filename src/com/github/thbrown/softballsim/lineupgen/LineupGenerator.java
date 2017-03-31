@@ -15,5 +15,5 @@ public interface LineupGenerator {
    * Pull data from all files in the immediate supplied directory. This is
    * called before any calls to {@link #getNextLineup()}
    */
-  void readInDataFromFile(String statsPath);
+  void readDataFromFile(String statsPath);
 }

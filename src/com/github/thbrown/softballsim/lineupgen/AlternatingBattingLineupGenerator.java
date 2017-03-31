@@ -1,16 +1,16 @@
 package com.github.thbrown.softballsim.lineupgen;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.Scanner;
+import java.util.function.BiFunction;
 
 import com.github.thbrown.softballsim.PermutationGeneratorUtil;
 import com.github.thbrown.softballsim.Player;
@@ -22,21 +22,13 @@ public class AlternatingBattingLineupGenerator implements LineupGenerator {
   private Queue<BattingLineup> allPossibleLineups = new LinkedList<>();
 
   @Override
-  public void readInDataFromFile(String statsPath) {
+  public void readDataFromFile(String statsPath) {
     List<Player> groupA = new ArrayList<>();
     List<Player> groupB = new ArrayList<>();
 
-    // Read in batter data from the supplied directory
-    File folder = new File(statsPath);
-    File[] listOfFiles = folder.listFiles(m -> m.isFile());
-    if (listOfFiles == null) {
-      throw new IllegalArgumentException("No files were found in " + statsPath);
-    }
-    for (int i = 0; i < listOfFiles.length; i++) {
-      System.out.println("Processing file " + listOfFiles[i].getName());
-      read(statsPath + File.separator + listOfFiles[i].getName());
-    }
-    collect(groupA, groupB);
+    Map<String, String> nameAndGroupToHitData =
+        LineupGeneratorUtil.readFilesFromPath(statsPath, read);
+    collect(nameAndGroupToHitData, groupA, groupB);
 
     // Find all batting lineup permutations
     List<List<Player>> groupALineups = PermutationGeneratorUtil.permute(groupA);
@@ -55,81 +47,68 @@ public class AlternatingBattingLineupGenerator implements LineupGenerator {
     return allPossibleLineups.poll();
   }
 
-  Map<String, String> data = new HashMap<>();
+  // FIXME: Format is brittle.
+  private static BiFunction<String, Map<String, String>, Void> read =
+      (filename, nameAndGroupToHitData) -> {
+        try {
+          Scanner in = null;
+          try {
+            in = new Scanner(new FileReader(filename));
+            in.useDelimiter(System.lineSeparator());
 
-  // FIXME: This is brittle and has a bad format
-  private void read(String string) {
-    try {
-      Scanner in = null;
-      try {
-        in = new Scanner(new FileReader(string));
-        in.useDelimiter(System.lineSeparator());
-        while (in.hasNext()) {
-          String line = in.next();
-          if (line.trim().isEmpty()) {
-            continue;
-          }
-          String[] s = line.split(",");
-          String key = s[0] + "," + s[1];
+            while (in.hasNext()) {
+              String line = in.next().trim();
+              if (line.isEmpty()) {
+                continue;
+              }
+              String[] splitLine = line.split(",");
+              validate(splitLine);
 
-          // Validate data
-          if (!s[1].equals("A") && !s[1].equals("B")) {
-            throw new RuntimeException("Expected each player to be in either group A or B");
-          }
-          for (int i = 2; i < s.length; i++) {
-            String hit = s[i].trim();
-            if (!(hit.equals("0") || hit.equals("1") || hit.equals("2") || hit.equals("3") || hit
-                .equals("4"))) {
-              throw new IllegalArgumentException("Invalid data value: " + s[i]);
+              // Name,Group
+              String key = splitLine[0] + "," + splitLine[1];
+              // Hits
+              String value = line.replace(key, "");
+
+              if (nameAndGroupToHitData.containsKey(key)) {
+                nameAndGroupToHitData.put(key, nameAndGroupToHitData.get(key) + value);
+              } else {
+                nameAndGroupToHitData.put(key, value);
+              }
             }
+          } catch (FileNotFoundException e) {
+            throw e;
+          } finally {
+            in.close();
           }
-
-          if (data.containsKey(key)) {
-            data.put(key, data.get(key) + line.replace(key + ",", "") + ",");
-          } else {
-            data.put(key, line.replace(key + ",", "") + ",");
-          }
+        } catch (Exception e) {
+          System.out.println("WARNING: There was a problem while processing " + filename
+              + ". This file will be skipped. Problem: " + e.getMessage());
         }
-      } catch (FileNotFoundException e) {
-        throw e;
-      } finally {
-        in.close();
-      }
-    } catch (Exception e) {
-      e.printStackTrace();
-      System.out.println("WARNING: There was a problem while processing " + string
-          + ". This file will be skipped. Problem: " + e.getMessage());
-    }
+        return null;
+      };
 
+  private static void validate(String[] splitLine) {
+    if (!splitLine[1].equals("A") && !splitLine[1].equals("B")) {
+      throw new RuntimeException("Expected each player to be in either group A or B");
+    }
+    LineupGeneratorUtil.validateHitValues(Arrays.copyOfRange(splitLine, 2, splitLine.length));
   }
 
-  // FIXME: This is brittle and has a bad format
-  private void collect(List<Player> groupA, List<Player> groupB) {
-    for (String key : data.keySet()) {
-      String name = key.split(",")[0];
-      String gender = key.split(",")[1];
-      String line = data.get(key);
-      String[] s = line.split(",");
-      if (gender.equals("A")) {
+  // FIXME: Format is brittle.
+  private void collect(Map<String, String> nameAndGroupToHitData, List<Player> groupA,
+      List<Player> groupB) {
+    for (Entry<String, String> entry : nameAndGroupToHitData.entrySet()) {
+      String[] keySplit = entry.getKey().split(",");
+      String name = keySplit[0];
+      String group = keySplit[1];
+      String hitLine = entry.getValue();
+      String[] hitSplit = hitLine.split(",");
+      if (group.equals("A")) {
         groupA.add(
-            new Player(
-                name,
-                (int) Arrays.stream(s).filter(e -> e.equals("0")).count(),
-                (int) Arrays.stream(s).filter(e -> e.equals("1")).count(),
-                (int) Arrays.stream(s).filter(e -> e.equals("2")).count(),
-                (int) Arrays.stream(s).filter(e -> e.equals("3")).count(),
-                (int) Arrays.stream(s).filter(e -> e.equals("4")).count(),
-                (int) Arrays.stream(s).filter(e -> e.equals("BB")).count()));
+            LineupGeneratorUtil.createPlayer(name, hitSplit));
       } else {
         groupB.add(
-            new Player(
-                name,
-                (int) Arrays.stream(s).filter(e -> e.equals("0")).count(),
-                (int) Arrays.stream(s).filter(e -> e.equals("1")).count(),
-                (int) Arrays.stream(s).filter(e -> e.equals("2")).count(),
-                (int) Arrays.stream(s).filter(e -> e.equals("3")).count(),
-                (int) Arrays.stream(s).filter(e -> e.equals("4")).count(),
-                (int) Arrays.stream(s).filter(e -> e.equals("BB")).count()));
+            LineupGeneratorUtil.createPlayer(name, hitSplit));
       }
     }
   }
