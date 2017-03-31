@@ -3,9 +3,10 @@ Command line Monte Carlo simulation tool for making sure you choose the best lin
 softball or baseball team.
 
 Usage:
-`ant`
-`java -jar SoftballSim <lineupType (string) OR lineupType ordinal (int)>`
-`java -jar SoftballSim ordinary`
+```
+ant
+java -jar SoftballSim <lineupType(string) OR lineupType ordinal(int)> # ordinary OR 0
+```
 
 Assumes input file(s) in `./stats`. See the `stats` directory in this repository for example files.
 
