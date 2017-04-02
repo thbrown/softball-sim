@@ -7,7 +7,6 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.Scanner;
 import java.util.function.BiFunction;
@@ -26,9 +25,9 @@ public class AlternatingBattingLineupGenerator implements LineupGenerator {
     List<Player> groupA = new ArrayList<>();
     List<Player> groupB = new ArrayList<>();
 
-    Map<String, String> nameAndGroupToHitData =
-        LineupGeneratorUtil.readFilesFromPath(statsPath, read);
-    collect(nameAndGroupToHitData, groupA, groupB);
+    List<Map<String, String>> groups = LineupGeneratorUtil.readFilesFromPath(statsPath, 2 /* numGroups */, read);
+    LineupGeneratorUtil.createPlayersFromMap(groups.get(0), groupA);
+    LineupGeneratorUtil.createPlayersFromMap(groups.get(1), groupB);
 
     // Find all batting lineup permutations
     List<List<Player>> groupALineups = PermutationGeneratorUtil.permute(groupA);
@@ -38,7 +37,7 @@ public class AlternatingBattingLineupGenerator implements LineupGenerator {
       for (List<Player> groupBPermutation : groupBLineups) {
         // TODO: Need to account for both groupA bat first and groupB bat first.
         allPossibleLineups.add(new AlternatingBattingLineup(groupAPermutation, groupBPermutation));
-        allPossibleLineups.add(new AlternatingBattingLineup(groupBPermutation, groupAPermutation));
+        // allPossibleLineups.add(new AlternatingBattingLineup(groupBPermutation, groupAPermutation));
       }
     }
   }
@@ -49,68 +48,63 @@ public class AlternatingBattingLineupGenerator implements LineupGenerator {
   }
 
   // FIXME: Format is brittle.
-  private static BiFunction<String, Map<String, String>, Void> read =
-      (filename, nameAndGroupToHitData) -> {
-        try {
-          Scanner in = null;
-          try {
-            in = new Scanner(new FileReader(filename));
-            in.useDelimiter(System.lineSeparator());
+  private static BiFunction<String, List<Map<String, String>>, Void> read = (filename, groups) -> {
+    if (groups.size() != 2) {
+      throw new IllegalArgumentException(
+          "AlternatingBattingLineupGenerator expects 2 groups, was " + groups.size());
+    }
+    Map<String, String> groupAMap = groups.get(0);
+    Map<String, String> groupBMap = groups.get(1);
+    try {
+      Scanner in = null;
+      try {
+        in = new Scanner(new FileReader(filename));
+        in.useDelimiter(System.lineSeparator());
 
-            while (in.hasNext()) {
-              String line = in.next().trim();
-              if (line.isEmpty()) {
-                continue;
-              }
-              String[] splitLine = line.split(",");
-              validate(splitLine);
-
-              // Name,Group
-              String key = splitLine[0] + "," + splitLine[1];
-              // Hits
-              String value = line.replace(key, "");
-
-              if (nameAndGroupToHitData.containsKey(key)) {
-                nameAndGroupToHitData.put(key, nameAndGroupToHitData.get(key) + value);
-              } else {
-                nameAndGroupToHitData.put(key, value);
-              }
-            }
-          } catch (FileNotFoundException e) {
-            throw e;
-          } finally {
-            in.close();
+        while (in.hasNext()) {
+          String line = in.next().trim();
+          if (line.isEmpty()) {
+            continue;
           }
-        } catch (Exception e) {
-          System.out.println("WARNING: There was a problem while processing " + filename
-              + ". This file will be skipped. Problem: " + e.getMessage());
+          String[] splitLine = line.split(",");
+          validate(splitLine);
+
+          // Name
+          String key = splitLine[0];
+          // Hits
+          String value = line.replace(splitLine[0] + "," + splitLine[1], "");
+
+          if (splitLine[1].equals("A")) {
+            if (groupAMap.containsKey(key)) {
+              groupAMap.put(key, groupAMap.get(key) + value);
+            } else {
+              groupAMap.put(key, value);
+            }
+          } else {
+            if (groupBMap.containsKey(key)) {
+              groupBMap.put(key, groupBMap.get(key) + value);
+            } else {
+              groupBMap.put(key, value);
+            }
+          }
+
         }
-        return null;
-      };
+      } catch (FileNotFoundException e) {
+        throw e;
+      } finally {
+        in.close();
+      }
+    } catch (Exception e) {
+      System.out.println("WARNING: There was a problem while processing " + filename
+          + ". This file will be skipped. Problem: " + e.getMessage());
+    }
+    return null;
+  };
 
   private static void validate(String[] splitLine) {
     if (!splitLine[1].equals("A") && !splitLine[1].equals("B")) {
       throw new RuntimeException("Expected each player to be in either group A or B");
     }
     LineupGeneratorUtil.validateHitValues(Arrays.copyOfRange(splitLine, 2, splitLine.length));
-  }
-
-  // FIXME: Format is brittle.
-  private void collect(Map<String, String> nameAndGroupToHitData, List<Player> groupA,
-      List<Player> groupB) {
-    for (Entry<String, String> entry : nameAndGroupToHitData.entrySet()) {
-      String[] keySplit = entry.getKey().split(",");
-      String name = keySplit[0];
-      String group = keySplit[1];
-      String hitLine = entry.getValue();
-      String[] hitSplit = hitLine.split(",");
-      if (group.equals("A")) {
-        groupA.add(
-            LineupGeneratorUtil.createPlayer(name, hitSplit));
-      } else {
-        groupB.add(
-            LineupGeneratorUtil.createPlayer(name, hitSplit));
-      }
-    }
   }
 }

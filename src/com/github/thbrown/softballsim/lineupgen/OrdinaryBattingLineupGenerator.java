@@ -2,11 +2,12 @@ package com.github.thbrown.softballsim.lineupgen;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.Scanner;
 import java.util.function.BiFunction;
@@ -28,10 +29,13 @@ public class OrdinaryBattingLineupGenerator implements LineupGenerator {
   @Override
   public void readDataFromFile(String statsPath) {
     List<Player> players = new LinkedList<>();
-
-    Map<String, String> nameAndGroupToHitData =
-        LineupGeneratorUtil.readFilesFromPath(statsPath, read);
-    collect(nameAndGroupToHitData, players);
+    
+    List<Map<String, String>> groups = new ArrayList<>();
+    Map<String, String> groupAMap = new HashMap<>();
+    groups.add(groupAMap);
+    
+    LineupGeneratorUtil.readFilesFromPath(statsPath, 1 /* numGroups */, read);
+    LineupGeneratorUtil.createPlayersFromMap(groupAMap, players);
 
     // Find all batting lineup permutations
     List<List<Player>> lineups = PermutationGeneratorUtil.permute(players);
@@ -41,53 +45,41 @@ public class OrdinaryBattingLineupGenerator implements LineupGenerator {
   }
 
   // FIXME: Format is brittle.
-  private static BiFunction<String, Map<String, String>, Void> read =
-      (filename, nameAndGroupToHitData) -> {
-        try {
-          Scanner in = null;
-          try {
-            in = new Scanner(new FileReader(filename));
-            in.useDelimiter(System.lineSeparator());
+  private static BiFunction<String, List<Map<String, String>>, Void> read = (filename, groups) -> {
+    try {
+      Scanner in = null;
+      try {
+        in = new Scanner(new FileReader(filename));
+        in.useDelimiter(System.lineSeparator());
 
-            while (in.hasNext()) {
-              String line = in.next().trim();
-              if (line.isEmpty()) {
-                continue;
-              }
-              String[] splitLine = line.split(",");
-              LineupGeneratorUtil.validateHitValues(Arrays.copyOfRange(splitLine, 1,
-                  splitLine.length));
-
-              // Name
-              String key = splitLine[0];
-              // Hits
-              String value = line.replace(key, "");
-
-              if (nameAndGroupToHitData.containsKey(key)) {
-                nameAndGroupToHitData.put(key,
-                    nameAndGroupToHitData.get(key) + value);
-              } else {
-                nameAndGroupToHitData.put(key, value);
-              }
-            }
-          } catch (FileNotFoundException e) {
-            e.printStackTrace();
-          } finally {
-            in.close();
+        while (in.hasNext()) {
+          String line = in.next().trim();
+          if (line.isEmpty()) {
+            continue;
           }
-        } catch (Exception e) {
-          System.out.println("WARNING: There was a problem while processing " + filename
-              + ". This file will be skipped. Problem: " + e.getMessage());
-        }
-        return null;
-      };
+          String[] splitLine = line.split(",");
+          LineupGeneratorUtil.validateHitValues(Arrays.copyOfRange(splitLine, 1, splitLine.length));
 
-  // FIXME: Format is brittle.
-  private void collect(Map<String, String> nameAndGroupToHitData, List<Player> players) {
-    for (Entry<String, String> entry : nameAndGroupToHitData.entrySet()) {
-      String name = entry.getKey();
-      String[] hitLine = entry.getValue().split(",");
-      players.add(LineupGeneratorUtil.createPlayer(name, hitLine));
+          // Name
+          String key = splitLine[0];
+          // Hits
+          String value = line.replace(key, "");
+
+          if (groups.get(0).containsKey(key)) {
+            groups.get(0).put(key, groups.get(0).get(key) + value);
+          } else {
+            groups.get(0).put(key, value);
+          }
+        }
+      } catch (FileNotFoundException e) {
+        e.printStackTrace();
+      } finally {
+        in.close();
+      }
+    } catch (Exception e) {
+      System.out.println("WARNING: There was a problem while processing " + filename
+          + ". This file will be skipped. Problem: " + e.getMessage());
     }
-  }
+    return null;
+  };
 }
