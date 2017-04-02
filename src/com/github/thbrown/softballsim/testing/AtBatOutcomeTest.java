@@ -25,5 +25,4 @@ public class AtBatOutcomeTest {
     assertFalse(AtBatOutcome.isValidAtBatOutcome("BBB"));
     assertFalse(AtBatOutcome.isValidAtBatOutcome("5"));
   }
-
 }

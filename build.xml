@@ -23,7 +23,7 @@
 
     <target name="compile">
         <mkdir dir="${class.dir}"/>
-        <javac srcdir="${source.dir}" destdir="${class.dir}" debug="true" includeantruntime="false">
+        <javac srcdir="${source.dir}" destdir="${class.dir}" debug="true" includeantruntime="false" excludes="**/*Test*">
         	<classpath refid="libraries.path"/>
     	</javac>
     </target>

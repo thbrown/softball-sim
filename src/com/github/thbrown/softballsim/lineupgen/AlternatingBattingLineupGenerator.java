@@ -36,8 +36,9 @@ public class AlternatingBattingLineupGenerator implements LineupGenerator {
 
     for (List<Player> groupAPermutation : groupALineups) {
       for (List<Player> groupBPermutation : groupBLineups) {
-        // TODO: need to account for both groupA bat first and groupB bat first
+        // TODO: Need to account for both groupA bat first and groupB bat first.
         allPossibleLineups.add(new AlternatingBattingLineup(groupAPermutation, groupBPermutation));
+        allPossibleLineups.add(new AlternatingBattingLineup(groupBPermutation, groupAPermutation));
       }
     }
   }
