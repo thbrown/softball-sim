@@ -1,20 +1,28 @@
 package com.github.thbrown.softballsim;
 
+import java.util.concurrent.Callable;
+
 import com.github.thbrown.softballsim.lineup.BattingLineup;
 
-public class Simulation {
+public class Simulation implements Callable<Double> {
 
   private BattingLineup lineup;
+  private int numberOfGamesToSimulate;
 
-  private boolean first;
+  private boolean first; 
   private boolean second;
   private boolean third;
 
-  Simulation(BattingLineup lineup) {
+  Simulation(BattingLineup lineup, int numberOfGamesToSimulate) {
     this.lineup = lineup;
+    this.numberOfGamesToSimulate = numberOfGamesToSimulate;
   }
 
-  public double run(int numberOfGamesToSimulate) {
+  public Double call() {
+    return run();
+  }
+
+  public double run() {
     double totalScore = 0;
 
     // Full Simulation
@@ -95,6 +103,10 @@ public class Simulation {
           "Something is wrong, bases must be between 0 and 4 inclusive." +
               "Value was %s", bases));
     }
+  }
+
+  public BattingLineup getLineup() {
+    return lineup;
   }
 
   // Thank you

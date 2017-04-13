@@ -1,6 +1,8 @@
 package com.github.thbrown.softballsim;
 
 import java.io.File;
+import java.util.*;
+import java.util.concurrent.*;
 
 import com.github.thbrown.softballsim.lineup.BattingLineup;
 import com.github.thbrown.softballsim.lineupgen.LineupGenerator;
@@ -22,25 +24,43 @@ public class SoftballSim {
     LineupGenerator generator = getLineupGenerator(args[0]);
     generator.readDataFromFile(STATS_FILE_PATH);
 
-    // More fun simulation stuff
-    double bestResult = 0;
-    BattingLineup bestLineup = null;
-
     System.out.println("*********************************************************************");
     System.out.println("Games simulated per lineup: " + GAMES_TO_SIMULATE);
     System.out.println("Innings per game: " + INNINGS_PER_GAME);
     System.out.println("*********************************************************************");
 
+    
+    // Build a list of simulations each with one lineup
+    List<Simulation> simulations = new ArrayList<>();
     BattingLineup lineup;
     while ((lineup = generator.getNextLineup()) != null) {
+      Simulation s = new Simulation(lineup, GAMES_TO_SIMULATE);
+      simulations.add(s);
+    }
 
-      Simulation s = new Simulation(lineup);
-      double result = s.run(GAMES_TO_SIMULATE);
+    // Run all the simulations using the specified number of threads
+    ExecutorService executor = Executors.newFixedThreadPool(5);
+    List<Future<Double>> results = null;
+    try {
+      results = executor.invokeAll(simulations);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
 
-      if (result > bestResult) {
-        bestResult = result;
-        bestLineup = lineup;
+    // Interate over all the results, choosing lineup with the highest score
+    double bestResult = 0;
+    BattingLineup bestLineup = null;
+    int index = 0;
+    try {
+      for(Future<Double> result : results) {
+        if (result.get() > bestResult) {
+          bestResult = result.get();
+          bestLineup = simulations.get(index).getLineup();
+        }
+        index++;
       }
+    } catch (InterruptedException | ExecutionException e) {
+      e.printStackTrace();
     }
 
     System.out.println();
