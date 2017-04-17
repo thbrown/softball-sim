@@ -1,23 +1,20 @@
 package com.github.thbrown.softballsim;
 
-import java.util.Random;
+import java.util.concurrent.*;
 import java.util.TreeMap;
 
 public class Player {
 
-  private static final long SEED = System.currentTimeMillis();
-  private static Random rand = new Random(SEED);
-
   String name;
 
-  private int singles;
-  private int doubles;
-  private int triples;
-  private int homeRuns;
-  private int walks;
-  private int plateAppearances;
+  private final int singles;
+  private final int doubles;
+  private final int triples;
+  private final int homeRuns;
+  private final int walks;
+  private final int plateAppearances;
 
-  TreeMap<Integer, Integer> plateApperanceDistribution = new TreeMap<>();
+  private TreeMap<Integer, Integer> plateApperanceDistribution = new TreeMap<>();
 
   private Player(Player.Builder builder) {
     this.name = builder.name;
@@ -39,7 +36,7 @@ public class Player {
   }
 
   public int hit() {
-    int randomValue = rand.nextInt(plateAppearances) + 1;
+    int randomValue = ThreadLocalRandom.current().nextInt(plateAppearances) + 1;
     return plateApperanceDistribution.ceilingEntry(randomValue).getValue();
   }
 
@@ -76,6 +73,17 @@ public class Player {
 
     public Player build() {
       return new Player(this);
+    }
+
+    public Builder player(Player player) {
+      this.name = player.name;
+      this.singles = player.singles;
+      this.doubles = player.doubles;
+      this.triples = player.triples;
+      this.homeRuns = player.homeRuns;
+      this.walks = player.walks;
+      this.outs = player.plateAppearances - singles - doubles - triples - homeRuns - walks;
+      return this;
     }
 
     public Builder singles(int singles) {

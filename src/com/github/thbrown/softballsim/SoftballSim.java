@@ -13,7 +13,7 @@ public class SoftballSim {
   public static final int INNINGS_PER_GAME = 6;
   public static final int GAMES_TO_SIMULATE = 10000;
   public static final boolean VERBOSE = false;
-  public static final int THREADS_TO_USE = 5;
+  public static final int THREADS_TO_USE = Runtime.getRuntime().availableProcessors();
   public static final int NAME_PADDING = 24; // Just for formatting verbose output
   public static final String STATS_FILE_PATH =
       System.getProperty("user.dir") + File.separator + "stats";
@@ -28,6 +28,7 @@ public class SoftballSim {
     System.out.println("*********************************************************************");
     System.out.println("Games simulated per lineup: " + GAMES_TO_SIMULATE);
     System.out.println("Innings per game: " + INNINGS_PER_GAME);
+    System.out.println("Threads used: " + THREADS_TO_USE);
     System.out.println("*********************************************************************");
 
     
@@ -42,6 +43,7 @@ public class SoftballSim {
     // Run all the simulations using the specified number of threads
     ExecutorService executor = Executors.newFixedThreadPool(THREADS_TO_USE);
     List<Future<Double>> results = null;
+    long startTime = System.currentTimeMillis();
     try {
       results = executor.invokeAll(simulations);
     } catch (InterruptedException e) {
@@ -52,7 +54,6 @@ public class SoftballSim {
     double bestResult = 0;
     BattingLineup bestLineup = null;
     int index = 0;
-    long startTime = System.currentTimeMillis();
     try {
       for(Future<Double> result : results) {
         if (result.get() > bestResult) {
@@ -70,6 +71,7 @@ public class SoftballSim {
     System.out.println(bestLineup);
     System.out.println("Best lineup mean runs scored: " + bestResult);
     System.out.println("Simulation took " + (System.currentTimeMillis() - startTime) + " milliseconds.");
+    System.exit(0);
   }
 
   private static LineupGenerator getLineupGenerator(String lineupTypeString) {
