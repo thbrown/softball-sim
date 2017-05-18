@@ -40,6 +40,10 @@ public class Player {
     return plateApperanceDistribution.ceilingEntry(randomValue).getValue();
   }
 
+  public String getName() {
+    return name;
+  }
+
   @Override
   public String toString() {
     return Simulation.padRight(this.name, 12) + Simulation.padRight(getAverage(), 8)
