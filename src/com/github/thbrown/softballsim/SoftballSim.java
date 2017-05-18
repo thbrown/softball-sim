@@ -13,7 +13,8 @@ public class SoftballSim {
   public static final int INNINGS_PER_GAME = 6;
   public static final int GAMES_TO_SIMULATE = 10000;
   public static final boolean VERBOSE = false;
-  public static final int THREADS_TO_USE = Runtime.getRuntime().availableProcessors();
+  // Minus one so you can still do things while it's running.
+  public static final int THREADS_TO_USE = Runtime.getRuntime().availableProcessors() - 1;
   public static final int NAME_PADDING = 24; // Just for formatting verbose output
   public static final String STATS_FILE_PATH =
       System.getProperty("user.dir") + File.separator + "stats";
