@@ -28,5 +28,5 @@ Input data is an integer 0-4 (inclusive) that represents the number of bases the
 ## Extending the simulation
 To add your own lineup generator:
 1. Implement BattingLienup and LineupGenerator.
-1. Register your new generator in the static map in the main SoftballSim class.
+1. Register your new generator in the static map in the LineupType class.
 		

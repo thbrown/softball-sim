@@ -44,6 +44,7 @@ public class LineupGeneratorUtil {
     for (Entry<String, String> entry : nameAndGroupToHitData.entrySet()) {
       String name = entry.getKey();
       String hitLine = entry.getValue();
+      //System.out.println(name + " " + hitLine);
       players.add(LineupGeneratorUtil.createPlayer(name, hitLine));
     }
   }
@@ -55,6 +56,29 @@ public class LineupGeneratorUtil {
             String.format("Invalid hit value: (%s)", splitHitLine[i]));
       }
     }
+  }
+  
+  static final BiFunction<List<Map<String, String>>, String, Void> ADD_LINE_TO_TWO_GROUPS_FUNCTION = (
+      groups, line) -> {
+    String[] splitLine = line.split(",");
+    validateTwoGroups(splitLine);
+
+    String key = splitLine[0];
+    String value = line.replace(splitLine[0] + "," + splitLine[1], "");
+    String groupString = splitLine[1];
+    if (groupString.equals("A")) {
+      LineupGeneratorUtil.addEntryToGroup(groups.get(0), key, value);
+    } else {
+      LineupGeneratorUtil.addEntryToGroup(groups.get(1), key, value);
+    }
+    return null;
+  };
+  
+  private static void validateTwoGroups(String[] splitLine) {
+    if (!splitLine[1].equals("A") && !splitLine[1].equals("B")) {
+      throw new RuntimeException("Expected each player to be in either group A or B");
+    }
+    LineupGeneratorUtil.validateHitValues(Arrays.copyOfRange(splitLine, 2, splitLine.length));
   }
 
   static void addEntryToGroup(Map<String, String> group, String key, String value) {

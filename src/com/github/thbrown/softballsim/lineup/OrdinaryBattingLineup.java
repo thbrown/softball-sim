@@ -1,6 +1,8 @@
 package com.github.thbrown.softballsim.lineup;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 import com.github.thbrown.softballsim.Player;
 
@@ -36,5 +38,24 @@ public class OrdinaryBattingLineup implements BattingLineup {
       result.append("\t").append(p).append("\n");
     }
     return result.toString();
+  }
+
+  @Override
+  public BattingLineup getRandomSwap() {
+    List<Player> players = new ArrayList<>();
+    players.addAll(this.players);
+
+    int randomValueA = ThreadLocalRandom.current().nextInt(players.size());
+    int randomValueB = ThreadLocalRandom.current().nextInt(players.size()-1);
+
+    if(randomValueB >= randomValueA) {
+      randomValueB = randomValueB + 1;
+    }
+    
+    Player temp = players.get(randomValueA);
+    players.set(randomValueA, players.get(randomValueB));
+    players.set(randomValueB, temp);
+    
+    return new OrdinaryBattingLineup(players);
   }
 }

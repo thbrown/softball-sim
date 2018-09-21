@@ -14,4 +14,6 @@ public interface BattingLineup {
    * first player is up to bat at the beginning of the next simulated game.
    */
   public void reset();
+  
+  public BattingLineup getRandomSwap();
 }

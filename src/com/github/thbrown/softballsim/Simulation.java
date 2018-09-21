@@ -12,10 +12,13 @@ public class Simulation implements Callable<Double> {
   private boolean first; 
   private boolean second;
   private boolean third;
+  
+  ProgressTracker tracker = new ProgressTracker();
 
-  Simulation(BattingLineup lineup, int numberOfGamesToSimulate) {
+  Simulation(BattingLineup lineup, int numberOfGamesToSimulate, ProgressTracker tracker) {
     this.lineup = lineup;
     this.numberOfGamesToSimulate = numberOfGamesToSimulate;
+    this.tracker = tracker;
   }
 
   public Double call() {
@@ -65,6 +68,9 @@ public class Simulation implements Callable<Double> {
       lineup.reset();
 
     }
+    
+    tracker.markOperationAsComplete();
+    
     return totalScore / numberOfGamesToSimulate;
   }
 

@@ -65,4 +65,10 @@ public class AlternatingBattingLineup implements BattingLineup {
     }
     return result.toString();
   }
+  
+  @Override
+  public BattingLineup getRandomSwap() {
+    throw new UnsupportedOperationException();
+  }
+  
 }
