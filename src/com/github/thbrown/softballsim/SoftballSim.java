@@ -104,11 +104,12 @@ public class SoftballSim {
 
        double bestRuns = Double.MIN_VALUE;
        BattingLineup bestLineup = null; 
-       for(int i = 0; i < 1000; i++) {
+       double ITERATIONS = 10000;
+       for(int i = 0; i < ITERATIONS; i++) {
          s = new Simulation(lineup, GAMES_TO_SIMULATE, null);
          double result = s.run();
-         if(result > bestRuns || Math.abs(bestRuns - result) < (((1000.0-i-1)/1000.0)/10.0)) {
-           System.out.println(Math.abs(bestRuns - result) + " " + ((1000.0-i-1)/1000.0) + " " + (Math.abs(bestRuns - result) < (((1000.0-i-1)/1000.0)/10.0)));
+         if(result > bestRuns || Math.abs(bestRuns - result) < (((ITERATIONS-i-1)/ITERATIONS)/10.0)) {
+           System.out.println(Math.abs(bestRuns - result) + " " + ((ITERATIONS-i-1)/ITERATIONS) + " " + (Math.abs(bestRuns - result) < (((ITERATIONS-i-1)/ITERATIONS)/10.0)));
 
            bestRuns = result;
            bestLineup = lineup;
