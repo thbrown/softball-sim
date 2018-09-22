@@ -22,19 +22,7 @@ public class NoConsecutiveFemalesLineupGenerator implements LineupGenerator {
   public void readDataFromFile(String statsPath) {
     List<Map<String, String>> groups = LineupGeneratorUtil.readFilesFromPath(statsPath,
         2 /* numGroups */, LineupGeneratorUtil.ADD_LINE_TO_TWO_GROUPS_FUNCTION);
-    
-    groups.get(1).remove("Laura");
-    groups.get(1).remove("Jenn");
-    groups.get(1).remove("BobbiJo");
-    groups.get(1).remove("Morgan");
-
-    
-    groups.get(0).remove("Jeff");
-    groups.get(0).remove("Darren");
-    groups.get(0).remove("Dan");
-    groups.get(0).remove("Randy");
-
-    
+        
     LineupGeneratorUtil.createPlayersFromMap(groups.get(0), groupA);
     LineupGeneratorUtil.createPlayersFromMap(groups.get(1), groupB);
     
@@ -73,5 +61,12 @@ public class NoConsecutiveFemalesLineupGenerator implements LineupGenerator {
   @Override
   public BattingLineup getNextLineup() {
     return allPossibleLineups.poll();
+  }
+  
+  @Override
+  public BattingLineup getIntitialLineup() {
+    BattingLineup someLineup = allPossibleLineups.peek();
+    // TODO: Sort by batting avarage, that's an okay first guess
+    return someLineup;
   }
 }

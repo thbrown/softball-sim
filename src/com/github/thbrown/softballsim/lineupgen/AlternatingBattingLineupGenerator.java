@@ -43,4 +43,11 @@ public class AlternatingBattingLineupGenerator implements LineupGenerator {
   public BattingLineup getNextLineup() {
     return allPossibleLineups.poll();
   }
+  
+  @Override
+  public BattingLineup getIntitialLineup() {
+    BattingLineup someLineup = allPossibleLineups.peek();
+    // TODO: Sort by batting avarage, that's an okay first guess
+    return someLineup;
+  }
 }

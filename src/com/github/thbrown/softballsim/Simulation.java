@@ -69,7 +69,9 @@ public class Simulation implements Callable<Double> {
 
     }
     
-    tracker.markOperationAsComplete();
+    if(this.tracker != null) {
+      tracker.markOperationAsComplete();
+    }
     
     return totalScore / numberOfGamesToSimulate;
   }

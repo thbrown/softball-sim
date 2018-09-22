@@ -11,7 +11,7 @@ import com.github.thbrown.softballsim.lineupgen.LineupType;
 
 public class SoftballSim {
   // Config -- TODO convert these to flags w/ defaults
-  public static int GAMES_TO_SIMULATE = 10000000;
+  public static int GAMES_TO_SIMULATE = 100000;
   public static int INNINGS_PER_GAME = 7;
   public static boolean VERBOSE = false;
   // Minus one so you can still do things while it's running.
@@ -19,6 +19,8 @@ public class SoftballSim {
   public static final int NAME_PADDING = 24; // Just for formatting verbose output
   public static final String STATS_FILE_PATH =
       System.getProperty("user.dir") + File.separator + "stats";
+
+  
 
   public static void main(String[] args) {
     // Args
@@ -29,72 +31,93 @@ public class SoftballSim {
     LineupGenerator generator = getLineupGenerator(args[0]);
     generator.readDataFromFile(STATS_FILE_PATH);
     
-    // Build a list of simulations each with one lineup
-    ProgressTracker tracker = new ProgressTracker();
-    List<Simulation> simulations = new ArrayList<>();
-    BattingLineup lineup;
-    while ((lineup = generator.getNextLineup()) != null) {
-      Simulation s = new Simulation(lineup, GAMES_TO_SIMULATE, tracker);
-      simulations.add(s);
-    }
-    long numberOfLineupsToTest = simulations.size();
-    tracker.init(numberOfLineupsToTest, 100);
-
-    // Print the details before we start
-    DecimalFormat formatter = new DecimalFormat("#,###");
-    System.out.println("*********************************************************************");
-    System.out.println("Possible lineups: \t\t" + formatter.format(numberOfLineupsToTest));
-    System.out.println("Games to simulate per lineup: \t" + GAMES_TO_SIMULATE);
-    System.out.println("Innings per game: \t\t" + INNINGS_PER_GAME);
-    System.out.println("Threads used: \t\t\t" + THREADS_TO_USE);
-    System.out.println("*********************************************************************");
-
-    // Run all the simulations using the specified number of threads
-    ExecutorService executor = Executors.newFixedThreadPool(THREADS_TO_USE);
-    List<Future<Double>> results = new ArrayList<>(simulations.size());
-    long startTime = System.currentTimeMillis();
-
-    try {
-      results = executor.invokeAll(simulations);
-    } catch (InterruptedException e) {
-      e.printStackTrace();
-    }
-    
-    Map<Integer, Integer> histo = new HashMap<>();
-
-    // Iterate over all the results, choosing the lineup with the highest score
-    double bestResult = 0;
-    BattingLineup bestLineup = null;
-    int index = 0;
-    try {
-      for(Future<Double> result : results) {
-        // Update histogram
-        int key = (int)(result.get()*10);
-        if(histo.containsKey(key)) {
-          histo.put(key, histo.get(key)+1);
-        } else {
-          histo.put(key, 1);
-        }
-        
-        if (result.get() > bestResult) {
-          bestResult = result.get();
-          bestLineup = simulations.get(index).getLineup();
-        }
-        index++;
+     if(false) {
+      // Build a list of simulations each with one lineup
+      ProgressTracker tracker = new ProgressTracker();
+      List<Simulation> simulations = new ArrayList<>();
+      BattingLineup lineup;
+      while ((lineup = generator.getNextLineup()) != null) {
+        Simulation s = new Simulation(lineup, GAMES_TO_SIMULATE, tracker);
+        simulations.add(s);
       }
-    } catch (InterruptedException | ExecutionException e) {
-      e.printStackTrace();
-    }
+      long numberOfLineupsToTest = simulations.size();
+      tracker.init(numberOfLineupsToTest, 100);
+  
+      // Print the details before we start
+      DecimalFormat formatter = new DecimalFormat("#,###");
+      System.out.println("*********************************************************************");
+      System.out.println("Possible lineups: \t\t" + formatter.format(numberOfLineupsToTest));
+      System.out.println("Games to simulate per lineup: \t" + GAMES_TO_SIMULATE);
+      System.out.println("Innings per game: \t\t" + INNINGS_PER_GAME);
+      System.out.println("Threads used: \t\t\t" + THREADS_TO_USE);
+      System.out.println("*********************************************************************");
+  
+      // Run all the simulations using the specified number of threads
+      ExecutorService executor = Executors.newFixedThreadPool(THREADS_TO_USE);
+      List<Future<Double>> results = new ArrayList<>(simulations.size());
+      long startTime = System.currentTimeMillis();
+  
+      try {
+        results = executor.invokeAll(simulations);
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
+      
+      Map<Integer, Integer> histo = new HashMap<>();
+  
+      // Iterate over all the results, choosing the lineup with the highest score
+      double bestResult = 0;
+      BattingLineup bestLineup = null;
+      int index = 0;
+      try {
+        for(Future<Double> result : results) {
+          // Update histogram
+          int key = (int)(result.get()*10);
+          if(histo.containsKey(key)) {
+            histo.put(key, histo.get(key)+1);
+          } else {
+            histo.put(key, 1);
+          }
+          
+          if (result.get() > bestResult) {
+            bestResult = result.get();
+            bestLineup = simulations.get(index).getLineup();
+          }
+          index++;
+        }
+      } catch (InterruptedException | ExecutionException e) {
+        e.printStackTrace();
+      }
+  
+      System.out.println();
+      System.out.println("Best lineup");
+      System.out.println(bestLineup);
+      System.out.println("Best lineup mean runs scored: " + bestResult);
+      System.out.println("Simulation took " + (System.currentTimeMillis() - startTime) + " milliseconds.");
+      for(Integer k : histo.keySet()) {
+        System.out.println(k/10.0 + " - " + histo.get(k));
+      }
+      System.exit(0);
+     } else {
+       BattingLineup lineup = generator.getIntitialLineup();
+       Simulation s = new Simulation(lineup, GAMES_TO_SIMULATE, null);
 
-    System.out.println();
-    System.out.println("Best lineup");
-    System.out.println(bestLineup);
-    System.out.println("Best lineup mean runs scored: " + bestResult);
-    System.out.println("Simulation took " + (System.currentTimeMillis() - startTime) + " milliseconds.");
-    for(Integer k : histo.keySet()) {
-      System.out.println(k/10.0 + " - " + histo.get(k));
-    }
-    System.exit(0);
+       double bestRuns = Double.MIN_VALUE;
+       BattingLineup bestLineup = null; 
+       for(int i = 0; i < 1000; i++) {
+         s = new Simulation(lineup, GAMES_TO_SIMULATE, null);
+         double result = s.run();
+         if(result > bestRuns || Math.abs(bestRuns - result) < (((1000.0-i-1)/1000.0)/10.0)) {
+           System.out.println(Math.abs(bestRuns - result) + " " + ((1000.0-i-1)/1000.0) + " " + (Math.abs(bestRuns - result) < (((1000.0-i-1)/1000.0)/10.0)));
+
+           bestRuns = result;
+           bestLineup = lineup;
+           System.out.println("Lineup score " + i +  ") " + result);
+           System.out.println(lineup);
+         }
+         lineup = lineup.getRandomSwap();
+       }
+     }
   }
 
   private static LineupGenerator getLineupGenerator(String lineupTypeString) {

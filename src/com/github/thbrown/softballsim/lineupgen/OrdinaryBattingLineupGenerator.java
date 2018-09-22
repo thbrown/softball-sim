@@ -53,4 +53,11 @@ public class OrdinaryBattingLineupGenerator implements LineupGenerator {
   private static void validate(String[] splitLine) {
     LineupGeneratorUtil.validateHitValues(Arrays.copyOfRange(splitLine, 1, splitLine.length));
   }
+
+  @Override
+  public BattingLineup getIntitialLineup() {
+    BattingLineup someLineup = allPossibleLineups.peek();
+    // TODO: Sort by batting avarage, that's an okay first guess
+    return someLineup;
+  }
 }

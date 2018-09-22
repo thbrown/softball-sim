@@ -16,4 +16,5 @@ public interface BattingLineup {
   public void reset();
   
   public BattingLineup getRandomSwap();
+
 }

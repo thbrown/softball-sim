@@ -16,4 +16,6 @@ public interface LineupGenerator {
    * called before any calls to {@link #getNextLineup()}
    */
   void readDataFromFile(String statsPath);
+  
+  BattingLineup getIntitialLineup();
 }
