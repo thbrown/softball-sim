@@ -11,7 +11,7 @@ import com.github.thbrown.softballsim.lineupgen.LineupType;
 
 public class SoftballSim {
   // Config -- TODO convert these to flags w/ defaults
-  public static int GAMES_TO_SIMULATE = 100000;
+  public static int GAMES_TO_SIMULATE = 10000;
   public static int INNINGS_PER_GAME = 7;
   public static boolean VERBOSE = false;
   // Minus one so you can still do things while it's running.
@@ -19,8 +19,6 @@ public class SoftballSim {
   public static final int NAME_PADDING = 24; // Just for formatting verbose output
   public static final String STATS_FILE_PATH =
       System.getProperty("user.dir") + File.separator + "stats";
-
-  
 
   public static void main(String[] args) {
     // Args
@@ -31,7 +29,7 @@ public class SoftballSim {
     LineupGenerator generator = getLineupGenerator(args[0]);
     generator.readDataFromFile(STATS_FILE_PATH);
     
-     if(false) {
+     if(true) {
       // Build a list of simulations each with one lineup
       ProgressTracker tracker = new ProgressTracker();
       List<Simulation> simulations = new ArrayList<>();

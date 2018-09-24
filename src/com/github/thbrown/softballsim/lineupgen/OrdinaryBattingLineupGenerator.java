@@ -8,13 +8,16 @@ import java.util.Queue;
 import java.util.function.BiFunction;
 
 import com.github.thbrown.softballsim.PermutationGeneratorUtil;
+import com.github.thbrown.softballsim.PermutationIterator;
 import com.github.thbrown.softballsim.Player;
 import com.github.thbrown.softballsim.lineup.BattingLineup;
 import com.github.thbrown.softballsim.lineup.OrdinaryBattingLineup;
 
 public class OrdinaryBattingLineupGenerator implements LineupGenerator {
 
-  private Queue<BattingLineup> allPossibleLineups = new LinkedList<>();
+  //private Queue<BattingLineup> allPossibleLineups = new LinkedList<>();
+  private List<Player> players;
+  private PermutationIterator<Player> iterator;
 
   private static final BiFunction<List<Map<String, String>>, String, Void> ADD_LINE_TO_GROUPS_FUNCTION = (
       groups, line) -> {
@@ -31,12 +34,16 @@ public class OrdinaryBattingLineupGenerator implements LineupGenerator {
 
   @Override
   public BattingLineup getNextLineup() {
-    return allPossibleLineups.poll();
+    if(iterator.hasNext()) {
+      return new OrdinaryBattingLineup(iterator.next());
+    } else {
+      return null;
+    }
   }
 
   @Override
   public void readDataFromFile(String statsPath) {
-    List<Player> players = new LinkedList<>();
+    players = new LinkedList<>();
 
     List<Map<String, String>> groups = LineupGeneratorUtil.readFilesFromPath(statsPath,
         1 /* numGroups */,
@@ -44,10 +51,12 @@ public class OrdinaryBattingLineupGenerator implements LineupGenerator {
     LineupGeneratorUtil.createPlayersFromMap(groups.get(0), players);
 
     // Find all batting lineup permutations
+    /*
     List<List<Player>> lineups = PermutationGeneratorUtil.permute(players);
     for (List<Player> lineup : lineups) {
       allPossibleLineups.add(new OrdinaryBattingLineup(lineup));
-    }
+    }*/
+    iterator = new PermutationIterator<Player>(players);
   }
 
   private static void validate(String[] splitLine) {
@@ -56,8 +65,7 @@ public class OrdinaryBattingLineupGenerator implements LineupGenerator {
 
   @Override
   public BattingLineup getIntitialLineup() {
-    BattingLineup someLineup = allPossibleLineups.peek();
-    // TODO: Sort by batting avarage, that's an okay first guess
+    BattingLineup someLineup = new OrdinaryBattingLineup(players);
     return someLineup;
   }
 }
