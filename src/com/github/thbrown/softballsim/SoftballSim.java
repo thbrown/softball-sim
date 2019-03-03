@@ -12,7 +12,7 @@ import com.github.thbrown.softballsim.lineupgen.LineupType;
 
 public class SoftballSim {
   // Config
-  public static int GAMES_TO_SIMULATE = 1;
+  public static int GAMES_TO_SIMULATE = 10000;
   public static int INNINGS_PER_GAME = 7;
   public static int START_INDEX = 0;
   public static int TASK_BUFFER_SIZE = 1000;

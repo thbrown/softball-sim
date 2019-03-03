@@ -12,7 +12,6 @@ import com.github.thbrown.softballsim.lineup.BattingLineup;
 import com.github.thbrown.softballsim.lineup.OrdinaryBattingLineup;
 
 public class OrdinaryBattingLineupGenerator implements LineupGenerator {
-
   private List<Player> players;
   private long size;
 
@@ -61,8 +60,7 @@ public class OrdinaryBattingLineupGenerator implements LineupGenerator {
   }
 
   @Override
-  public BattingLineup getIntitialLineup() {
-	  
+  public BattingLineup getIntitialLineup() {  
     players.sort( (a,b) -> {
     	double diff = b.getAverageNumeric() - a.getAverageNumeric();
     	if(diff > 0) {
