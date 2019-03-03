@@ -55,6 +55,11 @@ public class Player {
     return String.format(java.util.Locale.US, "%.3f", result);
   }
 
+  public double getAverageNumeric() {
+	    double result = (double) (singles + doubles + triples + homeRuns + walks) / plateAppearances;
+	    return result;
+  }
+  
   private String getSluggingPercentage() {
     double result = (double) (singles * 1 + doubles * 2 + triples * 3 + homeRuns * 4)
         / plateAppearances;

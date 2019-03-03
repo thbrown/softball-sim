@@ -12,4 +12,5 @@ import com.github.thbrown.softballsim.lineupgen.LineupGenerator;
 public interface LineupGeneratorFactory {
 
   public LineupGenerator getLineupGenerator();
+  
 }

@@ -6,10 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 
-import com.github.thbrown.softballsim.PermutationGeneratorUtil;
 import com.github.thbrown.softballsim.Player;
 import com.github.thbrown.softballsim.lineup.BattingLineup;
-import com.github.thbrown.softballsim.lineup.NoConsecutiveFemalesBattingLineup;
 
 public class NoConsecutiveFemalesLineupGenerator implements LineupGenerator {
   
@@ -29,13 +27,6 @@ public class NoConsecutiveFemalesLineupGenerator implements LineupGenerator {
     List<Player> players = new ArrayList<>();
     players.addAll(groupA);
     players.addAll(groupB);
-    
-    List<List<Player>> lineups = PermutationGeneratorUtil.permute(players);
-    for (List<Player> lineup : lineups) {
-      if (isValidLineup(lineup)) {
-        allPossibleLineups.add(new NoConsecutiveFemalesBattingLineup(lineup));
-      }
-    }
   }
   
   private boolean bothPlayersAreGroupB(Player A, Player B) {
@@ -57,16 +48,22 @@ public class NoConsecutiveFemalesLineupGenerator implements LineupGenerator {
     }
     return true;
   }
-
-  @Override
-  public BattingLineup getNextLineup() {
-    return allPossibleLineups.poll();
-  }
   
   @Override
   public BattingLineup getIntitialLineup() {
-    BattingLineup someLineup = allPossibleLineups.peek();
-    // TODO: Sort by batting avarage, that's an okay first guess
-    return someLineup;
+    // TODO: Sort by batting average, that's an okay first guess
+    return getLineup(0);
+  }
+
+  @Override
+  public BattingLineup getLineup(long index) {
+	// TODO Auto-generated method stub
+	return null;
+  }
+	
+  @Override
+  public long size() {
+	  // TODO Auto-generated method stub
+	  return 0;
   }
 }

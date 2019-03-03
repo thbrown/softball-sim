@@ -4,7 +4,7 @@ import java.util.concurrent.Callable;
 
 import com.github.thbrown.softballsim.lineup.BattingLineup;
 
-public class Simulation implements Callable<Double> {
+public class Simulation implements Callable<Result> {
 
   private BattingLineup lineup;
   private int numberOfGamesToSimulate;
@@ -13,19 +13,22 @@ public class Simulation implements Callable<Double> {
   private boolean second;
   private boolean third;
   
-  ProgressTracker tracker = new ProgressTracker();
+  ProgressTracker tracker;
 
   Simulation(BattingLineup lineup, int numberOfGamesToSimulate, ProgressTracker tracker) {
+	  if(lineup == null) {
+		  System.out.println("NULL LINEUP");
+	  }
     this.lineup = lineup;
     this.numberOfGamesToSimulate = numberOfGamesToSimulate;
     this.tracker = tracker;
   }
 
-  public Double call() {
+  public Result call() {
     return run();
   }
 
-  public double run() {
+  public Result run() {
     double totalScore = 0;
 
     // Full Simulation
@@ -73,7 +76,10 @@ public class Simulation implements Callable<Double> {
       tracker.markOperationAsComplete();
     }
     
-    return totalScore / numberOfGamesToSimulate;
+    double score = totalScore / numberOfGamesToSimulate;
+    
+    Result result = new Result(score, lineup);
+    return result;
   }
 
   private int updateRunsAndBasesAfterHit(int bases) {

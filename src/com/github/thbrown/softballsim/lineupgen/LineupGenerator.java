@@ -9,8 +9,13 @@ public interface LineupGenerator {
    * get the next possible lineup. This method should return null when there are
    * no more lineups to simulate.
    */
-  public BattingLineup getNextLineup();
+  public BattingLineup getLineup(long index);
 
+  /**
+   * Total number of lineups that can be generated
+   */
+  public long size();
+  
   /**
    * Pull data from all files in the immediate supplied directory. This is
    * called before any calls to {@link #getNextLineup()}

@@ -15,7 +15,7 @@ public class ProgressTracker {
   
   private DecimalFormat df = new DecimalFormat("#.##"); 
   
-  public void init(long totalOperations, long numberOfUpdateUnits) {
+  public ProgressTracker(long totalOperations, long numberOfUpdateUnits) {
     this.triggerValue = totalOperations/numberOfUpdateUnits;
     this.percentagePerUpdate = ((double)this.triggerValue/totalOperations); 
     System.out.println(totalOperations + " " + this.triggerValue + " " + this.percentagePerUpdate);
