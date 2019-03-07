@@ -1,5 +1,7 @@
 package com.github.thbrown.softballsim;
 
+import java.util.Optional;
+
 import com.github.thbrown.softballsim.lineup.BattingLineup;
 
 public class Result {
@@ -11,11 +13,16 @@ public class Result {
 		this.lineup = lineup;
 	}
 	
-	double getScore() {
+	public double getScore() {
 		return this.avgScore;
 	}
 	
-	BattingLineup getLineup() {
+	public BattingLineup getLineup() {
 		return this.lineup;
+	}
+	
+	@Override
+	public String toString() {
+	  return avgScore + " " + Optional.ofNullable(lineup).map(v -> v.toString()).orElse("null");
 	}
 }

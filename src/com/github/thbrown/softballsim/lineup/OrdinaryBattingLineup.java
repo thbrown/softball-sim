@@ -1,9 +1,12 @@
 package com.github.thbrown.softballsim.lineup;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 
 import com.github.thbrown.softballsim.Player;
 
@@ -39,6 +42,13 @@ public class OrdinaryBattingLineup implements BattingLineup {
       result.append("\t").append(p).append("\n");
     }
     return result.toString();
+  }
+  
+  @Override
+  public Map<String, List<String>> toMap() {
+    Map<String,List<String>>result = new HashMap<>();
+    result.put("GroupA", players.stream().map(p -> p.getName().trim()).collect(Collectors.toList()));
+    return result;
   }
 
   @Override

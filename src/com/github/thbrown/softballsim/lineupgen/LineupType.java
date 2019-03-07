@@ -4,7 +4,7 @@ import com.github.thbrown.softballsim.LineupGeneratorFactory;
 
 public enum LineupType implements LineupGeneratorFactory {
 
-  // Register all new batting lineups here
+  // Register batting lineup generators here
   ORDINARY(() -> new OrdinaryBattingLineupGenerator()),
   ALTERNATING(() -> new AlternatingBattingLineupGenerator()),
   NO_CONSECUTIVE_FEMALES(() -> new NoConsecutiveFemalesLineupGenerator());

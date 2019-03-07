@@ -1,6 +1,9 @@
 package com.github.thbrown.softballsim.lineup;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.github.thbrown.softballsim.Player;
 
@@ -8,6 +11,8 @@ import com.github.thbrown.softballsim.Player;
  * Batting order that strictly alternates between two groups of players. (i.e.
  * women and men or older and younger). Batters in a group with less players
  * will bat more often.
+ * 
+ * TODO: add optional out for skipping batter
  *
  * @author thbrown
  */
@@ -64,6 +69,14 @@ public class AlternatingBattingLineup implements BattingLineup {
       result.append("\t").append(p).append("\n");
     }
     return result.toString();
+  }
+  
+  @Override
+  public Map<String, List<String>> toMap() {
+    Map<String,List<String>>result = new HashMap<>();
+    result.put("GroupA", groupA.stream().map(p -> p.getName().trim()).collect(Collectors.toList()));
+    result.put("GroupB", groupB.stream().map(p -> p.getName().trim()).collect(Collectors.toList()));
+    return result;
   }
   
   @Override

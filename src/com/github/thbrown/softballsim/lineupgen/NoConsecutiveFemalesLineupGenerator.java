@@ -29,6 +29,19 @@ public class NoConsecutiveFemalesLineupGenerator implements LineupGenerator {
     players.addAll(groupB);
   }
   
+  @Override
+  public void readDataFromString(String data) {
+    List<Map<String, String>> groups = LineupGeneratorUtil.readDataFromString(data,
+        2 /* numGroups */, LineupGeneratorUtil.ADD_LINE_TO_TWO_GROUPS_FUNCTION);
+        
+    LineupGeneratorUtil.createPlayersFromMap(groups.get(0), groupA);
+    LineupGeneratorUtil.createPlayersFromMap(groups.get(1), groupB);
+    
+    List<Player> players = new ArrayList<>();
+    players.addAll(groupA);
+    players.addAll(groupB);
+  }
+  
   private boolean bothPlayersAreGroupB(Player A, Player B) {
     return groupB.contains(A) && groupB.contains(B);
   }

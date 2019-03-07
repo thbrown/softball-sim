@@ -1,5 +1,8 @@
 package com.github.thbrown.softballsim.lineup;
 
+import java.util.List;
+import java.util.Map;
+
 import com.github.thbrown.softballsim.Player;
 
 public interface BattingLineup {
@@ -14,6 +17,12 @@ public interface BattingLineup {
    * first player is up to bat at the beginning of the next simulated game.
    */
   public void reset();
+  
+  /**
+   * Gets a map representation of the result so it can be easily serialized into json
+   * @return 
+   */
+  public Map<String, List<String>> toMap();
   
   public BattingLineup getRandomSwap();
 

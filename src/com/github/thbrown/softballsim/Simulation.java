@@ -5,23 +5,25 @@ import java.util.concurrent.Callable;
 import com.github.thbrown.softballsim.lineup.BattingLineup;
 
 public class Simulation implements Callable<Result> {
+  
+  private static boolean VERBOSE = false;
+  private static final int NAME_PADDING = 24; // Just for formatting verbose output
 
   private BattingLineup lineup;
   private int numberOfGamesToSimulate;
+  private int inningsPerGame;
 
   private boolean first; 
   private boolean second;
   private boolean third;
-  
-  ProgressTracker tracker;
 
-  Simulation(BattingLineup lineup, int numberOfGamesToSimulate, ProgressTracker tracker) {
-	  if(lineup == null) {
-		  System.out.println("NULL LINEUP");
-	  }
+  Simulation(BattingLineup lineup, int numberOfGamesToSimulate, int inningsPerGame) {
+	if(lineup == null) {
+		System.out.println("NULL LINEUP");
+	}
     this.lineup = lineup;
     this.numberOfGamesToSimulate = numberOfGamesToSimulate;
-    this.tracker = tracker;
+    this.inningsPerGame = inningsPerGame;
   }
 
   public Result call() {
@@ -36,7 +38,7 @@ public class Simulation implements Callable<Result> {
 
       // Game
       int gameScore = 0;
-      for (int inning = 0; SoftballSim.INNINGS_PER_GAME > inning; inning++) {
+      for (int inning = 0; this.inningsPerGame > inning; inning++) {
 
         // Inning
         int outs = 0;
@@ -49,31 +51,27 @@ public class Simulation implements Callable<Result> {
             outs++;
           }
 
-          if (SoftballSim.VERBOSE) {
+          if (VERBOSE) {
             String message =
-                padRight(p.name, SoftballSim.NAME_PADDING) +
+                padRight(p.name, NAME_PADDING) +
                     "\t hit:" + mapBasesToHitType(bases) +
                     "\t outs:" + outs +
                     "\t score:" + gameScore;
             System.out.println(message);
           }
         }
-        if (SoftballSim.VERBOSE) {
+        if (VERBOSE) {
           System.out.println("--------------");
         }
         clearBases();
       }
-      if (SoftballSim.VERBOSE) {
+      if (VERBOSE) {
         System.out.println("Runs Scored: " + gameScore);
         System.out.println("=============================================================");
       }
       totalScore += gameScore;
       lineup.reset();
 
-    }
-    
-    if(this.tracker != null) {
-      tracker.markOperationAsComplete();
     }
     
     double score = totalScore / numberOfGamesToSimulate;

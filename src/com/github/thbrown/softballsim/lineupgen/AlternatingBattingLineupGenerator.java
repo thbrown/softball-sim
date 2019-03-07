@@ -28,6 +28,18 @@ public class AlternatingBattingLineupGenerator implements LineupGenerator {
     groupBSize = CombinatoricsUtil.factorial(groupB.size());
     this.size = groupASize * groupBSize * 2;
   }
+  
+  @Override
+  public void readDataFromString(String data) {
+    List<Map<String, String>> groups = LineupGeneratorUtil.readDataFromString(data,
+        2 /* numGroups */, LineupGeneratorUtil.ADD_LINE_TO_TWO_GROUPS_FUNCTION);
+
+    LineupGeneratorUtil.createPlayersFromMap(groups.get(0), groupA);
+    LineupGeneratorUtil.createPlayersFromMap(groups.get(1), groupB);
+    groupASize = CombinatoricsUtil.factorial(groupA.size());
+    groupBSize = CombinatoricsUtil.factorial(groupB.size());
+    this.size = groupASize * groupBSize * 2;
+  }
 
   @Override
   public BattingLineup getLineup(long index) {

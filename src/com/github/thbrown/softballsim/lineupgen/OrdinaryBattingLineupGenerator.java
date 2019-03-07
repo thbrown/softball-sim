@@ -49,6 +49,18 @@ public class OrdinaryBattingLineupGenerator implements LineupGenerator {
     
     this.size = CombinatoricsUtil.factorial(players.size());
   }
+  
+  @Override
+  public void readDataFromString(String data) {
+    players = new LinkedList<>();
+
+    List<Map<String, String>> groups = LineupGeneratorUtil.readDataFromString(data,
+        1 /* numGroups */,
+        ADD_LINE_TO_GROUPS_FUNCTION);
+    LineupGeneratorUtil.createPlayersFromMap(groups.get(0), players);
+    
+    this.size = CombinatoricsUtil.factorial(players.size());
+  }
 
   private static void validate(String[] splitLine) {
     LineupGeneratorUtil.validateHitValues(Arrays.copyOfRange(splitLine, 1, splitLine.length));
@@ -74,4 +86,5 @@ public class OrdinaryBattingLineupGenerator implements LineupGenerator {
     
     return new OrdinaryBattingLineup(players);
   }
+
 }

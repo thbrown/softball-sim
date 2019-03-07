@@ -22,5 +22,7 @@ public interface LineupGenerator {
    */
   void readDataFromFile(String statsPath);
   
+  void readDataFromString(String data);
+  
   BattingLineup getIntitialLineup();
 }

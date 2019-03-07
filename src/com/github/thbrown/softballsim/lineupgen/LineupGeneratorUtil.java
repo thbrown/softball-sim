@@ -105,6 +105,16 @@ public class LineupGeneratorUtil {
     }
     return groups;
   }
+  
+  static List<Map<String, String>> readDataFromString(String data, int numGroups,
+      BiFunction<List<Map<String, String>>, String, Void> addLineToGroupsFunction) {
+    List<Map<String, String>> groups = new ArrayList<>();
+    for (int i = 0; i < numGroups; i++) {
+      groups.add(new HashMap<>());
+    }
+    readStringDataIntoGroups(data, groups, addLineToGroupsFunction);
+    return groups;
+  }
 
   private static void readFileIntoGroups(String filename, List<Map<String, String>> groups,
       BiFunction<List<Map<String, String>>, String, Void> addLineToGroupsFunction) {
@@ -130,6 +140,24 @@ public class LineupGeneratorUtil {
     } catch (Exception e) {
       System.out.println("WARNING: There was a problem while processing " + filename
           + ". This file will be skipped. Problem: " + e.getMessage());
+    }
+  }
+  
+  private static void readStringDataIntoGroups(String data, List<Map<String, String>> groups,
+      BiFunction<List<Map<String, String>>, String, Void> addLineToGroupsFunction) {
+    try {
+      String[] lineDelimited = data.split("\n");
+
+      for(int i = 0; i < lineDelimited.length; i++) {
+        String line = lineDelimited[i];
+        if (line.isEmpty()) {
+          continue;
+        }
+        addLineToGroupsFunction.apply(groups, line);
+      }
+    } catch (Exception e) {
+      System.out.println("WARNING: There was a problem while processing the data string. Problem: " 
+          + e.getMessage());
     }
   }
 
