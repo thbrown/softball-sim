@@ -1,24 +1,41 @@
 # SoftballSim
-Command line Monte Carlo simulation tool for making sure you choose the best lineup for your 
-softball or baseball team.
+Monte Carlo simulation tool for making sure you choose the best lineup for your softball, baseball, or kickball team. Used by softball.app for lineup optimizations but can also be run from the command line on file system data.
 
-Usage:
+Build and Run (requires java and gradle):
 ```
-ant
-java -jar SoftballSim <lineupType(string) OR lineupType ordinal(int)> # ordinary OR 0
+gradle build
+gradle jar
+java -jar ./build/libs/softball-sim.jar FILE_SYSTEM 0
 ```
 
-Assumes input file(s) in `./stats`. See the `stats` directory in this repository for example files.
+### Arguments
+
+Arguments to be supplied to the jar take the form:
+```
+java -jar ~/build/lib softball-sim.jar <dataSource(string)> <lineupType(string) OR lineupType ordinal(int)>
+```
+
+#### dataSource options
+
+* FILE_SYSTEM - Gets data from files in the `./stats` directory. See the `stats` directory in this repository for example files. Application will atteampt to read data of all files in the `./stats` directory.
+
+* NETWORK - Get's data from a network connection. This option is intended to be used with by mostly by softball-scorer app (https://github.com/thbrown/softball-scorer).
+
+#### lineupType options
 
 Available lineup generators:
 *  0 - OrdinaryBatteryLineupGenerator
-   *  Expects file format like: `Hermione Granger,A,3,4,2,4`
+   *  Expects data formated like: `Bashful,4,0,0,0`
+   *  Which is interpreted as *(name, hits... (homerun, out, out, out)*
 *  1 - AlternatingBattingLineupGenerator
-   *  Expects file format like: `Bashful,4,0,0,0` 
-		
+   *  Expects data formated like: `Hermione Granger,B,1,0,2,1` 
+   *  Which is interpreted as *(name, group \[e.g. A=male, B=female\], hits... (single, out, double, single)*
+*  2 - NoConsecutiveFemalesLineupGenerator
+   *  Expects data formatted the same way as AlternatingBattingLineupGenerator
+
 ## Notes
 
-Input data is an integer 0-4 (inclusive) that represents the number of bases the player reached in each of their at bats:
+Hit data is an integer 0-4 (inclusive) that represents the number of bases the player reached in each of their at bats. Explicitly:
 *  0 => out/error/fielder's choice
 *  1 => single/walk
 *  2 => double
@@ -29,4 +46,3 @@ Input data is an integer 0-4 (inclusive) that represents the number of bases the
 To add your own lineup generator:
 1. Implement BattingLienup and LineupGenerator.
 1. Register your new generator in the static map in the LineupType class.
-		

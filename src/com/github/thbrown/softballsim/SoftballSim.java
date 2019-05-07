@@ -27,7 +27,7 @@ import com.google.gson.reflect.TypeToken;
 
 public class SoftballSim {
   // Config
-  private static int DEFAULT_GAMES_TO_SIMULATE = 10000;
+  private static int DEFAULT_GAMES_TO_SIMULATE = 100000;
   private static int DEFAULT_INNINGS_PER_GAME = 6;
   private static int DEFAULT_START_INDEX = 0;
   private static int DEFAULT_UPDATE_FREQUENCY = 1000;
