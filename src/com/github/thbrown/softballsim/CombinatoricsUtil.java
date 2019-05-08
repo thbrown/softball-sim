@@ -8,6 +8,7 @@ public class CombinatoricsUtil {
 
   /**
    * Given a lineup of players, returns a list of all possible lineups.
+   * @Deprecated avoid keeping all possible lineups in memory
    */
   public static List<List<Player>> permute(List<Player> original) {
     if (original.size() == 0) {

@@ -123,7 +123,7 @@ public class LineupGeneratorUtil {
       Scanner in = null;
       try {
         in = new Scanner(new FileReader(filename));
-        in.useDelimiter(System.lineSeparator());
+        in.useDelimiter("\n");
 
         while (in.hasNext()) {
           String line = in.next().trim();

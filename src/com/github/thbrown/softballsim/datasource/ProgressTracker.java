@@ -1,6 +1,7 @@
 package com.github.thbrown.softballsim.datasource;
 
 import java.text.DecimalFormat;
+import java.util.HashMap;
 import java.util.Map;
 
 import com.github.thbrown.softballsim.Result;
@@ -38,6 +39,16 @@ public class ProgressTracker {
   public void onMilestone(Result bestResult, Map<Long, Long> histo) {
     // TODO: find a way to remove this from the sync block
     System.out.println(df.format(operationCounter*100/totalOperations) + "% complete");
+    Map<String,Object> inProgressCommand = new HashMap<>();
+    inProgressCommand.put("command", "IN_PROGRESS");
+    inProgressCommand.put("complete", operationCounter);
+    inProgressCommand.put("total", totalOperations);
+    inProgressCommand.put("histoSoFar", histo);
+    inProgressCommand.put("bestLineupSoFar", bestResult.getLineup().toMap());
+    inProgressCommand.put("bestLineupScoreSoFar", bestResult.getScore());
+    
+    //for(Strin inProgressCommand.keySet())
+    System.out.println(inProgressCommand);
   }
   
 }

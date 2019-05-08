@@ -31,7 +31,7 @@ Available lineup generators:
    *  Expects data formated like: `Hermione Granger,B,1,0,2,1` 
    *  Which is interpreted as *(name, group \[e.g. A=male, B=female\], hits... (single, out, double, single)*
 *  2 - NoConsecutiveFemalesLineupGenerator
-   *  Expects data formatted the same way as AlternatingBattingLineupGenerator
+   *  Expects data formatted the same way as AlternatingBattingLineupGenerator except expect second value must be gender (A=male, B=female)
 
 ## Notes
 
