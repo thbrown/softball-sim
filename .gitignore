@@ -11,3 +11,4 @@ build
 .settings
 
 gson-2.8.5.jar
+/bin
