@@ -21,16 +21,23 @@ public class NetworkProgressTracker extends ProgressTracker {
   @Override
   public void onMilestone(Result bestResult, Map<Long, Long> histo) {
     super.onMilestone(bestResult, histo);
+    
+    // TODO: This needs to move to some optimization specific file
     Map<String,Object> inProgressCommand = new HashMap<>();
     inProgressCommand.put("command", "IN_PROGRESS");
     inProgressCommand.put("complete", operationCounter);
     inProgressCommand.put("total", totalOperations);
-    inProgressCommand.put("histoSoFar", histo);
-    inProgressCommand.put("bestLineupSoFar", bestResult.getLineup().toMap());
-    inProgressCommand.put("bestLineupScoreSoFar", bestResult.getScore());
+    inProgressCommand.put("histogram", histo);
+    inProgressCommand.put("lineup", bestResult.getLineup().toMap());
+    inProgressCommand.put("score", bestResult.getScore());
     String jsonInProgressCommand = gson.toJson(inProgressCommand);
     network.println(jsonInProgressCommand);
     System.out.println("SENT: \t\t" + jsonInProgressCommand);
+    
+    // If the connection was broken, stop computation. We can't save the results anyways.
+    if(network.checkError()) {
+      throw new RuntimeException("Network Stream Encountered An Error. Terminating Compute.");
+    };
   }
 
 }

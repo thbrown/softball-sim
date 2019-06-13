@@ -13,9 +13,7 @@ import com.github.thbrown.softballsim.lineup.BattingLineup;
 import com.github.thbrown.softballsim.lineup.OrdinaryBattingLineup;
 
 public class NoConsecutiveFemalesLineupGenerator implements LineupGenerator {
-  
-  private Queue<BattingLineup> allPossibleLineups = new LinkedList<>();
-  
+    
   List<Player> groupA = new ArrayList<>();
   List<Player> groupB = new ArrayList<>();
   List<List<Player>> possibleLineups;
@@ -26,65 +24,63 @@ public class NoConsecutiveFemalesLineupGenerator implements LineupGenerator {
   public void readDataFromFile(String statsPath) {
     List<Map<String, String>> groups = LineupGeneratorUtil.readFilesFromPath(statsPath,
         2 /* numGroups */, LineupGeneratorUtil.ADD_LINE_TO_TWO_GROUPS_FUNCTION);
-        
-    LineupGeneratorUtil.createPlayersFromMap(groups.get(0), groupA);
-    LineupGeneratorUtil.createPlayersFromMap(groups.get(1), groupB);
-    
-    List<Player> players = new ArrayList<>();
-    players.addAll(groupA);
-    players.addAll(groupB);
-    
-    if(groupA.size() < groupB.size()) {
-      throw new RuntimeException("The number of males must be greater than or equal to the number of females. Males: " + groupA.size() + " Females: " + groupB.size());
-    }
-    
-    // TODO: develop indexable combinations so we don't have to save all these lineups in memory
-    this.possibleLineups = CombinatoricsUtil.permute(players);
-    
-    // Filter invalid lineups
-    this.possibleLineups = possibleLineups.stream().filter( lineup -> isValidLineup(lineup)).collect(Collectors.toList());;
-    
-    /*
-     * For ever permutation of males we want to insert every permutation of females into the slots 
-     * between the males (excluding the last slot because if both the first and the last slot were
-     * selected there would be back to back female batters). Therefore, we must add back all the
-     * lineups in which there is a female better                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     last.
-     */
-    
-    /*
-    int males = groupA.size();
-    int females = groupB.size();
-    
-    long malePermutations = CombinatoricsUtil.factorial(males);
-    long femalePermutations = CombinatoricsUtil.factorial(groupB.size());
-    
-    long slotCombinations = malePermutations/(femalePermutations*CombinatoricsUtil.factorial(males- females));
-    
-    long availableSlots = CombinatoricsUtil.factorial(males - 1);
-    long availableFemales = CombinatoricsUtil.factorial(females - 1);
-    
-    long additionalSlotCombinations = availableSlots/(availableFemales * CombinatoricsUtil.factorial((males-1)*(females-1)));
-    
-    this.size = malePermutations * (femalePermutations*slotCombinations + femalePermutations*additionalSlotCombinations);
-    */
-    this.size = this.possibleLineups.size();
-    
-    //if(this.size != possibleLineups.size()) {
-    //  throw new RuntimeException("Calculated size did not match empirical size. Calculated: " + this.size + " Empirical: " + possibleLineups.size());
-    //}
+    initCommon(groups);
   }
   
   @Override
   public void readDataFromString(String data) {
     List<Map<String, String>> groups = LineupGeneratorUtil.readDataFromString(data,
         2 /* numGroups */, LineupGeneratorUtil.ADD_LINE_TO_TWO_GROUPS_FUNCTION);
-        
-    LineupGeneratorUtil.createPlayersFromMap(groups.get(0), groupA);
-    LineupGeneratorUtil.createPlayersFromMap(groups.get(1), groupB);
-    
-    List<Player> players = new ArrayList<>();
-    players.addAll(groupA);
-    players.addAll(groupB);
+    initCommon(groups);
+  }
+  
+  private void initCommon(List<Map<String, String>> groups) {
+      
+   LineupGeneratorUtil.createPlayersFromMap(groups.get(0), groupA);
+   LineupGeneratorUtil.createPlayersFromMap(groups.get(1), groupB);
+   
+   List<Player> players = new ArrayList<>();
+   players.addAll(groupA);
+   players.addAll(groupB);
+   
+   if(groupA.size() < groupB.size()) {
+     throw new RuntimeException("The number of males must be greater than or equal to the number of females. Males: " + groupA.size() + " Females: " + groupB.size());
+   }
+   
+   // TODO: develop indexable combinations so we don't have to save all these lineups in memory
+   this.possibleLineups = CombinatoricsUtil.permute(players);
+   
+   // Filter invalid lineups
+   this.possibleLineups = possibleLineups.stream().filter( lineup -> isValidLineup(lineup)).collect(Collectors.toList());;
+   
+   /*
+    * For ever permutation of males we want to insert every permutation of females into the slots 
+    * between the males (excluding the last slot because if both the first and the last slot were
+    * selected there would be back to back female batters). Therefore, we must add back all the
+    * lineups in which there is a female better                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     last.
+    */
+   
+   /*
+   int males = groupA.size();
+   int females = groupB.size();
+   
+   long malePermutations = CombinatoricsUtil.factorial(males);
+   long femalePermutations = CombinatoricsUtil.factorial(groupB.size());
+   
+   long slotCombinations = malePermutations/(femalePermutations*CombinatoricsUtil.factorial(males- females));
+   
+   long availableSlots = CombinatoricsUtil.factorial(males - 1);
+   long availableFemales = CombinatoricsUtil.factorial(females - 1);
+   
+   long additionalSlotCombinations = availableSlots/(availableFemales * CombinatoricsUtil.factorial((males-1)*(females-1)));
+   
+   this.size = malePermutations * (femalePermutations*slotCombinations + femalePermutations*additionalSlotCombinations);
+   */
+   this.size = this.possibleLineups.size();
+   
+   //if(this.size != possibleLineups.size()) {
+   //  throw new RuntimeException("Calculated size did not match empirical size. Calculated: " + this.size + " Empirical: " + possibleLineups.size());
+   //}
   }
   
   private boolean bothPlayersAreGroupB(Player A, Player B) {

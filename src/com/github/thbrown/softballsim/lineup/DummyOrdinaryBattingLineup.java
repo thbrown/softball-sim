@@ -13,11 +13,12 @@ import com.github.thbrown.softballsim.Player;
  */
 public class DummyOrdinaryBattingLineup implements BattingLineup {
 
-  private List<String> players;
+  private List<String> groupANames;
 
   public DummyOrdinaryBattingLineup(List<String> playerNames) {
     super();
-    if (players.size() <= 0) {
+    groupANames = playerNames;
+    if (playerNames.size() <= 0) {
       throw new IllegalArgumentException("You must include at least one player in the lineup.");
     }
   }
@@ -36,7 +37,7 @@ public class DummyOrdinaryBattingLineup implements BattingLineup {
   public String toString() {
     StringBuilder result = new StringBuilder();
     result.append("Players").append("\n");
-    for (String p : players) {
+    for (String p : groupANames) {
       result.append("\t").append(p).append("\n");
     }
     return result.toString();
@@ -45,7 +46,7 @@ public class DummyOrdinaryBattingLineup implements BattingLineup {
   @Override
   public Map<String, List<String>> toMap() {
     Map<String,List<String>>result = new HashMap<>();
-    result.put("GroupA", players);
+    result.put("GroupA", groupANames);
     return result;
   }
 

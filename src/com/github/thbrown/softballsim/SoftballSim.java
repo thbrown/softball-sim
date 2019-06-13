@@ -6,31 +6,27 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.lang.reflect.Type;
 import java.net.Socket;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.concurrent.*;
 
 import com.github.thbrown.softballsim.datasource.DataSource;
-import com.github.thbrown.softballsim.datasource.NetworkProgressTracker;
 import com.github.thbrown.softballsim.datasource.ProgressTracker;
+import com.github.thbrown.softballsim.gson.BaseOptimizationData;
+import com.github.thbrown.softballsim.gson.OptimizationDataDeserializer;
 import com.github.thbrown.softballsim.lineup.BattingLineup;
-import com.github.thbrown.softballsim.lineup.DummyAlternatingBattingLineup;
-import com.github.thbrown.softballsim.lineup.DummyOrdinaryBattingLineup;
-import com.github.thbrown.softballsim.lineup.OrdinaryBattingLineup;
 import com.github.thbrown.softballsim.lineupgen.LineupGenerator;
 import com.github.thbrown.softballsim.lineupgen.LineupType;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
 
 public class SoftballSim {
   // Config
-  private static int DEFAULT_GAMES_TO_SIMULATE = 10000;
-  private static int DEFAULT_INNINGS_PER_GAME = 7;
-  private static int DEFAULT_START_INDEX = 0;
-  private static int DEFAULT_UPDATE_FREQUENCY = 1000;
+  public static int DEFAULT_GAMES_TO_SIMULATE = 70000;
+  public static int DEFAULT_INNINGS_PER_GAME = 7;
+  public static int DEFAULT_START_INDEX = 0;
+  public static int DEFAULT_UPDATE_FREQUENCY = 1000;
   
   private static int TASK_BUFFER_SIZE = 1000;
   private static final int THREADS_TO_USE = Runtime.getRuntime().availableProcessors() - 1;
@@ -49,8 +45,8 @@ public class SoftballSim {
     }
     
     if(DATA_SOURCE == DataSource.FILE_SYSTEM) {
-        int gamesToSimulate = args.length >= 3 ? Integer.parseInt(args[3]) : DEFAULT_GAMES_TO_SIMULATE;
-        int inningsToSimulate = args.length >= 4 ? Integer.parseInt(args[4]) : DEFAULT_INNINGS_PER_GAME;
+        int gamesToSimulate = args.length >= 3 ? Integer.parseInt(args[2]) : DEFAULT_GAMES_TO_SIMULATE;
+        int inningsToSimulate = args.length >= 4 ? Integer.parseInt(args[3]) : DEFAULT_INNINGS_PER_GAME;
         int startIndex = DEFAULT_START_INDEX;
 
         long startTime = System.currentTimeMillis();
@@ -66,14 +62,20 @@ public class SoftballSim {
     	System.out.println("Simulation took " + (System.currentTimeMillis() - startTime) + " milliseconds.");
 
     } else if (DATA_SOURCE == DataSource.NETWORK) {
+      boolean shutdownOnComplete = false;
       try{
-        String ip = "127.0.0.1"; // TODO: pass this as an argument?
+        String connectionIp = args.length >= 2 ? args[1] : "127.0.0.1";
+        String optimizationId = args.length >= 3 ? args[2] : "0000000000";
+        shutdownOnComplete = args.length >= 4 ? Boolean.parseBoolean(args[3]) : false;
+        
         int port = 8414;
         
-        System.out.println("[Connecting to socket...]");
-        Socket socket = new Socket(ip, port);
+        System.out.println("[Connecting to " + connectionIp + ":" + port + "]");
+        Socket socket = new Socket(connectionIp, port);
 
-        Gson gson = new GsonBuilder().create();
+        final GsonBuilder gsonBuilder = new GsonBuilder();
+        gsonBuilder.registerTypeAdapter(BaseOptimizationData.class, new OptimizationDataDeserializer());
+        Gson gson = gsonBuilder.create();
         
         PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
         BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -81,87 +83,35 @@ public class SoftballSim {
           // Send the start command to
           Map<String,String> readyCommand = new HashMap<>();
           readyCommand.put("command", "READY");
+          readyCommand.put("optimizationId", optimizationId);
           
           String jsonReadyCommand = gson.toJson(readyCommand);
           out.println(jsonReadyCommand);
           System.out.println("SENT: \t\t" + jsonReadyCommand);
-          
-          OptimizationResult result = null;
+                    
           String data = null;
           while ((data = in.readLine()) != null) {
             System.out.println("RECEIVED: \t" + data);
-            
-            Type empMapType = new TypeToken<Map<String, String>>(){}.getType();
-            Map<String, String> map = gson.fromJson(data, empMapType);
-            
-            int gamesToSimulate = map.get("iterations") != null ? Integer.parseInt(map.get("iterations")) : DEFAULT_GAMES_TO_SIMULATE;
-            int inningsToSimulate = map.get("innings") != null ? Integer.parseInt(map.get("innings")) : DEFAULT_INNINGS_PER_GAME;
-            long startIndex = map.get("startIndex") != null ? Long.parseLong(map.get("startIndex")) : DEFAULT_START_INDEX;
-            String lineupType = map.get("lineupType");
-            
-            // Account for initial conditions if specified
-            Type histoType = new TypeToken<Map<Integer, Integer>>(){}.getType();
-            Map<Long, Long> initialHisto = map.get("initialHisto") != null ? gson.fromJson(map.get("initialHisto"), histoType) : null;
-            Type lineupObjectType = new TypeToken<Map<String, List<String>>>(){}.getType();
-            Map<String,List<String>> initialLineup = gson.fromJson(map.get("initialLineup"), lineupObjectType);
-            Double initialScore = map.get("initialScore") == null ? null : Double.parseDouble(map.get("initialScore"));
-            Result initialResult = null;
-            if(initialScore != null && initialLineup != null && initialHisto != null) {
-              // Build a list of players
-              if(lineupType.equals("0") || lineupType.equals("2")) {
-                initialResult = new Result(initialScore, new DummyOrdinaryBattingLineup(initialLineup.get("GroupA")));
-              } else if(lineupType.equals("1")) {
-                initialResult = new Result(initialScore, new DummyAlternatingBattingLineup(initialLineup.get("GroupA"), initialLineup.get("GroupB")));
-              } else {
-                throw new RuntimeException("Unrecognized lineup type: " + lineupType);
-              }
-
-              System.out.println("Initial conditions were specified");
-              System.out.println(initialResult);
-              System.out.println(initialHisto);
-            } else {
-              initialHisto = null;
-              initialResult = null;
-            }
-            
-            long startTime = System.currentTimeMillis();
-            
-            LineupGenerator generator = getLineupGenerator(map.get("lineupType"));
-            generator.readDataFromString(map.get("data"));
-            
-            ProgressTracker tracker = new NetworkProgressTracker(generator.size(), DEFAULT_UPDATE_FREQUENCY, startIndex, gson, out);
-            
-            result = simulateLineups(generator, gamesToSimulate, inningsToSimulate, startIndex, tracker, initialResult, initialHisto);
-            
-            System.out.println(result.toString());
-            System.out.println("Simulation took " + (System.currentTimeMillis() - startTime) + " milliseconds.");
+            BaseOptimizationData parsedData = gson.fromJson(data, BaseOptimizationData.class);
+            parsedData.runSimulation(gson, out);
             break;
           }
-          
-          Map<String,Object> completeCommand = new HashMap<>();
-          completeCommand.put("command", "COMPLETE");
-          completeCommand.put("lineup", result.getLineup());
-          completeCommand.put("score", result.getScore());
-          completeCommand.put("histogram", result.getHistogram());
-          String jsonCompleteCommand = gson.toJson(completeCommand);
-          out.println(jsonCompleteCommand);
-          System.out.println("SENT: \t\t" + jsonCompleteCommand);
-            
         } catch (Exception e) {
           StringWriter sw = new StringWriter();
           e.printStackTrace(new PrintWriter(sw));
           String exceptionAsString = sw.toString();
           
-          Map<String,Object> completeCommand = new HashMap<>();
-          completeCommand.put("command", "ERROR");
-          completeCommand.put("message", e.getMessage());
-          completeCommand.put("trace", exceptionAsString);
-          String jsonCompleteCommand = gson.toJson(completeCommand);
+          Map<String,Object> errorCommand = new HashMap<>();
+          errorCommand.put("command", "ERROR");
+          errorCommand.put("message", e.toString());
+          errorCommand.put("trace", exceptionAsString);
+          String jsonCompleteCommand = gson.toJson(errorCommand);
           out.println(jsonCompleteCommand);
           System.out.println("SENT: \t\t" + jsonCompleteCommand); 
           throw e;
         } finally {
-           socket.close();
+          Thread.sleep(1000);
+          socket.close();
         }
       } catch (Exception e) {
         e.printStackTrace();
@@ -179,8 +129,18 @@ public class SoftballSim {
             throw new RuntimeException("Unsupported operating system: " + operatingSystem);
         }
 
-        //Runtime.getRuntime().exec(shutdownCommand);
-        System.out.println("Instance would have shut down " + shutdownCommand);
+        if(shutdownOnComplete) {
+          try {
+            System.out.println("Running shutdown command " + shutdownCommand);         
+            Runtime.getRuntime().exec(shutdownCommand);
+          } catch (IOException e) {
+            System.out.println("Encountered error while running shutdown command");
+            e.printStackTrace();
+          }
+        } else {
+          System.out.println("Skipping shutdown");
+        }
+
         System.exit(0);
       }
     } else {
@@ -188,7 +148,7 @@ public class SoftballSim {
     }
   }
 
-  private static LineupGenerator getLineupGenerator(String lineupTypeString) {
+  public static LineupGenerator getLineupGenerator(String lineupTypeString) {
     LineupType lineupType = null;
     try {
       lineupType = LineupType.valueOf(lineupTypeString.toUpperCase());
@@ -196,7 +156,7 @@ public class SoftballSim {
       try {
         // This is brittle, but should be fairly stable.
         int ordinal = Integer.parseInt(lineupTypeString);
-        lineupType = LineupType.values()[ordinal];
+        lineupType = LineupType.values()[ordinal-1];
       } catch (IndexOutOfBoundsException | NumberFormatException unused) {
         System.out.println(String.format("Invalid LineupType. Was \"%s\".", lineupTypeString));
         printAvailableLineupTypes();
@@ -221,11 +181,11 @@ public class SoftballSim {
     System.out.println("\tAvailable lineup generators:");
     LineupType[] lineupTypes = LineupType.values();
     for (int i = 0; i < lineupTypes.length; i++) {
-      System.out.println(String.format("\t\t\"%s\" or \"%s\"", lineupTypes[i], i));
+      System.out.println(String.format("\t\t\"%s\" or \"%s\"", lineupTypes[i], i+1));
     }
   }
   
-  private static OptimizationResult simulateLineups(LineupGenerator generator, int gamesToSimulate, int inningsPerGame, long startIndex, ProgressTracker tracker, Result initialResult, Map<Long, Long> initialHisto) {
+  public static OptimizationResult simulateLineups(LineupGenerator generator, int gamesToSimulate, int inningsPerGame, long startIndex, ProgressTracker tracker, Result initialResult, Map<Long, Long> initialHisto) {
 
     // Print the details before we start
     DecimalFormat formatter = new DecimalFormat("#,###");

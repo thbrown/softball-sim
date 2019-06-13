@@ -40,25 +40,23 @@ public class OrdinaryBattingLineupGenerator implements LineupGenerator {
 
   @Override
   public void readDataFromFile(String statsPath) {
-    players = new LinkedList<>();
-
     List<Map<String, String>> groups = LineupGeneratorUtil.readFilesFromPath(statsPath,
         1 /* numGroups */,
         ADD_LINE_TO_GROUPS_FUNCTION);
-    LineupGeneratorUtil.createPlayersFromMap(groups.get(0), players);
-    
-    this.size = CombinatoricsUtil.factorial(players.size());
+    initCommon(groups);
   }
   
   @Override
   public void readDataFromString(String data) {
-    players = new LinkedList<>();
-
     List<Map<String, String>> groups = LineupGeneratorUtil.readDataFromString(data,
         1 /* numGroups */,
         ADD_LINE_TO_GROUPS_FUNCTION);
+    initCommon(groups);
+  }
+  
+  private void initCommon(List<Map<String, String>> groups) {
+    players = new LinkedList<>();
     LineupGeneratorUtil.createPlayersFromMap(groups.get(0), players);
-    
     this.size = CombinatoricsUtil.factorial(players.size());
   }
 

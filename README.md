@@ -24,13 +24,13 @@ java -jar ~/build/lib softball-sim.jar <dataSource(string)> <lineupType(string) 
 #### lineupType options
 
 Available lineup generators:
-*  0 - OrdinaryBatteryLineupGenerator
+*  1 - OrdinaryBatteryLineupGenerator
    *  Expects data formated like: `Bashful,4,0,0,0`
    *  Which is interpreted as *(name, hits... (homerun, out, out, out)*
-*  1 - AlternatingBattingLineupGenerator
+*  2 - AlternatingBattingLineupGenerator
    *  Expects data formated like: `Hermione Granger,B,1,0,2,1` 
    *  Which is interpreted as *(name, group \[e.g. A=male, B=female\], hits... (single, out, double, single)*
-*  2 - NoConsecutiveFemalesLineupGenerator
+*  3 - NoConsecutiveFemalesLineupGenerator
    *  Expects data formatted the same way as AlternatingBattingLineupGenerator except expect second value must be gender (A=male, B=female)
 
 ## Notes

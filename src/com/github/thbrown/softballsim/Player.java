@@ -33,6 +33,10 @@ public class Player {
     System.out.println(String.format(
         "%s\t 1B: %d\t 2B: %d\t 3B: %d\t HR: %d\t BB: %d\t PA: %d",
         this, singles, doubles, triples, homeRuns, walks, plateAppearances));
+    
+    if(this.plateAppearances <= 0) {
+      throw new RuntimeException("Each batter must have at least one plate apperaance");
+    }
   }
 
   public int hit() {

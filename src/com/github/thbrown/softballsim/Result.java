@@ -8,7 +8,7 @@ public class Result {
 	private double avgScore;
 	private BattingLineup lineup;
 	
-	Result(double score, BattingLineup lineup) {
+	public Result(double score, BattingLineup lineup) {
 		this.avgScore = score;
 		this.lineup = lineup;
 	}
