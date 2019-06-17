@@ -19,7 +19,7 @@ public class Simulation implements Callable<Result> {
 
   Simulation(BattingLineup lineup, int numberOfGamesToSimulate, int inningsPerGame) {
 	if(lineup == null) {
-		System.out.println("NULL LINEUP");
+		Logger.log("NULL LINEUP");
 	}
     this.lineup = lineup;
     this.numberOfGamesToSimulate = numberOfGamesToSimulate;
@@ -57,17 +57,17 @@ public class Simulation implements Callable<Result> {
                     "\t hit:" + mapBasesToHitType(bases) +
                     "\t outs:" + outs +
                     "\t score:" + gameScore;
-            System.out.println(message);
+            Logger.log(message);
           }
         }
         if (VERBOSE) {
-          System.out.println("--------------");
+          Logger.log("--------------");
         }
         clearBases();
       }
       if (VERBOSE) {
-        System.out.println("Runs Scored: " + gameScore);
-        System.out.println("=============================================================");
+        Logger.log("Runs Scored: " + gameScore);
+        Logger.log("=============================================================");
       }
       totalScore += gameScore;
       lineup.reset();

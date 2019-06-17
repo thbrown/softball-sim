@@ -17,9 +17,9 @@ java -jar ~/build/lib softball-sim.jar <dataSource(string)> <lineupType(string) 
 
 #### dataSource options
 
-* FILE_SYSTEM - Gets data from files in the `./stats` directory. See the `stats` directory in this repository for example files. Application will atteampt to read data of all files in the `./stats` directory.
+* FILE_SYSTEM - Gets data from files in the `./stats` directory. See the `stats` directory in this repository for example files. Application will attempt to read data of all files in the `./stats` directory.
 
-* NETWORK - Get's data from a network connection. This option is intended to be used with by mostly by softball-scorer app (https://github.com/thbrown/softball-scorer).
+* NETWORK - Get's data from a network connection. This option is intended to be used mostly by softball-scorer app (https://github.com/thbrown/softball-scorer).
 
 #### lineupType options
 

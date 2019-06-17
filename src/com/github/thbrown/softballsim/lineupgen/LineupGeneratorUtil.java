@@ -13,6 +13,7 @@ import java.util.Scanner;
 import java.util.function.BiFunction;
 
 import com.github.thbrown.softballsim.AtBatOutcome;
+import com.github.thbrown.softballsim.Logger;
 import com.github.thbrown.softballsim.Player;
 
 public class LineupGeneratorUtil {
@@ -44,7 +45,7 @@ public class LineupGeneratorUtil {
     for (Entry<String, String> entry : nameAndGroupToHitData.entrySet()) {
       String name = entry.getKey();
       String hitLine = entry.getValue();
-      //System.out.println(name + " " + hitLine);
+      //Logger.log(name + " " + hitLine);
       players.add(LineupGeneratorUtil.createPlayer(name, hitLine));
     }
   }
@@ -100,7 +101,7 @@ public class LineupGeneratorUtil {
     for (int i = 0; i < listOfFiles.length; i++) {
       String filename = LineupGeneratorUtil.createAbsoluteFilename(statsPath,
           listOfFiles[i].getName());
-      System.out.println("Processing file " + filename);
+      Logger.log("Processing file " + filename);
       readFileIntoGroups(filename, groups, addLineToGroupsFunction);
     }
     return groups;
@@ -138,7 +139,7 @@ public class LineupGeneratorUtil {
         in.close();
       }
     } catch (Exception e) {
-      System.out.println("WARNING: There was a problem while processing " + filename
+      Logger.log("WARNING: There was a problem while processing " + filename
           + ". This file will be skipped. Problem: " + e.getMessage());
     }
   }
@@ -156,7 +157,7 @@ public class LineupGeneratorUtil {
         addLineToGroupsFunction.apply(groups, line);
       }
     } catch (Exception e) {
-      System.out.println("WARNING: There was a problem while processing the data string. Problem: " 
+      Logger.log("WARNING: There was a problem while processing the data string. Problem: " 
           + e.getMessage());
     }
   }

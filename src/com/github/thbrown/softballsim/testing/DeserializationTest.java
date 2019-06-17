@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 
 import org.junit.Test;
 
+import com.github.thbrown.softballsim.Logger;
 import com.github.thbrown.softballsim.gson.BaseOptimizationData;
 import com.github.thbrown.softballsim.gson.MonteCarloExaustiveData;
 import com.github.thbrown.softballsim.gson.OptimizationDataDeserializer;
@@ -30,7 +31,7 @@ public class DeserializationTest {
       assertEquals(null, data.getInitialHistogram());
       assertEquals(null, data.getInitialScore());
       
-      System.out.println(targetObject);
+      Logger.log(targetObject);
   }
 
 }

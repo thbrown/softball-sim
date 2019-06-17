@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
 
+import com.github.thbrown.softballsim.Logger;
 import com.github.thbrown.softballsim.OptimizationResult;
 import com.github.thbrown.softballsim.Result;
 import com.github.thbrown.softballsim.SoftballSim;
@@ -114,9 +115,9 @@ public class MonteCarloExaustiveData extends BaseOptimizationData {
         throw new RuntimeException("Unrecognized lineup type: " + lineupType);
       }
 
-      System.out.println("Initial conditions were specified");
-      System.out.println(initialResult);
-      System.out.println(initialHisto);
+      Logger.log("Initial conditions were specified");
+      Logger.log(initialResult);
+      Logger.log(initialHisto);
     } else {
       initialHisto = null;
       initialResult = null;
@@ -128,8 +129,8 @@ public class MonteCarloExaustiveData extends BaseOptimizationData {
     
     OptimizationResult result = SoftballSim.simulateLineups(generator, gamesToSimulate, inningsToSimulate, startIndex, tracker, initialResult, initialHisto);
     
-    System.out.println(result.toString());
-    System.out.println("Simulation took " + (System.currentTimeMillis() - startTime) + " milliseconds.");
+    Logger.log(result.toString());
+    Logger.log("Simulation took " + (System.currentTimeMillis() - startTime) + " milliseconds.");
     
     // Send the results back over the network
     Map<String,Object> completeCommand = new HashMap<>();
@@ -141,7 +142,7 @@ public class MonteCarloExaustiveData extends BaseOptimizationData {
     completeCommand.put("complete", generator.size());
     String jsonCompleteCommand = gson.toJson(completeCommand);
     network.println(jsonCompleteCommand);
-    System.out.println("SENT: \t\t" + jsonCompleteCommand);
+    Logger.log("SENT: \t\t" + jsonCompleteCommand);
   }
 
   private String joinIgnoreEmpty(String delimiter, String...strings) {

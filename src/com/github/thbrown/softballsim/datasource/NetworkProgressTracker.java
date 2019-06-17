@@ -4,6 +4,7 @@ import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.github.thbrown.softballsim.Logger;
 import com.github.thbrown.softballsim.Result;
 import com.google.gson.Gson;
 
@@ -32,7 +33,7 @@ public class NetworkProgressTracker extends ProgressTracker {
     inProgressCommand.put("score", bestResult.getScore());
     String jsonInProgressCommand = gson.toJson(inProgressCommand);
     network.println(jsonInProgressCommand);
-    System.out.println("SENT: \t\t" + jsonInProgressCommand);
+    Logger.log("SENT: \t\t" + jsonInProgressCommand);
     
     // If the connection was broken, stop computation. We can't save the results anyways.
     if(network.checkError()) {

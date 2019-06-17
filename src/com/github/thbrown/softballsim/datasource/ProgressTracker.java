@@ -4,6 +4,7 @@ import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.github.thbrown.softballsim.Logger;
 import com.github.thbrown.softballsim.Result;
 
 /**
@@ -39,7 +40,7 @@ public class ProgressTracker {
   public void onMilestone(Result bestResult, Map<Long, Long> histo) {
     // TODO: find a way to remove this from the sync block. Edit: Umm... this isn't in a sync block, 
     // it's just used for estimates of completeness, so hopefully that's okay
-    System.out.println(df.format(operationCounter*100/totalOperations) + "% complete");
+    Logger.log(df.format(operationCounter*100/totalOperations) + "% complete");
     Map<String,Object> inProgressCommand = new HashMap<>();
     inProgressCommand.put("command", "IN_PROGRESS");
     inProgressCommand.put("complete", operationCounter);
@@ -48,7 +49,7 @@ public class ProgressTracker {
     inProgressCommand.put("bestLineupSoFar", bestResult.getLineup().toMap());
     inProgressCommand.put("bestLineupScoreSoFar", bestResult.getScore());
     
-    System.out.println(inProgressCommand);
+    Logger.log(inProgressCommand);
   }
   
 }

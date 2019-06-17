@@ -40,7 +40,7 @@ public class SoftballSim {
     try {
       DATA_SOURCE = DataSource.valueOf(args[0]);
     } catch (IllegalArgumentException e) {
-      System.out.println("Invalid data source, must be 'NETWORK' or 'FILE_SYSTEM' but was '" + args[0] + "'");
+      Logger.log("Invalid data source, must be 'NETWORK' or 'FILE_SYSTEM' but was '" + args[0] + "'");
       System.exit(0);
     }
     
@@ -58,8 +58,8 @@ public class SoftballSim {
         
         OptimizationResult result = simulateLineups(generator, gamesToSimulate, inningsToSimulate, startIndex, tracker, null, null);
     	
-	    System.out.println(result.toString());
-    	System.out.println("Simulation took " + (System.currentTimeMillis() - startTime) + " milliseconds.");
+	    Logger.log(result.toString());
+    	Logger.log("Simulation took " + (System.currentTimeMillis() - startTime) + " milliseconds.");
 
     } else if (DATA_SOURCE == DataSource.NETWORK) {
       boolean shutdownOnComplete = false;
@@ -70,7 +70,7 @@ public class SoftballSim {
         
         int port = 8414;
         
-        System.out.println("[Connecting to " + connectionIp + ":" + port + "]");
+        Logger.log("[Connecting to " + connectionIp + ":" + port + "]");
         Socket socket = new Socket(connectionIp, port);
 
         final GsonBuilder gsonBuilder = new GsonBuilder();
@@ -87,11 +87,11 @@ public class SoftballSim {
           
           String jsonReadyCommand = gson.toJson(readyCommand);
           out.println(jsonReadyCommand);
-          System.out.println("SENT: \t\t" + jsonReadyCommand);
+          Logger.log("SENT: \t\t" + jsonReadyCommand);
                     
           String data = null;
           while ((data = in.readLine()) != null) {
-            System.out.println("RECEIVED: \t" + data);
+            Logger.log("RECEIVED: \t" + data);
             BaseOptimizationData parsedData = gson.fromJson(data, BaseOptimizationData.class);
             parsedData.runSimulation(gson, out);
             break;
@@ -107,15 +107,17 @@ public class SoftballSim {
           errorCommand.put("trace", exceptionAsString);
           String jsonCompleteCommand = gson.toJson(errorCommand);
           out.println(jsonCompleteCommand);
-          System.out.println("SENT: \t\t" + jsonCompleteCommand); 
+          Logger.log("SENT: \t\t" + jsonCompleteCommand); 
           throw e;
         } finally {
           Thread.sleep(1000);
           socket.close();
         }
       } catch (Exception e) {
+        Logger.log(e);
         e.printStackTrace();
       } finally {
+        Logger.log("FINALLY");
         String shutdownCommand;
         String operatingSystem = System.getProperty("os.name");
 
@@ -131,14 +133,14 @@ public class SoftballSim {
 
         if(shutdownOnComplete) {
           try {
-            System.out.println("Running shutdown command " + shutdownCommand);         
+            Logger.log("Running shutdown command " + shutdownCommand);         
             Runtime.getRuntime().exec(shutdownCommand);
           } catch (IOException e) {
-            System.out.println("Encountered error while running shutdown command");
+            Logger.log("Encountered error while running shutdown command");
             e.printStackTrace();
           }
         } else {
-          System.out.println("Skipping shutdown");
+          Logger.log("Skipping shutdown");
         }
 
         System.exit(0);
@@ -158,7 +160,7 @@ public class SoftballSim {
         int ordinal = Integer.parseInt(lineupTypeString);
         lineupType = LineupType.values()[ordinal-1];
       } catch (IndexOutOfBoundsException | NumberFormatException unused) {
-        System.out.println(String.format("Invalid LineupType. Was \"%s\".", lineupTypeString));
+        Logger.log(String.format("Invalid LineupType. Was \"%s\".", lineupTypeString));
         printAvailableLineupTypes();
         System.exit(1);
       }
@@ -170,18 +172,18 @@ public class SoftballSim {
 
   private static void validateArgs(String[] args) {
     if (args.length == 0) {
-      System.out.println("Usage: java SoftballSim <DataSource> <LineupType> <GamesToSimulate default=10000> <InningsToSimulate default=7>");
-      System.out.println("\tExpecting input files in " + STATS_FILE_PATH);
+      Logger.log("Usage: java SoftballSim <DataSource> <LineupType> <GamesToSimulate default=10000> <InningsToSimulate default=7>");
+      Logger.log("\tExpecting input files in " + STATS_FILE_PATH);
       printAvailableLineupTypes();
       System.exit(0);
     }
   }
 
   public static void printAvailableLineupTypes() {
-    System.out.println("\tAvailable lineup generators:");
+    Logger.log("\tAvailable lineup generators:");
     LineupType[] lineupTypes = LineupType.values();
     for (int i = 0; i < lineupTypes.length; i++) {
-      System.out.println(String.format("\t\t\"%s\" or \"%s\"", lineupTypes[i], i+1));
+      Logger.log(String.format("\t\t\"%s\" or \"%s\"", lineupTypes[i], i+1));
     }
   }
   
@@ -189,12 +191,12 @@ public class SoftballSim {
 
     // Print the details before we start
     DecimalFormat formatter = new DecimalFormat("#,###");
-    System.out.println("*********************************************************************");
-    System.out.println("Possible lineups: \t\t" + formatter.format(generator.size()));
-    System.out.println("Games to simulate per lineup: \t" + gamesToSimulate);
-    System.out.println("Innings per game: \t\t" + inningsPerGame);
-    System.out.println("Threads used: \t\t\t" + THREADS_TO_USE);
-    System.out.println("*********************************************************************");
+    Logger.log("*********************************************************************");
+    Logger.log("Possible lineups: \t\t" + formatter.format(generator.size()));
+    Logger.log("Games to simulate per lineup: \t" + gamesToSimulate);
+    Logger.log("Innings per game: \t\t" + inningsPerGame);
+    Logger.log("Threads used: \t\t\t" + THREADS_TO_USE);
+    Logger.log("*********************************************************************");
     
     ExecutorService executor = Executors.newFixedThreadPool(THREADS_TO_USE);
     Queue<Future<Result>> results = new LinkedList<>();
@@ -244,7 +246,7 @@ public class SoftballSim {
             Simulation s = new Simulation(lineup, gamesToSimulate, inningsPerGame);
             results.add(executor.submit(s));
             ThreadPoolExecutor ex =(ThreadPoolExecutor)executor;
-            //System.out.println("Adding task 2 " + ex.getQueue().size() + " " + ex.);
+            //Logger.log("Adding task 2 " + ex.getQueue().size() + " " + ex.);
             counter++;
         }
     }
