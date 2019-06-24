@@ -26,7 +26,7 @@ public class SoftballSim {
   public static int DEFAULT_GAMES_TO_SIMULATE = 70000;
   public static int DEFAULT_INNINGS_PER_GAME = 7;
   public static int DEFAULT_START_INDEX = 0;
-  public static int DEFAULT_UPDATE_FREQUENCY = 1000;
+  public static int DEFAULT_UPDATE_FREQUENCY_MS = 5000;
   
   private static int TASK_BUFFER_SIZE = 1000;
   private static final int THREADS_TO_USE = Runtime.getRuntime().availableProcessors() - 1;
@@ -54,7 +54,7 @@ public class SoftballSim {
         LineupGenerator generator = getLineupGenerator(args[1]);
         generator.readDataFromFile(STATS_FILE_PATH);
         
-        ProgressTracker tracker = new ProgressTracker(generator.size(), DEFAULT_UPDATE_FREQUENCY, startIndex);
+        ProgressTracker tracker = new ProgressTracker(generator.size(), DEFAULT_UPDATE_FREQUENCY_MS, startIndex);
         
         OptimizationResult result = simulateLineups(generator, gamesToSimulate, inningsToSimulate, startIndex, tracker, null, null);
     	
@@ -117,7 +117,6 @@ public class SoftballSim {
         Logger.log(e);
         e.printStackTrace();
       } finally {
-        Logger.log("FINALLY");
         String shutdownCommand;
         String operatingSystem = System.getProperty("os.name");
 

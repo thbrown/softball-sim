@@ -125,7 +125,7 @@ public class MonteCarloExaustiveData extends BaseOptimizationData {
     
     long startTime = System.currentTimeMillis();   
     
-    ProgressTracker tracker = new NetworkProgressTracker(generator.size(), SoftballSim.DEFAULT_UPDATE_FREQUENCY, startIndex, gson, network);
+    ProgressTracker tracker = new NetworkProgressTracker(generator.size(), SoftballSim.DEFAULT_UPDATE_FREQUENCY_MS, startIndex, gson, network);
     
     OptimizationResult result = SoftballSim.simulateLineups(generator, gamesToSimulate, inningsToSimulate, startIndex, tracker, initialResult, initialHisto);
     

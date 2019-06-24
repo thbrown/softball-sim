@@ -4,7 +4,7 @@
 # Ignore Gradle build output directory
 build
 
-#eclipse
+# Eclipse
 .classpath
 .project
 .metadata
@@ -12,3 +12,6 @@ build
 
 gson-2.8.5.jar
 /bin
+
+# Application log files
+java.log

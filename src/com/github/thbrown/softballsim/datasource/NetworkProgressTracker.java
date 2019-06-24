@@ -1,13 +1,16 @@
 package com.github.thbrown.softballsim.datasource;
 
 import java.io.PrintWriter;
-import java.util.HashMap;
 import java.util.Map;
 
 import com.github.thbrown.softballsim.Logger;
 import com.github.thbrown.softballsim.Result;
 import com.google.gson.Gson;
 
+/**
+ * Progress tracker that sends the progress report over the network in
+ * addition to printing it in the logs
+ */
 public class NetworkProgressTracker extends ProgressTracker {
   
   private final PrintWriter network;
@@ -20,18 +23,10 @@ public class NetworkProgressTracker extends ProgressTracker {
   }
   
   @Override
-  public void onMilestone(Result bestResult, Map<Long, Long> histo) {
-    super.onMilestone(bestResult, histo);
+  public Map<String, Object> onMilestone(Result bestResult, Map<Long, Long> histo) {
+    Map<String, Object> progressReport = super.onMilestone(bestResult, histo);
     
-    // TODO: This needs to move to some optimization specific file
-    Map<String,Object> inProgressCommand = new HashMap<>();
-    inProgressCommand.put("command", "IN_PROGRESS");
-    inProgressCommand.put("complete", operationCounter);
-    inProgressCommand.put("total", totalOperations);
-    inProgressCommand.put("histogram", histo);
-    inProgressCommand.put("lineup", bestResult.getLineup().toMap());
-    inProgressCommand.put("score", bestResult.getScore());
-    String jsonInProgressCommand = gson.toJson(inProgressCommand);
+    String jsonInProgressCommand = gson.toJson(progressReport);
     network.println(jsonInProgressCommand);
     Logger.log("SENT: \t\t" + jsonInProgressCommand);
     
@@ -39,6 +34,8 @@ public class NetworkProgressTracker extends ProgressTracker {
     if(network.checkError()) {
       throw new RuntimeException("Network Stream Encountered An Error. Terminating Compute.");
     };
+    
+    return progressReport;
   }
 
 }
