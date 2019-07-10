@@ -23,13 +23,13 @@ import com.google.gson.GsonBuilder;
 
 public class SoftballSim {
   // Config
-  public static int DEFAULT_GAMES_TO_SIMULATE = 70000;
+  public static int DEFAULT_GAMES_TO_SIMULATE = 1000;
   public static int DEFAULT_INNINGS_PER_GAME = 7;
   public static int DEFAULT_START_INDEX = 0;
   public static int DEFAULT_UPDATE_FREQUENCY_MS = 5000;
   
   private static int TASK_BUFFER_SIZE = 1000;
-  private static final int THREADS_TO_USE = Runtime.getRuntime().availableProcessors() - 1;
+  private static final int THREADS_TO_USE = Runtime.getRuntime().availableProcessors();
   
   private static DataSource DATA_SOURCE = DataSource.FILE_SYSTEM;
   private static final String STATS_FILE_PATH = System.getProperty("user.dir") + File.separator + "stats";

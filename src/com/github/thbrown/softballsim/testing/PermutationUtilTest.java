@@ -26,9 +26,25 @@ public class PermutationUtilTest {
 		  String result = Arrays.toString(CombinatoricsUtil.getIthPermutation(length, i));
 		  boolean isSuccess = dupDetector.add(result);
 		  if(!isSuccess) {
-			  throw new RuntimeException("Duplicate value detected");
+			  throw new RuntimeException("Duplicate value detected" + result);
 		  }
 	  }
+  }
+  
+  @Test
+  public void generateNthCombination() {
+      Set<String> dupDetector = new HashSet<>();
+      int length = 8;
+      int numberToChoose = 4;
+      for(int i = 0 ; i < CombinatoricsUtil.binomial(length, numberToChoose); i++) {
+          String result = Arrays.toString(CombinatoricsUtil.getIthCombination(numberToChoose, i));
+          System.out.println(result);
+
+          boolean isSuccess = dupDetector.add(result);
+          if(!isSuccess) {
+              throw new RuntimeException("Duplicate value detected" + result);
+          }
+      }
   }
 
 }

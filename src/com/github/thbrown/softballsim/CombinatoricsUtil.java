@@ -29,12 +29,41 @@ public class CombinatoricsUtil {
     return returnValue;
   }
   
+  public static long[] factorials = {
+      1, 
+      1, 
+      2, 
+      6, 
+      24, 
+      120, 
+      720, 
+      5040, 
+      40320, 
+      362880, 
+      3628800, 
+      39916800, 
+      479001600, 
+      6227020800L, 
+      87178291200L, 
+      1307674368000L, 
+      20922789888000L, 
+      355687428096000L,
+      6402373705728000L,
+      121645100408832000L,
+      2432902008176640000L}; // Last factorial that fits in a long is 20!
+
   public static long factorial(int number) {
-      long result = 1;
-      for (int factor = 2; factor <= number; factor++) {
-          result *= factor;
-      }
-      return result;
+    if(number < 0 || number > factorials.length) {
+      throw new RuntimeException("Bad factorial" + number);
+    }
+    return factorials[number];
+  }
+  
+  public static long binomial(int n, int k) {
+    if(n == 0 || k > n) {
+      return 0;
+    }
+    return (factorial(n)/(factorial(k)*factorial(n-k)));
   }
   
   public static <T> List<T> mapListToArray(List<T> list, int[] order) {
@@ -62,9 +91,26 @@ public class CombinatoricsUtil {
 	return initialOrder;
   }
   
+  // https://computationalcombinatorics.wordpress.com/2012/09/10/ranking-and-unranking-of-combinations-and-permutations/
+  public static int[] getIthCombination(int k, long m) {
+    int[] S = new int[k];
+    int i = k - 1;
+    while(i >= 0) {
+      int l = i;
+      while(binomial(l,i+1) <= m) {
+        l = l + 1;
+      }
+      S[i] = l - 1;
+      m = m - binomial(l-1, i+1);
+      i = i - 1;
+    }
+    return S;
+  }
+  
   static private void swap(int indexOne, int indexTwo, int[] arrayToSwap) {
 	int temp = arrayToSwap[indexOne];
 	arrayToSwap[indexOne] = arrayToSwap[indexTwo];
 	arrayToSwap[indexTwo] = temp;
   }
+  
 }
