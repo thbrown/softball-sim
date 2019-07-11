@@ -60,7 +60,7 @@ public class CombinatoricsUtil {
   }
   
   public static long binomial(int n, int k) {
-    if(n == 0 || k > n) {
+    if(n == 0 || k > n || k < 0) {
       return 0;
     }
     return (factorial(n)/(factorial(k)*factorial(n-k)));

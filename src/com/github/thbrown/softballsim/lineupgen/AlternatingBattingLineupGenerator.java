@@ -42,25 +42,25 @@ public class AlternatingBattingLineupGenerator implements LineupGenerator {
 
   @Override
   public BattingLineup getLineup(long index) {
-	  if(index >= this.size) {
-		  return null;
-	  } else {
-		  long groupAIndex = index % groupASize;
-		  int[] groupAOrder = CombinatoricsUtil.getIthPermutation(groupA.size(), groupAIndex);
-		  List<Player> groupAOrderList = CombinatoricsUtil.mapListToArray(groupA, groupAOrder);
-		  
-		  long groupBIndex = (int) Math.floor(index / groupASize);
-		  int[] groupBOrder = CombinatoricsUtil.getIthPermutation(groupB.size(), groupBIndex);
-		  List<Player> groupBOrderList = CombinatoricsUtil.mapListToArray(groupB, groupBOrder);
-
-		  if(index < this.size/2) {
-			  // Group A bats first
-			  return new AlternatingBattingLineup(groupAOrderList, groupBOrderList);
-		  } else {
-			  // Group B bats first
-			  return new AlternatingBattingLineup(groupBOrderList, groupAOrderList);
-		  }
-	  } 
+    if(index >= this.size) {
+      return null;
+    }
+	
+    long groupAIndex = index % groupASize;
+    int[] groupAOrder = CombinatoricsUtil.getIthPermutation(groupA.size(), groupAIndex);
+    List<Player> groupAOrderList = CombinatoricsUtil.mapListToArray(groupA, groupAOrder);
+    		  
+    long groupBIndex = (int) Math.floor(index / groupASize);
+    int[] groupBOrder = CombinatoricsUtil.getIthPermutation(groupB.size(), groupBIndex);
+    List<Player> groupBOrderList = CombinatoricsUtil.mapListToArray(groupB, groupBOrder);
+    
+    if(index < this.size/2) {
+      // Group A bats first
+      return new AlternatingBattingLineup(groupAOrderList, groupBOrderList);
+    } else {
+      // Group B bats first
+      return new AlternatingBattingLineup(groupBOrderList, groupAOrderList);
+    }
   }
   
   @Override

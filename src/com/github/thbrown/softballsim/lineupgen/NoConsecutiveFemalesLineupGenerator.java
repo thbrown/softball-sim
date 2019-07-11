@@ -15,7 +15,11 @@ public class NoConsecutiveFemalesLineupGenerator implements LineupGenerator {
   
   private long size;
   private long slotCombinations;
-  private long cuttoff;
+  private long cutoff;
+  
+  private int maleCount;
+  private int femaleCount;
+  private int totalCount;
 
   @Override
   public void readDataFromFile(String statsPath) {
@@ -40,8 +44,16 @@ public class NoConsecutiveFemalesLineupGenerator implements LineupGenerator {
    players.addAll(groupA);
    players.addAll(groupB);
    
-   if(groupA.size() < groupB.size()) {
+   maleCount = groupA.size();
+   femaleCount = groupB.size();
+   totalCount = maleCount + femaleCount;
+   
+   if(maleCount < femaleCount) {
      throw new RuntimeException("The number of males must be greater than or equal to the number of females. Males: " + groupA.size() + " Females: " + groupB.size());
+   }
+   
+   if(totalCount <= 0) {
+     throw new RuntimeException("There must be at least one player in the lineup, but there were none");
    }
    
    /*
@@ -50,17 +62,15 @@ public class NoConsecutiveFemalesLineupGenerator implements LineupGenerator {
     * selected there would be back to back female batters). Therefore, we must add back all the
     * lineups in which there is a female batter in the last lineup slot.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     last.
     */
-   int males = groupA.size();
-   int females = groupB.size();
+
    
-   long malePermutations = CombinatoricsUtil.factorial(males);
-   long femalePermutations = CombinatoricsUtil.factorial(females);
+   long malePermutations = CombinatoricsUtil.factorial(maleCount);
+   long femalePermutations = CombinatoricsUtil.factorial(femaleCount);
    
-   this.slotCombinations = CombinatoricsUtil.binomial(males, females) + CombinatoricsUtil.binomial(males-1, females-1);
-   this.cuttoff = CombinatoricsUtil.binomial(males, females);
+   this.slotCombinations = CombinatoricsUtil.binomial(maleCount, femaleCount) + CombinatoricsUtil.binomial(maleCount-1, femaleCount-1);
+   this.cutoff = CombinatoricsUtil.binomial(maleCount - 1, femaleCount - 1);
    
    this.size = malePermutations * femalePermutations * this.slotCombinations;
-   
   }
   
   private boolean bothPlayersAreGroupB(Player A, Player B) {
@@ -91,6 +101,10 @@ public class NoConsecutiveFemalesLineupGenerator implements LineupGenerator {
 
   @Override
   public BattingLineup getLineup(long index) {
+    if(index >= size) {
+      return null;
+    }
+    
     int males = groupA.size();
     int females = groupB.size();
         
@@ -108,15 +122,9 @@ public class NoConsecutiveFemalesLineupGenerator implements LineupGenerator {
     List<Player> femaleLineup = CombinatoricsUtil.mapListToArray(groupB, femaleOrder);
     
     int[] femalePositions = null;
-    if(femaleCombinationIndex < cuttoff) {
-      femalePositions = CombinatoricsUtil.getIthCombination(females, femaleCombinationIndex);
-      // Female positions before the cutoff indicate spots between the males. To convert them to lineup indices add the number of females inserted before the to their value.
-      for(int i = 0; i < femalePositions.length; i++) {
-        femalePositions[i] = femalePositions[i] + i;
-      }
-    } else {
-      femalePositions = CombinatoricsUtil.getIthCombination(females - 1, femaleCombinationIndex - cuttoff);
-      // Female positions after the cutoff indicate spots between the males starting at position 2. To convert them to lineup indices add the number of females inserted before the to their value plus 1.
+    if(femaleCombinationIndex < cutoff) {
+      femalePositions = CombinatoricsUtil.getIthCombination(females - 1, femaleCombinationIndex);
+      // Female positions before the cutoff indicate spots between the males starting at position 2. To convert them to lineup indices add the number of females inserted before previously plus 1.
       for(int i = 0; i < femalePositions.length; i++) {
         femalePositions[i] = femalePositions[i] + i + 1;
       }
@@ -128,15 +136,20 @@ public class NoConsecutiveFemalesLineupGenerator implements LineupGenerator {
       }
       arrayWithLastFemaleAdded[femalePositions.length] = males + females - 1;
       femalePositions = arrayWithLastFemaleAdded;
+    } else {
+      femalePositions = CombinatoricsUtil.getIthCombination(females, femaleCombinationIndex - cutoff);
+      // Female positions after the cutoff indicate spots between the males. To convert them to lineup indices add the number of females inserted before the to their value.
+      for(int i = 0; i < femalePositions.length; i++) {
+        femalePositions[i] = femalePositions[i] + i;
+      }
     }
 
     // These three parameters are all we need to define a noConsecutiveFemale lineup, merge them
-    int mergedLineupSize = males + females;
-    List<Player> mergedLineup = new ArrayList<>(mergedLineupSize);
+    List<Player> mergedLineup = new ArrayList<>(totalCount);
     int femalePositionsIndex = 0;
     int femaleOrderIndex = 0;
     int maleOrderIndex = 0;
-    for(int i = 0; i < mergedLineupSize; i++) {
+    for(int i = 0; i < totalCount; i++) {
       // If a female is at the Ith position, add her. Otherwise add a dude.
       if(femalePositionsIndex < femalePositions.length && i == femalePositions[femalePositionsIndex]) {
         Player toAdd = femaleLineup.get(femaleOrderIndex);
@@ -150,11 +163,12 @@ public class NoConsecutiveFemalesLineupGenerator implements LineupGenerator {
       }
     }
     
-    if(index < size) {
-      return new OrdinaryBattingLineup(mergedLineup);
-    } else {
-      return null;
-    }
+    // For testing
+    // if(!isValidLineup(mergedLineup)) {
+    //   System.out.println("");
+    // }
+    
+    return new OrdinaryBattingLineup(mergedLineup);
   }
 	
   @Override

@@ -31,8 +31,8 @@ public class AlternatingBattingLineup implements BattingLineup {
     this.groupB = groupB;
     if (groupA.size() <= 0 || groupB.size() <= 0) {
       throw new IllegalArgumentException(String.format(
-          "You must include at least one player in each group.\n" +
-              "groupA has %s players; groupB has %s players.", groupA.size(), groupB.size()));
+          "You must include at least one player of each gender.\n" +
+              "Males: %s Females: %s .", groupA.size(), groupB.size()));
     }
   }
 

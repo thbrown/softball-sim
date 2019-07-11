@@ -23,7 +23,7 @@ import com.google.gson.GsonBuilder;
 
 public class SoftballSim {
   // Config
-  public static int DEFAULT_GAMES_TO_SIMULATE = 1000;
+  public static int DEFAULT_GAMES_TO_SIMULATE = 10000;
   public static int DEFAULT_INNINGS_PER_GAME = 7;
   public static int DEFAULT_START_INDEX = 0;
   public static int DEFAULT_UPDATE_FREQUENCY_MS = 5000;
@@ -244,7 +244,7 @@ public class SoftballSim {
         if(lineup != null) {
             Simulation s = new Simulation(lineup, gamesToSimulate, inningsPerGame);
             results.add(executor.submit(s));
-            ThreadPoolExecutor ex =(ThreadPoolExecutor)executor;
+            //ThreadPoolExecutor ex =(ThreadPoolExecutor)executor;
             //Logger.log("Adding task 2 " + ex.getQueue().size() + " " + ex.);
             counter++;
         }
