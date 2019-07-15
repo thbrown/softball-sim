@@ -1,11 +1,12 @@
 package com.github.thbrown.softballsim;
 
 import java.util.concurrent.*;
+import java.util.ArrayList;
 import java.util.TreeMap;
 
 public class Player {
 
-  String name;
+  private final String name;
 
   private final int singles;
   private final int doubles;
@@ -13,9 +14,11 @@ public class Player {
   private final int homeRuns;
   private final int walks;
   private final int plateAppearances;
-
-  private TreeMap<Integer, Integer> plateApperanceDistribution = new TreeMap<>();
-
+  
+  // Primitive array is slightly faster than array list and significantly faster than tree map
+  // This array is not bounded but I think that's okay. Worst case some malicious client will get an OOM error.
+  private final int[] resultBucket;
+  
   private Player(Player.Builder builder) {
     this.name = builder.name;
     this.singles = builder.singles;
@@ -24,12 +27,31 @@ public class Player {
     this.homeRuns = builder.homeRuns;
     this.walks = builder.walks;
     this.plateAppearances = singles + doubles + triples + homeRuns + walks + builder.outs;
-
-    plateApperanceDistribution.putIfAbsent(homeRuns, 4);
-    plateApperanceDistribution.putIfAbsent(homeRuns + triples, 3);
-    plateApperanceDistribution.putIfAbsent(homeRuns + triples + doubles, 2);
-    plateApperanceDistribution.putIfAbsent(homeRuns + triples + doubles + singles + walks, 1);
-    plateApperanceDistribution.putIfAbsent(plateAppearances, 0);
+    
+    this.resultBucket = new int [this.plateAppearances];
+    
+    int index = 0;
+    for(int i = 0; i < homeRuns; i++) {
+      resultBucket[index] = 4;
+      index++;
+    }
+    for(int i = 0; i < triples; i++) {
+      resultBucket[index] = 3;
+      index++;
+    }
+    for(int i = 0; i < doubles; i++) {
+      resultBucket[index] = 2;
+      index++;
+    }
+    for(int i = 0; i < singles + walks; i++) {
+      resultBucket[index] = 1;
+      index++;
+    }
+    for(int i = 0; i < builder.outs; i++) {
+      resultBucket[index] = 0;
+      index++;
+    }
+    
     Logger.log(String.format(
         "%s\t 1B: %d\t 2B: %d\t 3B: %d\t HR: %d\t BB: %d\t PA: %d",
         this, singles, doubles, triples, homeRuns, walks, plateAppearances));
@@ -40,8 +62,9 @@ public class Player {
   }
 
   public int hit() {
-    int randomValue = ThreadLocalRandom.current().nextInt(plateAppearances) + 1;
-    return plateApperanceDistribution.ceilingEntry(randomValue).getValue();
+    // TODO: Using a length that is a power of 2 is about 25% faster, there could be some optimization here
+    int randomValue = ThreadLocalRandom.current().nextInt(resultBucket.length);
+    return resultBucket[randomValue];
   }
 
   public String getName() {

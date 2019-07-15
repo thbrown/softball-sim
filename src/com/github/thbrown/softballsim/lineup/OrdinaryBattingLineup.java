@@ -53,7 +53,7 @@ public class OrdinaryBattingLineup implements BattingLineup {
 
   @Override
   public BattingLineup getRandomSwap() {
-	  /*
+	/*
 	LinkedList<Player> players = new LinkedList<>();
 	players.addAll(this.players);
 	if(ThreadLocalRandom.current().nextInt(2) == 0) {

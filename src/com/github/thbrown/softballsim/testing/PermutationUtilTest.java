@@ -38,8 +38,6 @@ public class PermutationUtilTest {
       int numberToChoose = 4;
       for(int i = 0 ; i < CombinatoricsUtil.binomial(length, numberToChoose); i++) {
           String result = Arrays.toString(CombinatoricsUtil.getIthCombination(numberToChoose, i));
-          System.out.println(result);
-
           boolean isSuccess = dupDetector.add(result);
           if(!isSuccess) {
               throw new RuntimeException("Duplicate value detected" + result);

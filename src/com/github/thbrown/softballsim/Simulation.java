@@ -6,8 +6,10 @@ import com.github.thbrown.softballsim.lineup.BattingLineup;
 
 public class Simulation implements Callable<Result> {
   
-  private static boolean VERBOSE = false;
+  final private static boolean VERBOSE = false;
   private static final int NAME_PADDING = 24; // Just for formatting verbose output
+  
+  private static int MAX_RUNS_PER_INNING = 100;
 
   private BattingLineup lineup;
   private int numberOfGamesToSimulate;
@@ -42,24 +44,26 @@ public class Simulation implements Callable<Result> {
 
         // Inning
         int outs = 0;
-        while (outs < 3) {
+        int runsThisInning = 0;
+        while (outs < 3 && runsThisInning < MAX_RUNS_PER_INNING) {
           Player p = lineup.getNextBatter();
           int bases = p.hit();
           if (bases > 0) {
-            gameScore += updateRunsAndBasesAfterHit(bases);
+            runsThisInning += updateRunsAndBasesAfterHit(bases);
           } else {
             outs++;
           }
 
           if (VERBOSE) {
             String message =
-                padRight(p.name, NAME_PADDING) +
+                padRight(p.getName(), NAME_PADDING) +
                     "\t hit:" + mapBasesToHitType(bases) +
                     "\t outs:" + outs +
                     "\t score:" + gameScore;
             Logger.log(message);
           }
         }
+        gameScore += runsThisInning;
         if (VERBOSE) {
           Logger.log("--------------");
         }
