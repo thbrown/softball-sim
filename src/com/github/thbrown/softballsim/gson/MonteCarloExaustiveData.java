@@ -25,6 +25,7 @@ public class MonteCarloExaustiveData extends BaseOptimizationData {
   private Map<String, List<String>> initialLineup;
   private int startIndex;
   private Double initialScore; // Allow for nulls
+  private long initialElapsedTimeMs;
   
   private Map<Long, Long> initialHistogram;
   
@@ -42,6 +43,10 @@ public class MonteCarloExaustiveData extends BaseOptimizationData {
 
   public int getStartIndex() {
     return startIndex;
+  }
+  
+  public long getInitialElapsedTimeMs() {
+    return initialElapsedTimeMs;
   }
 
   public Map<String, List<String>> getInitialLineup() {
@@ -100,6 +105,7 @@ public class MonteCarloExaustiveData extends BaseOptimizationData {
 
     // Account for initial conditions if specified
     long startIndex = this.getStartIndex();
+    long initialElapsedTimeMs = this.getInitialElapsedTimeMs();
     Map<Long, Long> initialHisto = this.getInitialHistogram();
     Double initialScore = this.getInitialScore();
     Result initialResult = null;
@@ -123,14 +129,13 @@ public class MonteCarloExaustiveData extends BaseOptimizationData {
       initialResult = null;
     }
     
-    long startTime = System.currentTimeMillis();   
     
-    ProgressTracker tracker = new NetworkProgressTracker(generator.size(), SoftballSim.DEFAULT_UPDATE_FREQUENCY_MS, startIndex, gson, network);
+    ProgressTracker tracker = new NetworkProgressTracker(generator.size(), SoftballSim.DEFAULT_UPDATE_FREQUENCY_MS, startIndex, gson, network, initialElapsedTimeMs);
     
     OptimizationResult result = SoftballSim.simulateLineups(generator, gamesToSimulate, inningsToSimulate, startIndex, tracker, initialResult, initialHisto);
     
     Logger.log(result.toString());
-    Logger.log("Simulation took " + (System.currentTimeMillis() - startTime) + " milliseconds.");
+    Logger.log("Local simulation time: " + tracker.getLocalElapsedTimeMs() + " milliseconds --");
     
     // Send the results back over the network
     Map<String,Object> completeCommand = new HashMap<>();
@@ -138,6 +143,7 @@ public class MonteCarloExaustiveData extends BaseOptimizationData {
     completeCommand.put("lineup", result.getLineup());
     completeCommand.put("score", result.getScore());
     completeCommand.put("histogram", result.getHistogram());
+    completeCommand.put("elapsedTimeMs", result.getElapsedTimeMs());
     completeCommand.put("total", generator.size());
     completeCommand.put("complete", generator.size());
     String jsonCompleteCommand = gson.toJson(completeCommand);

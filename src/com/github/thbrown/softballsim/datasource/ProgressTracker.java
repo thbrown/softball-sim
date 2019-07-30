@@ -20,20 +20,25 @@ public class ProgressTracker {
   protected long nextUpdateTime;
   protected long lastChunkCompletedCount = 0;
   
+  protected final long startingElapsedTimeMs;
+  protected final long startTimeMs;
+  
   protected DecimalFormat df = new DecimalFormat("#.##"); 
   
-  public ProgressTracker(long totalOperations, long updateFrequency, long startIndex) {
+  public ProgressTracker(long totalOperations, long updateFrequency, long startIndex, long startingElapsedTimeMs ) {
     this.totalChunks = totalOperations;
     this.updateInterval = updateFrequency;
     this.chunkCounter = startIndex;
     this.lastChunkCompletedCount = startIndex;
     this.nextUpdateTime = System.currentTimeMillis() + updateFrequency;
+    this.startTimeMs = System.currentTimeMillis();
+    this.startingElapsedTimeMs = startingElapsedTimeMs;
   }
   
   public void markOperationAsComplete(Result bestResult, Map<Long, Long> histo) {
     chunkCounter++;
     long time = System.currentTimeMillis();
-    if(time > nextUpdateTime) { 
+    if(time > nextUpdateTime) {
       onMilestone(bestResult, histo);
       nextUpdateTime = time + updateInterval;
       lastChunkCompletedCount = chunkCounter;
@@ -58,9 +63,18 @@ public class ProgressTracker {
     progressReport.put("histogram", histo);
     progressReport.put("lineup", bestResult.getLineup().toMap());
     progressReport.put("score", bestResult.getScore());
-    progressReport.put("remainingSeconds", remainingSeconds);
+    progressReport.put("remainingTimeSec", remainingSeconds);
+    progressReport.put("elapsedTimeMs", this.startingElapsedTimeMs + (System.currentTimeMillis() - this.startTimeMs));
     Logger.log(progressReport);
     return progressReport;
+  }
+
+  public long getLocalElapsedTimeMs() {
+    return this.startingElapsedTimeMs + (System.currentTimeMillis() - this.startTimeMs);
+  }
+  
+  public long getTotalElapsedTimeMs() {
+    return System.currentTimeMillis() - this.startTimeMs;
   }
   
 }

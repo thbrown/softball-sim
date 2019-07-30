@@ -1,4 +1,4 @@
-package com.github.thbrown.softballsim.testing;
+package com.github.thbrown.softballsim.testing.tests;
 
 import static org.junit.Assert.*;
 
@@ -27,7 +27,7 @@ public class DeserializationTest {
       assertEquals(7, data.getInnings());
       assertEquals(100000, data.getIterations());
       assertEquals(0, data.getStartIndex());
-      assertEquals(0, data.getLineupType());
+      assertEquals(1, data.getLineupType());
       assertEquals(null, data.getInitialHistogram());
       assertEquals(null, data.getInitialScore());
       

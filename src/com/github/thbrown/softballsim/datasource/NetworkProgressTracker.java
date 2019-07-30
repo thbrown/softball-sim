@@ -16,8 +16,8 @@ public class NetworkProgressTracker extends ProgressTracker {
   private final PrintWriter network;
   private final Gson gson;
 
-  public NetworkProgressTracker(long totalOperations, long numberOfUpdateUnits, long startIndex, Gson gson, PrintWriter network) {
-    super(totalOperations, numberOfUpdateUnits, startIndex);
+  public NetworkProgressTracker(long totalOperations, long numberOfUpdateUnits, long startIndex, Gson gson, PrintWriter network, long initialElapsedTimeMs) {
+    super(totalOperations, numberOfUpdateUnits, startIndex, initialElapsedTimeMs);
     this.network = network;
     this.gson = gson;
   }

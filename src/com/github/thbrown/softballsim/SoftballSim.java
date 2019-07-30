@@ -23,7 +23,7 @@ import com.google.gson.GsonBuilder;
 
 public class SoftballSim {
   // Config
-  public static int DEFAULT_GAMES_TO_SIMULATE = 10000;
+  public static int DEFAULT_GAMES_TO_SIMULATE = 100000;
   public static int DEFAULT_INNINGS_PER_GAME = 7;
   public static int DEFAULT_START_INDEX = 0;
   public static int DEFAULT_UPDATE_FREQUENCY_MS = 5000;
@@ -48,18 +48,18 @@ public class SoftballSim {
         int gamesToSimulate = args.length >= 3 ? Integer.parseInt(args[2]) : DEFAULT_GAMES_TO_SIMULATE;
         int inningsToSimulate = args.length >= 4 ? Integer.parseInt(args[3]) : DEFAULT_INNINGS_PER_GAME;
         int startIndex = DEFAULT_START_INDEX;
-
-        long startTime = System.currentTimeMillis();
         
         LineupGenerator generator = getLineupGenerator(args[1]);
         generator.readDataFromFile(STATS_FILE_PATH);
         
-        ProgressTracker tracker = new ProgressTracker(generator.size(), DEFAULT_UPDATE_FREQUENCY_MS, startIndex);
+        ProgressTracker tracker = new ProgressTracker(generator.size(), DEFAULT_UPDATE_FREQUENCY_MS, startIndex, 0);
         
         OptimizationResult result = simulateLineups(generator, gamesToSimulate, inningsToSimulate, startIndex, tracker, null, null);
     	
 	    Logger.log(result.toString());
-    	Logger.log("Simulation took " + (System.currentTimeMillis() - startTime) + " milliseconds.");
+	    if(tracker.getLocalElapsedTimeMs() != tracker.getTotalElapsedTimeMs()) {
+	      Logger.log("Local simulation time: " + tracker.getLocalElapsedTimeMs() + " milliseconds");
+	    }
 
     } else if (DATA_SOURCE == DataSource.NETWORK) {
       boolean shutdownOnComplete = false;
@@ -105,9 +105,9 @@ public class SoftballSim {
           errorCommand.put("command", "ERROR");
           errorCommand.put("message", e.toString());
           errorCommand.put("trace", exceptionAsString);
-          String jsonCompleteCommand = gson.toJson(errorCommand);
-          out.println(jsonCompleteCommand);
-          Logger.log("SENT: \t\t" + jsonCompleteCommand); 
+          String jsonErrorCommand = gson.toJson(errorCommand);
+          out.println(jsonErrorCommand);
+          Logger.log("SENT: \t\t" + jsonErrorCommand); 
           throw e;
         } finally {
           Thread.sleep(1000);
@@ -141,8 +141,6 @@ public class SoftballSim {
         } else {
           Logger.log("Skipping shutdown");
         }
-
-        System.exit(0);
       }
     } else {
     	throw new IllegalArgumentException("Unrecognized data source: " + DATA_SOURCE);
@@ -249,7 +247,7 @@ public class SoftballSim {
             counter++;
         }
     }
-    
-    return new OptimizationResult(bestResult, histo);
+
+    return new OptimizationResult(bestResult, histo, tracker.getTotalElapsedTimeMs());
   }
 }

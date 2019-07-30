@@ -2,6 +2,7 @@ package com.github.thbrown.softballsim;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class CombinatoricsUtil {
@@ -111,6 +112,69 @@ public class CombinatoricsUtil {
 	int temp = arrayToSwap[indexOne];
 	arrayToSwap[indexOne] = arrayToSwap[indexTwo];
 	arrayToSwap[indexTwo] = temp;
+  }
+  
+  /**
+   * Partitions count objects into buckets. 
+   * https://en.wikipedia.org/wiki/Partition_(number_theory)
+   */
+  public static List<List<List<Integer>>> getPartitions(int count, int maxBucketSize, int maxBucketCount) {
+    List<List<List<Integer>>> result = new ArrayList<>();
+    
+    List<List<Integer>> zeroResult = new ArrayList<>();
+    zeroResult.add(new ArrayList<>());
+    result.add(zeroResult);
+    
+    // We need to calculate results for all the partitions from 1 to count
+    for(int counter = 1; counter <= count; counter++) {
+      //System.out.println("Calculating " + counter + " of " + count);
+
+      List<List<Integer>> resultForOneCount = new ArrayList<>();
+      // We need to start with the highest value of each count and work our way to 0
+      for(int progress = counter; progress > 0; progress--) {
+        //System.out.println(progress + " of " + 0);
+        List<Integer> partialResult = new ArrayList<>();
+        partialResult.add(progress);
+      
+        int remaining = counter - progress;
+        //System.out.println("remaining " + remaining);
+
+        if(remaining == 0) {
+          // This isn't a partial result, it's a full result
+          // Only add the result if it fits into the max bucket size
+          if(Collections.max(partialResult) <= maxBucketSize) {
+            if(partialResult.size() <= maxBucketCount) { // Doesn't this always pass?
+              resultForOneCount.add(partialResult);
+            }
+          }
+
+          continue;
+        } else {
+          List<List<Integer>> resultsAtRemainingIndex = result.get(remaining);
+
+          for(List<Integer> entry : resultsAtRemainingIndex) {
+            // all values in entry are lower than progress
+            if(Collections.max(entry) <= progress) {
+              List<Integer> singleResult = new ArrayList<>();
+              singleResult.addAll(partialResult);
+              singleResult.addAll(entry);
+              // Only add the result if it fits into the max bucket size
+              if(Collections.max(singleResult) <= maxBucketSize) {
+                if(singleResult.size() <= maxBucketCount) {
+                  resultForOneCount.add(singleResult);
+                }
+              }
+            }
+          }
+        }
+      }
+      //System.out.println(counter + ") " + resultForOneCount);
+
+      result.add(resultForOneCount);
+    }
+    
+    return result;
+    
   }
   
 }

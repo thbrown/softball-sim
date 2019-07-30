@@ -7,10 +7,12 @@ public class OptimizationResult {
 
   private Result bestResult;
   private Map<Long, Long> histogram; // TODO int, long?
+  private long elapsedTimeMs;
   
-  OptimizationResult(Result bestResult, Map<Long, Long> histogram) {
+  OptimizationResult(Result bestResult, Map<Long, Long> histogram, long elapsedTimeMs) {
     this.bestResult = bestResult;
     this.histogram = histogram;
+    this.elapsedTimeMs = elapsedTimeMs;
   }
   
   public Map<String, List<String>> getLineup() {
@@ -23,6 +25,10 @@ public class OptimizationResult {
   
   public Map<Long, Long> getHistogram() {
     return this.histogram;
+  }
+  
+  public long getElapsedTimeMs() {
+    return elapsedTimeMs;
   }
   
   @Override
@@ -38,7 +44,9 @@ public class OptimizationResult {
       sb.append(k/10.0 + " - " + histogram.get(k));
       sb.append(System.lineSeparator());
     }
+    sb.append("Total simulation time: " + elapsedTimeMs + " milliseconds");
     return sb.toString();
   }
+
   
 }
