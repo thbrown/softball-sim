@@ -13,6 +13,7 @@ public class MonteCarloSimulationDataBuilder extends SimulationDataBuilder {
   private String lineupType = "1";
   private String startIndex = "0";
   private String innings = "7";
+  private int threadCount = 1;
 
   private PlayerBuilder[] players;
 
@@ -48,6 +49,11 @@ public class MonteCarloSimulationDataBuilder extends SimulationDataBuilder {
 
   public MonteCarloSimulationDataBuilder withPlayers(PlayerBuilder[] players) {
     this.players = players;
+    return this;
+  }
+
+  public MonteCarloSimulationDataBuilder withThreadCount(int threadCount) {
+    this.threadCount = threadCount;
     return this;
   }
 

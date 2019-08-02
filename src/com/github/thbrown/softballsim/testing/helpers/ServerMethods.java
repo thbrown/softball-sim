@@ -5,8 +5,8 @@ import java.util.Map;
 
 public interface ServerMethods {
   
-  public void onReady(PrintWriter out);
+  public void onReady(PrintWriter out) throws Exception;
   
-  public void onComplete(Map<String, String> data);
+  public void onComplete(Map<String, String> data) throws Exception;
   
 }

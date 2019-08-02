@@ -12,7 +12,7 @@ java -jar ./build/libs/softball-sim.jar FILE_SYSTEM 0
 
 Arguments to be supplied to the jar take the form:
 ```
-java -jar ~/build/lib softball-sim.jar <dataSource(string)> <lineupType(string) OR lineupType ordinal(int)>
+java -jar ~/build/lib softball-sim.jar <dataSource(string)> <lineupType(string) OR lineupType ordinal(int)> <iterations(int) optional> <threadsToUse(int) optional>
 ```
 
 #### dataSource options

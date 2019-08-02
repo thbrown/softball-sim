@@ -51,14 +51,22 @@ public class TestServer implements Runnable {
       Map<String, String> data = gson.fromJson(inputLine, Map.class);
       String command = data.get("command");
 
-      if(command.equals("READY")) {
-        methods.onReady(out);
+      if (command.equals("READY")) {
+        try {
+          methods.onReady(out);
+        } catch (Exception e) {
+          throw new RuntimeException(e);
+        }
       } else if (command.equals("COMPLETE")) {
-        methods.onComplete(data);
+        try {
+          methods.onComplete(data);
+        } catch (Exception e) {
+          throw new RuntimeException(e);
+        }
         break;
       }
     }
-    
+
     in.close();
     out.close();
     clientSocket.close();

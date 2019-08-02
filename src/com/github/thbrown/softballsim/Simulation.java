@@ -1,5 +1,6 @@
 package com.github.thbrown.softballsim;
 
+import java.util.Map;
 import java.util.concurrent.Callable;
 
 import com.github.thbrown.softballsim.lineup.BattingLineup;
@@ -18,6 +19,47 @@ public class Simulation implements Callable<Result> {
   private boolean first; 
   private boolean second;
   private boolean third;
+  
+  private static HitResult[] hitResults = new HitResult[32];
+  
+  static {
+    for(int i = 0; i < 32; i++) {
+      // First three bits represent if a runner is present (1) on each base or not (0)
+      boolean first = (i & 1) == 1;
+      boolean second = (i >> 1 & 1) == 1;
+      boolean third = (i >> 2 & 1) == 1;
+      
+      // Next two bits are the type of hit (00 - single, 01 - double, 10 - triple, 11 - homerun)
+      // Add one so the value is the number of bases that a hit earns (e.g. double = 2 bases)
+      int bases = (i >> 3) + 1;
+      
+      // Calculate the ending configuration
+      int runsResultingFromHit = 0;
+      for (int j = 0; j < bases; j++) {
+        runsResultingFromHit += third ? 1 : 0;
+        third = second;
+        second = first;
+        first = (j == 0) ? true : false;
+      }
+      
+      // Save the results in a map for quick later lookup
+      hitResults[i] = new HitResult(first, second, third, runsResultingFromHit);
+    }
+  }
+  
+  // Class that holds info about what the field and score look like.
+  private static class HitResult {
+    HitResult(boolean first, boolean second, boolean third, int runsScored) {
+      this.first = first;
+      this.second = second;
+      this.third = third;
+      this.runsScored = runsScored;
+    }
+    public boolean first; 
+    public boolean second;
+    public boolean third;
+    public int runsScored;
+  }
 
   Simulation(BattingLineup lineup, int numberOfGamesToSimulate, int inningsPerGame) {
 	if(lineup == null) {
@@ -85,15 +127,26 @@ public class Simulation implements Callable<Result> {
   }
 
   private int updateRunsAndBasesAfterHit(int bases) {
-    int runsResultingFromHit = 0;
-    for (int i = 0; i < bases; i++) {
-      // TODO: Consider if sometimes the runner should score from 2nd.
-      runsResultingFromHit += this.third ? 1 : 0;
-      this.third = this.second;
-      this.second = this.first;
-      this.first = (i == 0) ? true : false;
-    }
-    return runsResultingFromHit;
+    // There 3 bases (2^3) that may or may not be holding a player
+    // There are 4 non-out hit types (single, double, triple, hr) for 32 possibilities
+    // We can enumerate all possibilities here for quick computation.
+    /*
+    int index = 0;
+    // First three bits represent the presence (1) or absence (0) of runners on each base
+    index |= this.first ? 1 : 0;
+    index |= this.second ? 2 : 0;
+    index |= this.third ? 4 : 0;
+    // Second two bits are the hit type
+    index |= ((bases-1) << 3);
+    
+    // Lookup the solution in our map
+    HitResult result = hitResults[index];
+    this.first = result.first;
+    this.second = result.second;
+    this.third = result.third;
+    return result.runsScored;
+    */
+    return 0;
   }
 
   private void clearBases() {

@@ -4,9 +4,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -14,8 +14,6 @@ import java.util.Map;
 import org.junit.Test;
 
 import com.github.thbrown.softballsim.CombinatoricsUtil;
-import com.github.thbrown.softballsim.Logger;
-import com.github.thbrown.softballsim.SoftballSim;
 import com.github.thbrown.softballsim.StatsUtil;
 import com.github.thbrown.softballsim.testing.helpers.MonteCarloSimulationDataBuilder;
 import com.github.thbrown.softballsim.testing.helpers.PlayerBuilder;
@@ -31,12 +29,58 @@ import com.github.thbrown.softballsim.testing.helpers.TestServer;
 public class TimeEstimateConstantsTest {
 
   @Test
+  public void singleSituation() {
+    MonteCarloSimulationDataBuilder mcsdb = new MonteCarloSimulationDataBuilder()
+        .withInnings(7)
+        .withIterations(10000)
+        .withLineupType(1);
+   
+    final int playerCount = 6;
+    PlayerBuilder[] players = new PlayerBuilder[playerCount];
+    
+    /*
+    for (int k = 0; k < playerCount; k++) {
+      players[k] = new PlayerBuilder().withId("player" + k).withOuts(10).withHomeruns(17);
+    }
+    //*/
+    
+    ///*
+    players[0] = new PlayerBuilder().withId("player" + 0).withOuts(11).withSingles(13).withDoubles(5).withTriples(3).withHomeruns(1);
+    players[1] = new PlayerBuilder().withId("player" + 1).withOuts(11).withSingles(2).withDoubles(8).withTriples(1).withHomeruns(4);
+    players[2] = new PlayerBuilder().withId("player" + 2).withOuts(8).withSingles(12).withDoubles(2).withTriples(2).withHomeruns(0);
+    players[3] = new PlayerBuilder().withId("player" + 3).withOuts(13).withSingles(8).withDoubles(0).withTriples(0).withHomeruns(0);
+    players[4] = new PlayerBuilder().withId("player" + 4).withOuts(13).withSingles(11).withDoubles(7).withTriples(3).withHomeruns(0);
+    players[5] = new PlayerBuilder().withId("player" + 5).withOuts(8).withSingles(20).withDoubles(6).withTriples(1).withHomeruns(1);
+    //*/
+    
+    mcsdb.withPlayers(players);
+
+    TestServer.runSimulationOverNetwork(new ServerMethods() {
+      @Override
+      public void onReady(PrintWriter out) {
+        String json;
+        json = mcsdb.toString();
+        json = json.replace("\n", "").replace("\r", "");
+        out.println(json);
+      }
+
+      @Override
+      public void onComplete(Map<String, String> data) throws IOException {}
+    });
+
+  }
+
+  @Test
   public void standardDeviationAndTeamAverage() throws IOException {
+    
+    String logFileName = "stdDevAndAvg.log";
+    Files.deleteIfExists(Paths.get(logFileName));
 
     MonteCarloSimulationDataBuilder mcsdb = new MonteCarloSimulationDataBuilder()
         .withInnings(7)
         .withIterations(100000)
-        .withLineupType(1);
+        .withLineupType(1)
+        .withThreadCount(1);
 
     final int PLAYER_COUNT = 6;
     final int PA_COUNT = 5;
@@ -83,32 +127,22 @@ public class TimeEstimateConstantsTest {
               .withSingles(targetDistribution.get(stdDevIndex).get(k));
         }
         mcsdb.withPlayers(players);
-
-        Logger.log(mcsdb.toString());
         
         TestServer.runSimulationOverNetwork(new ServerMethods() {
           @Override
           public void onReady(PrintWriter out) {
             String json;
-            try {
-              json = mcsdb.toString();
-
-              json = json.replace("\n", "").replace("\r", "");
-              out.println(json);
-            } catch (Exception e) {
-              e.printStackTrace();
-            }
+            json = mcsdb.toString();
+            json = json.replace("\n", "").replace("\r", "");
+            out.println(json);
           }
 
           @Override
-          public void onComplete(Map<String, String> data) {
-            // TODO Auto-generated method stub
+          public void onComplete(Map<String, String> data) throws IOException {
             PrintWriter writer = null;
             try {
-              writer = new PrintWriter(new FileWriter("standardDev.log", true), true);
-              writer.println("DATA: " + String.valueOf(data.get("elapsedTimeMs")) + " " + avg + " " + stedev );
-            } catch (IOException e) {
-              e.printStackTrace();
+              writer = new PrintWriter(new FileWriter(logFileName, true), true);
+              writer.println("DATA: " + String.valueOf(data.get("elapsedTimeMs")) + " " + avg + " " + stedev);
             } finally {
               writer.close();
             }
@@ -117,10 +151,111 @@ public class TimeEstimateConstantsTest {
             System.out.println(data);
           }
         });
-        
       }
-
     }
+  }
+  
+  @Test
+  public void lineupCounts() throws IOException {
+    String logFileName = "lineupCount.log";
+    Files.deleteIfExists(Paths.get(logFileName));
+    
+    MonteCarloSimulationDataBuilder mcsdb = new MonteCarloSimulationDataBuilder()
+        .withInnings(7)
+        .withIterations(1000)
+        .withLineupType(1)
+        .withThreadCount(1);
+
+    for (int lineupType = 1; lineupType <= 3; lineupType++) {
+      mcsdb.withLineupType(lineupType);
+
+      for (int playerCount = 5; playerCount <= 9; playerCount++) {
+
+        PlayerBuilder[] players = new PlayerBuilder[playerCount];
+        for (int k = 0; k < playerCount; k++) {
+          players[k] = new PlayerBuilder().withId("player" + k).withGender(k%2 == 0 ? "M" : "F").withOuts(5).withSingles(5);
+        }
+
+        mcsdb.withPlayers(players);
+
+        final int lineupTypeFinal = lineupType;
+
+        TestServer.runSimulationOverNetwork(new ServerMethods() {
+          @Override
+          public void onReady(PrintWriter out) {
+            String json;
+            json = mcsdb.toString();
+            json = json.replace("\n", "").replace("\r", "");
+            out.println(json);
+          }
+
+          @Override
+          public void onComplete(Map<String, String> data) throws IOException {
+            PrintWriter writer = null;
+            try {
+              writer = new PrintWriter(new FileWriter(logFileName, true), true);
+              writer.println("DATA: " + String.valueOf(data.get("elapsedTimeMs")) + " " + lineupTypeFinal + " "
+                  + String.valueOf(data.get("total")));
+            } finally {
+              writer.close();
+            }
+
+            System.out.println("DATA: " + String.valueOf(data.get("elapsedTimeMs")) + " " + lineupTypeFinal + " "
+                + String.valueOf(data.get("total")));
+            System.out.println(data);
+          }
+        });
+      }
+    }
+  }
+
+  @Test
+  public void threadCount() throws IOException {
+    String logFileName = "threadCount.log";
+    Files.deleteIfExists(Paths.get(logFileName));
+
+    MonteCarloSimulationDataBuilder mcsdb = new MonteCarloSimulationDataBuilder()
+        .withInnings(7)
+        .withIterations(1000)
+        .withLineupType(1);
+    
+    final int playerCount = 8;
+    PlayerBuilder[] players = new PlayerBuilder[playerCount];
+    for (int k = 0; k < playerCount; k++) {
+      players[k] = new PlayerBuilder().withId("player" + k).withOuts(5).withSingles(5);
+    }
+    mcsdb.withPlayers(players);
+
+    for (int threadCount = 1; threadCount <= 20; threadCount++) {
+      mcsdb.withThreadCount(threadCount);
+      
+      final int threadCountFinal = threadCount;
+
+      TestServer.runSimulationOverNetwork(new ServerMethods() {
+        @Override
+        public void onReady(PrintWriter out) {
+          String json;
+          json = mcsdb.toString();
+          json = json.replace("\n", "").replace("\r", "");
+          out.println(json);
+        }
+
+        @Override
+        public void onComplete(Map<String, String> data) throws IOException {
+          PrintWriter writer = null;
+          try {
+            writer = new PrintWriter(new FileWriter(logFileName, true), true);
+            writer.println("DATA: " + String.valueOf(data.get("elapsedTimeMs")) + " " + threadCountFinal);
+          } finally {
+            writer.close();
+          }
+
+          System.out.println("DATA: " + String.valueOf(data.get("elapsedTimeMs")) + " " + threadCountFinal);
+          System.out.println(data);
+        }
+      });
+    }
+
   }
   
   /**

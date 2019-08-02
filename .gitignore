@@ -15,4 +15,6 @@ gson-2.8.5.jar
 
 # Application log files
 java.log
-standardDev.log
+stdDevAndAvg.log
+threadCount.log
+lineupCount.log

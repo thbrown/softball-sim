@@ -23,16 +23,16 @@ import com.google.gson.GsonBuilder;
 
 public class SoftballSim {
   // Config
-  public static int DEFAULT_GAMES_TO_SIMULATE = 100000;
+  public static int DEFAULT_GAMES_TO_SIMULATE = 1000;
   public static int DEFAULT_INNINGS_PER_GAME = 7;
   public static int DEFAULT_START_INDEX = 0;
   public static int DEFAULT_UPDATE_FREQUENCY_MS = 5000;
   
   private static int TASK_BUFFER_SIZE = 1000;
-  private static final int THREADS_TO_USE = Runtime.getRuntime().availableProcessors();
   
   private static DataSource DATA_SOURCE = DataSource.FILE_SYSTEM;
   private static final String STATS_FILE_PATH = System.getProperty("user.dir") + File.separator + "stats";
+  public static final int DEFAULT_THREADS = Runtime.getRuntime().availableProcessors();
   
   public static void main(String[] args) {
     // Args
@@ -47,6 +47,7 @@ public class SoftballSim {
     if(DATA_SOURCE == DataSource.FILE_SYSTEM) {
         int gamesToSimulate = args.length >= 3 ? Integer.parseInt(args[2]) : DEFAULT_GAMES_TO_SIMULATE;
         int inningsToSimulate = args.length >= 4 ? Integer.parseInt(args[3]) : DEFAULT_INNINGS_PER_GAME;
+        int threads = args.length >= 4 ? Integer.parseInt(args[4]) : DEFAULT_THREADS;
         int startIndex = DEFAULT_START_INDEX;
         
         LineupGenerator generator = getLineupGenerator(args[1]);
@@ -54,7 +55,7 @@ public class SoftballSim {
         
         ProgressTracker tracker = new ProgressTracker(generator.size(), DEFAULT_UPDATE_FREQUENCY_MS, startIndex, 0);
         
-        OptimizationResult result = simulateLineups(generator, gamesToSimulate, inningsToSimulate, startIndex, tracker, null, null);
+        OptimizationResult result = simulateLineups(generator, gamesToSimulate, inningsToSimulate, startIndex, tracker, null, null, threads);
     	
 	    Logger.log(result.toString());
 	    if(tracker.getLocalElapsedTimeMs() != tracker.getTotalElapsedTimeMs()) {
@@ -145,6 +146,9 @@ public class SoftballSim {
     } else {
     	throw new IllegalArgumentException("Unrecognized data source: " + DATA_SOURCE);
     }
+    
+    // Java isn't exiting for some reason. Force close.
+    //System.exit(0);
   }
 
   public static LineupGenerator getLineupGenerator(String lineupTypeString) {
@@ -184,7 +188,7 @@ public class SoftballSim {
     }
   }
   
-  public static OptimizationResult simulateLineups(LineupGenerator generator, int gamesToSimulate, int inningsPerGame, long startIndex, ProgressTracker tracker, Result initialResult, Map<Long, Long> initialHisto) {
+  public static OptimizationResult simulateLineups(LineupGenerator generator, int gamesToSimulate, int inningsPerGame, long startIndex, ProgressTracker tracker, Result initialResult, Map<Long, Long> initialHisto, int threads) {
 
     // Print the details before we start
     DecimalFormat formatter = new DecimalFormat("#,###");
@@ -192,10 +196,10 @@ public class SoftballSim {
     Logger.log("Possible lineups: \t\t" + formatter.format(generator.size()));
     Logger.log("Games to simulate per lineup: \t" + gamesToSimulate);
     Logger.log("Innings per game: \t\t" + inningsPerGame);
-    Logger.log("Threads used: \t\t\t" + THREADS_TO_USE);
+    Logger.log("Threads used: \t\t\t" + threads);
     Logger.log("*********************************************************************");
     
-    ExecutorService executor = Executors.newFixedThreadPool(THREADS_TO_USE);
+    ExecutorService executor = Executors.newFixedThreadPool(threads);
     Queue<Future<Result>> results = new LinkedList<>();
     
     // Queue up a few tasks to process (number of tasks is capped by TASK_BUFFER_SIZE)

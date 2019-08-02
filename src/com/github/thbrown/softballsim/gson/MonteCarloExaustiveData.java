@@ -26,6 +26,7 @@ public class MonteCarloExaustiveData extends BaseOptimizationData {
   private int startIndex;
   private Double initialScore; // Allow for nulls
   private long initialElapsedTimeMs;
+  private Integer threadCount;
   
   private Map<Long, Long> initialHistogram;
   
@@ -60,12 +61,18 @@ public class MonteCarloExaustiveData extends BaseOptimizationData {
   public Map<Long, Long> getInitialHistogram() {
     return initialHistogram;
   }
+  
+  public Map<Long, Long> getThreadCount() {
+    return initialHistogram;
+  }
+
 
   @Override
   public void runSimulation(Gson gson, PrintWriter network) {
-    int gamesToSimulate = this.getIterations() != 0 ? this.getIterations() : SoftballSim.DEFAULT_GAMES_TO_SIMULATE;
-    int inningsToSimulate = this.getInnings() != 0 ? this.getInnings() : SoftballSim.DEFAULT_INNINGS_PER_GAME;
+    int gamesToSimulate = this.getIterations() == 0 ? SoftballSim.DEFAULT_GAMES_TO_SIMULATE : this.getIterations();
+    int inningsToSimulate = this.getInnings() == 0 ? SoftballSim.DEFAULT_INNINGS_PER_GAME : this.getInnings();
     int lineupType = this.getLineupType();
+    int threadCount = this.threadCount == null ? SoftballSim.DEFAULT_THREADS : this.threadCount;
     
     // Transform the json lineup given by the network to the comma separated form this program expects
     StringBuilder transformedData = new StringBuilder();
@@ -132,7 +139,7 @@ public class MonteCarloExaustiveData extends BaseOptimizationData {
     
     ProgressTracker tracker = new NetworkProgressTracker(generator.size(), SoftballSim.DEFAULT_UPDATE_FREQUENCY_MS, startIndex, gson, network, initialElapsedTimeMs);
     
-    OptimizationResult result = SoftballSim.simulateLineups(generator, gamesToSimulate, inningsToSimulate, startIndex, tracker, initialResult, initialHisto);
+    OptimizationResult result = SoftballSim.simulateLineups(generator, gamesToSimulate, inningsToSimulate, startIndex, tracker, initialResult, initialHisto, threadCount);
     
     Logger.log(result.toString());
     Logger.log("Local simulation time: " + tracker.getLocalElapsedTimeMs() + " milliseconds --");
