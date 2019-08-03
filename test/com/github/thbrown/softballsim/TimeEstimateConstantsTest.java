@@ -69,7 +69,7 @@ public class TimeEstimateConstantsTest {
 
   }
 
-  //@Test
+  @Test
   public void standardDeviationAndTeamAverage() throws IOException {
     
     String logFileName = "stdDevAndAvg.log";
@@ -154,7 +154,7 @@ public class TimeEstimateConstantsTest {
     }
   }
   
-  //@Test
+  @Test
   public void lineupCounts() throws IOException {
     String logFileName = "lineupCount.log";
     Files.deleteIfExists(Paths.get(logFileName));
@@ -208,7 +208,7 @@ public class TimeEstimateConstantsTest {
     }
   }
 
-  //@Test
+  @Test
   public void threadCount() throws IOException {
     String logFileName = "threadCount.log";
     Files.deleteIfExists(Paths.get(logFileName));
