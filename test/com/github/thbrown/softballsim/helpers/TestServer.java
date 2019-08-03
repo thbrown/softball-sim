@@ -1,4 +1,4 @@
-package com.github.thbrown.softballsim.testing.helpers;
+package com.github.thbrown.softballsim.helpers;
 
 import java.io.BufferedReader;
 import java.io.IOException;

@@ -1,4 +1,4 @@
-package com.github.thbrown.softballsim.testing.tests;
+package com.github.thbrown.softballsim;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;

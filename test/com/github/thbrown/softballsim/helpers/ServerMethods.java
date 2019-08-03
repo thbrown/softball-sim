@@ -1,4 +1,4 @@
-package com.github.thbrown.softballsim.testing.helpers;
+package com.github.thbrown.softballsim.helpers;
 
 import java.io.PrintWriter;
 import java.util.Map;

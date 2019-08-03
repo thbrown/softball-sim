@@ -1,4 +1,4 @@
-package com.github.thbrown.softballsim.testing.helpers;
+package com.github.thbrown.softballsim.helpers;
 
 import com.google.gson.Gson;
 

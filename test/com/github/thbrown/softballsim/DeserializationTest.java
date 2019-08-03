@@ -1,4 +1,4 @@
-package com.github.thbrown.softballsim.testing.tests;
+package com.github.thbrown.softballsim;
 
 import static org.junit.Assert.*;
 
@@ -25,7 +25,7 @@ public class DeserializationTest {
    
       MonteCarloExaustiveData data = (MonteCarloExaustiveData) targetObject;
       assertEquals(7, data.getInnings());
-      assertEquals(100000, data.getIterations());
+      assertEquals(10000000, data.getIterations());
       assertEquals(0, data.getStartIndex());
       assertEquals(1, data.getLineupType());
       assertEquals(null, data.getInitialHistogram());

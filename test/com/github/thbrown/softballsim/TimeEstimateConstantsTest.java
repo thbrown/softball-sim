@@ -1,10 +1,9 @@
-package com.github.thbrown.softballsim.testing.tests;
+package com.github.thbrown.softballsim;
 
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,10 +14,10 @@ import org.junit.Test;
 
 import com.github.thbrown.softballsim.CombinatoricsUtil;
 import com.github.thbrown.softballsim.StatsUtil;
-import com.github.thbrown.softballsim.testing.helpers.MonteCarloSimulationDataBuilder;
-import com.github.thbrown.softballsim.testing.helpers.PlayerBuilder;
-import com.github.thbrown.softballsim.testing.helpers.ServerMethods;
-import com.github.thbrown.softballsim.testing.helpers.TestServer;
+import com.github.thbrown.softballsim.helpers.MonteCarloSimulationDataBuilder;
+import com.github.thbrown.softballsim.helpers.PlayerBuilder;
+import com.github.thbrown.softballsim.helpers.ServerMethods;
+import com.github.thbrown.softballsim.helpers.TestServer;
 
 /**
  * This isn't a classical unit test.
@@ -70,7 +69,7 @@ public class TimeEstimateConstantsTest {
 
   }
 
-  @Test
+  //@Test
   public void standardDeviationAndTeamAverage() throws IOException {
     
     String logFileName = "stdDevAndAvg.log";
@@ -155,7 +154,7 @@ public class TimeEstimateConstantsTest {
     }
   }
   
-  @Test
+  //@Test
   public void lineupCounts() throws IOException {
     String logFileName = "lineupCount.log";
     Files.deleteIfExists(Paths.get(logFileName));
@@ -209,7 +208,7 @@ public class TimeEstimateConstantsTest {
     }
   }
 
-  @Test
+  //@Test
   public void threadCount() throws IOException {
     String logFileName = "threadCount.log";
     Files.deleteIfExists(Paths.get(logFileName));

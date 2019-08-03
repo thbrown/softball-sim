@@ -1,11 +1,16 @@
 # SoftballSim
 Monte Carlo simulation tool for making sure you choose the best lineup for your softball, baseball, or kickball team. Used by softball.app for lineup optimizations but can also be run from the command line on file system data.
 
-Build and Run (requires java and gradle):
+Build and Run (requires java, replace `./gradlew` with `./gradlew.bat` for windows machines):
 ```
-gradle build
-gradle jar
+./gradlew build -x test
+./gradlew jar
 java -jar ./build/libs/softball-sim.jar FILE_SYSTEM 0
+```
+
+To run tests:
+```
+./gradlew clean test --info
 ```
 
 ### Arguments
