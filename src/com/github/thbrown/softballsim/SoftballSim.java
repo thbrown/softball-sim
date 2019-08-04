@@ -13,8 +13,8 @@ import java.util.concurrent.*;
 
 import com.github.thbrown.softballsim.datasource.DataSource;
 import com.github.thbrown.softballsim.datasource.ProgressTracker;
-import com.github.thbrown.softballsim.gson.BaseOptimizationData;
-import com.github.thbrown.softballsim.gson.OptimizationDataDeserializer;
+import com.github.thbrown.softballsim.gson.BaseOptimizationDefinition;
+import com.github.thbrown.softballsim.gson.OptimizationDefinitionDeserializer;
 import com.github.thbrown.softballsim.lineup.BattingLineup;
 import com.github.thbrown.softballsim.lineupgen.LineupGenerator;
 import com.github.thbrown.softballsim.lineupgen.LineupType;
@@ -75,7 +75,7 @@ public class SoftballSim {
         Socket socket = new Socket(connectionIp, port);
 
         final GsonBuilder gsonBuilder = new GsonBuilder();
-        gsonBuilder.registerTypeAdapter(BaseOptimizationData.class, new OptimizationDataDeserializer());
+        gsonBuilder.registerTypeAdapter(BaseOptimizationDefinition.class, new OptimizationDefinitionDeserializer());
         Gson gson = gsonBuilder.create();
         
         PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
@@ -93,7 +93,7 @@ public class SoftballSim {
           String data = null;
           while ((data = in.readLine()) != null) {
             Logger.log("RECEIVED: \t" + data);
-            BaseOptimizationData parsedData = gson.fromJson(data, BaseOptimizationData.class);
+            BaseOptimizationDefinition parsedData = gson.fromJson(data, BaseOptimizationDefinition.class);
             parsedData.runSimulation(gson, out);
             break;
           }

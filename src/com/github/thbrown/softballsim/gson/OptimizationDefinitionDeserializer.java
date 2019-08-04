@@ -9,14 +9,14 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 
-public class OptimizationDataDeserializer implements JsonDeserializer<BaseOptimizationData> {
+public class OptimizationDefinitionDeserializer implements JsonDeserializer<BaseOptimizationDefinition> {
   
   // These names are hard coded in the test data and also defined in softball app
   public final String JSON_OPTIMIZATION_TYPE = "optimizationType";
   public final String JSON_OPTIMIZATION_DATA = "optimizationData";
 
   @Override
-  public BaseOptimizationData deserialize(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context)
+  public BaseOptimizationDefinition deserialize(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context)
           throws JsonParseException {
 
       // Figure out what type of optimization we were given data for
@@ -26,7 +26,7 @@ public class OptimizationDataDeserializer implements JsonDeserializer<BaseOptimi
       
       // Deserialize that data based on the type
       JsonObject data = jsonObject.getAsJsonObject();
-      BaseOptimizationData result = context.deserialize(data.getAsJsonObject(JSON_OPTIMIZATION_DATA), type.getDeserializationTarget());
+      BaseOptimizationDefinition result = context.deserialize(data.getAsJsonObject(JSON_OPTIMIZATION_DATA), type.getDeserializationTarget());
       return result;
   }
 

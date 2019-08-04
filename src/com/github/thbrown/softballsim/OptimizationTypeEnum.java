@@ -1,15 +1,15 @@
 package com.github.thbrown.softballsim;
 
-import com.github.thbrown.softballsim.gson.BaseOptimizationData;
-import com.github.thbrown.softballsim.gson.MonteCarloExaustiveData;
+import com.github.thbrown.softballsim.gson.BaseOptimizationDefinition;
+import com.github.thbrown.softballsim.gson.MonteCarloExaustiveOptimizatonDefinition;
 
 public enum OptimizationTypeEnum {
-  MONTE_CARLO_EXAUSTIVE(0, MonteCarloExaustiveData.class);
+  MONTE_CARLO_EXAUSTIVE(0, MonteCarloExaustiveOptimizatonDefinition.class);
   
   private final int apiValue;
-  private Class<? extends BaseOptimizationData> deserializationTarget;
+  private Class<? extends BaseOptimizationDefinition> deserializationTarget;
   
-  OptimizationTypeEnum(int apiValue, Class<? extends BaseOptimizationData> deserializationTarget) {
+  OptimizationTypeEnum(int apiValue, Class<? extends BaseOptimizationDefinition> deserializationTarget) {
     this.apiValue = apiValue;
     this.deserializationTarget = deserializationTarget;
   }
@@ -27,7 +27,7 @@ public enum OptimizationTypeEnum {
     return apiValue;
   }
 
-  public Class<? extends BaseOptimizationData> getDeserializationTarget() {
+  public Class<? extends BaseOptimizationDefinition> getDeserializationTarget() {
     return this.deserializationTarget;
   }
   

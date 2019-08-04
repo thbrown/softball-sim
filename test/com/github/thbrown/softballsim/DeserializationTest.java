@@ -9,9 +9,9 @@ import java.nio.file.Paths;
 import org.junit.Test;
 
 import com.github.thbrown.softballsim.Logger;
-import com.github.thbrown.softballsim.gson.BaseOptimizationData;
-import com.github.thbrown.softballsim.gson.MonteCarloExaustiveData;
-import com.github.thbrown.softballsim.gson.OptimizationDataDeserializer;
+import com.github.thbrown.softballsim.gson.BaseOptimizationDefinition;
+import com.github.thbrown.softballsim.gson.MonteCarloExaustiveOptimizatonDefinition;
+import com.github.thbrown.softballsim.gson.OptimizationDefinitionDeserializer;
 import com.google.gson.GsonBuilder;
 
 public class DeserializationTest {
@@ -20,10 +20,10 @@ public class DeserializationTest {
       String json = new String(Files.readAllBytes(Paths.get("./testData/monteCarloExaustiveData")));
       
       GsonBuilder gsonBldr = new GsonBuilder();
-      gsonBldr.registerTypeAdapter(BaseOptimizationData.class, new OptimizationDataDeserializer());
-      BaseOptimizationData targetObject = gsonBldr.create().fromJson(json, BaseOptimizationData.class);
+      gsonBldr.registerTypeAdapter(BaseOptimizationDefinition.class, new OptimizationDefinitionDeserializer());
+      BaseOptimizationDefinition targetObject = gsonBldr.create().fromJson(json, BaseOptimizationDefinition.class);
    
-      MonteCarloExaustiveData data = (MonteCarloExaustiveData) targetObject;
+      MonteCarloExaustiveOptimizatonDefinition data = (MonteCarloExaustiveOptimizatonDefinition) targetObject;
       assertEquals(7, data.getInnings());
       assertEquals(10000000, data.getIterations());
       assertEquals(0, data.getStartIndex());

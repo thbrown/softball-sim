@@ -2,6 +2,7 @@ package com.github.thbrown.softballsim.helpers;
 
 import java.util.Arrays;
 
+import com.github.thbrown.softballsim.Player;
 import com.google.gson.Gson;
 
 @SuppressWarnings("unused") // Fields are serialized
@@ -15,7 +16,7 @@ public class MonteCarloSimulationDataBuilder extends SimulationDataBuilder {
   private String innings = "7";
   private int threadCount = 1;
 
-  private PlayerBuilder[] players;
+  private Player[] players;
 
   // TODO
   // private String initialLineup;
@@ -47,7 +48,7 @@ public class MonteCarloSimulationDataBuilder extends SimulationDataBuilder {
     return this;
   }
 
-  public MonteCarloSimulationDataBuilder withPlayers(PlayerBuilder[] players) {
+  public MonteCarloSimulationDataBuilder withPlayers(Player[] players) {
     this.players = players;
     return this;
   }

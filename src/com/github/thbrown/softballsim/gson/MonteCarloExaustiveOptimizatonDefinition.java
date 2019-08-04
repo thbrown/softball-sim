@@ -8,6 +8,7 @@ import java.util.StringJoiner;
 
 import com.github.thbrown.softballsim.Logger;
 import com.github.thbrown.softballsim.OptimizationResult;
+import com.github.thbrown.softballsim.Player;
 import com.github.thbrown.softballsim.Result;
 import com.github.thbrown.softballsim.SoftballSim;
 import com.github.thbrown.softballsim.datasource.NetworkProgressTracker;
@@ -17,7 +18,7 @@ import com.github.thbrown.softballsim.lineup.DummyOrdinaryBattingLineup;
 import com.github.thbrown.softballsim.lineupgen.LineupGenerator;
 import com.google.gson.Gson;
 
-public class MonteCarloExaustiveData extends BaseOptimizationData {
+public class MonteCarloExaustiveOptimizatonDefinition extends BaseOptimizationDefinition {
   private int innings;
   private int iterations;
   private int lineupType;
@@ -77,18 +78,18 @@ public class MonteCarloExaustiveData extends BaseOptimizationData {
     // Transform the json lineup given by the network to the comma separated form this program expects
     StringBuilder transformedData = new StringBuilder();
     if(this.getLineupType() == 1) {
-      for(ParsedPlayerEntry entry : this.getPlayers()) {
+      for(Player entry : this.getPlayers()) {
         String outs = buildCommaSeparatedList("0", entry.getOuts());
         String singles = buildCommaSeparatedList("1", entry.getSingles());
         String doubles = buildCommaSeparatedList("2", entry.getDoubles());
         String triples = buildCommaSeparatedList("3", entry.getTriples());
         String homeruns = buildCommaSeparatedList("4", entry.getHomeruns());
-        String line = joinIgnoreEmpty(",", entry.getId(), outs, singles, doubles, triples, homeruns, "\n");
+        String line = joinIgnoreEmpty(",", entry.getName(), outs, singles, doubles, triples, homeruns, "\n");
         transformedData.append(line);
       }
     } else if(this.getLineupType() == 2 || this.getLineupType() == 3) {
       // TODO: We should probably have both lineup types take the same stats data and the non-gendered types can just ignore gender
-      for(ParsedPlayerEntry entry : this.getPlayers()) {
+      for(Player entry : this.getPlayers()) {
         String outs = buildCommaSeparatedList("0", entry.getOuts());
         String singles = buildCommaSeparatedList("1", entry.getSingles());
         String doubles = buildCommaSeparatedList("2", entry.getDoubles());
@@ -96,7 +97,7 @@ public class MonteCarloExaustiveData extends BaseOptimizationData {
         String homeruns = buildCommaSeparatedList("4", entry.getHomeruns());
         
         // Using A/B instead of M/F so we can reuse this optimizer for other use case (like maybe old/young). <- Still trying to decide if this was a good idea
-        String line = joinIgnoreEmpty(",", entry.getId(), entry.getGender().equals("F") ? "B" : "A", outs, singles, doubles, triples, homeruns, "\n");
+        String line = joinIgnoreEmpty(",", entry.getName(), entry.getGender().equals("F") ? "B" : "A", outs, singles, doubles, triples, homeruns, "\n");
         transformedData.append(line);
       }
     } else {
@@ -161,7 +162,7 @@ public class MonteCarloExaustiveData extends BaseOptimizationData {
   private String joinIgnoreEmpty(String delimiter, String...strings) {
     StringJoiner joiner = new StringJoiner(delimiter);
     for(String s : strings) {
-      if(s.equals("") || s == null) {
+      if(s == null || s.equals("")) {
         continue;
       }
       joiner.add(s);

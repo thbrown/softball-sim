@@ -1,17 +1,17 @@
 package com.github.thbrown.softballsim;
 
 import java.util.concurrent.*;
-import java.util.ArrayList;
-import java.util.TreeMap;
 
 public class Player {
 
-  private final String name;
+  private final String id; // Used to be name
+  private final String gender;
 
+  private final int outs;
   private final int singles;
   private final int doubles;
   private final int triples;
-  private final int homeRuns;
+  private final int homeruns;
   private final int walks;
   private final int plateAppearances;
   
@@ -20,18 +20,20 @@ public class Player {
   private final int[] resultBucket;
   
   private Player(Player.Builder builder) {
-    this.name = builder.name;
+    this.id = builder.id;
+    this.gender = builder.gender;
     this.singles = builder.singles;
     this.doubles = builder.doubles;
     this.triples = builder.triples;
-    this.homeRuns = builder.homeRuns;
+    this.homeruns = builder.homeruns;
     this.walks = builder.walks;
-    this.plateAppearances = singles + doubles + triples + homeRuns + walks + builder.outs;
+    this.outs = builder.outs;
+    this.plateAppearances = singles + doubles + triples + homeruns + builder.outs;
     
     this.resultBucket = new int [this.plateAppearances];
     
     int index = 0;
-    for(int i = 0; i < homeRuns; i++) {
+    for(int i = 0; i < homeruns; i++) {
       resultBucket[index] = 4;
       index++;
     }
@@ -54,7 +56,7 @@ public class Player {
     
     Logger.log(String.format(
         "%s\t 1B: %d\t 2B: %d\t 3B: %d\t HR: %d\t BB: %d\t PA: %d",
-        this, singles, doubles, triples, homeRuns, walks, plateAppearances));
+        this, singles, doubles, triples, homeruns, walks, plateAppearances));
     
     if(this.plateAppearances <= 0) {
       throw new RuntimeException("Each batter must have at least one plate apperaance");
@@ -68,43 +70,68 @@ public class Player {
   }
 
   public String getName() {
-    return name;
+    return id;
   }
 
   @Override
   public String toString() {
-    return Simulation.padRight(this.name, 12) + Simulation.padRight(getAverage(), 8)
+    return Simulation.padRight(this.id, 12) + Simulation.padRight(getAverage(), 8)
         + getSluggingPercentage();
   }
 
+  public String getGender() {
+    return gender;
+  }
+
+  public int getSingles() {
+    return singles;
+  }
+
+  public int getDoubles() {
+    return doubles;
+  }
+
+  public int getTriples() {
+    return triples;
+  }
+
+  public int getHomeruns() {
+    return homeruns;
+  }
+
+  public int getOuts() {
+    return outs;
+  }
+
   private String getAverage() {
-    double result = (double) (singles + doubles + triples + homeRuns + walks) / plateAppearances;
+    double result = (double) (singles + doubles + triples + homeruns + walks) / plateAppearances;
     return String.format(java.util.Locale.US, "%.3f", result);
   }
 
   public double getAverageNumeric() {
-	    double result = (double) (singles + doubles + triples + homeRuns + walks) / plateAppearances;
+	    double result = (double) (singles + doubles + triples + homeruns + walks) / plateAppearances;
 	    return result;
   }
   
   private String getSluggingPercentage() {
-    double result = (double) (singles * 1 + doubles * 2 + triples * 3 + homeRuns * 4)
+    double result = (double) (singles * 1 + doubles * 2 + triples * 3 + homeruns * 4)
         / plateAppearances;
     return String.format(java.util.Locale.US, "%.3f", result);
   }
 
   public static class Builder {
-    private String name;
-
+    private String id;
+	private String gender;
+    
     private int singles;
     private int doubles;
     private int triples;
-    private int homeRuns;
+    private int homeruns;
     private int walks;
     private int outs;
 
-    public Builder(String name) {
-      this.name = name;
+    public Builder(String id) {
+      this.id = id;
     }
 
     public Player build() {
@@ -112,13 +139,13 @@ public class Player {
     }
 
     public Builder player(Player player) {
-      this.name = player.name;
+      this.id = player.id;
       this.singles = player.singles;
       this.doubles = player.doubles;
       this.triples = player.triples;
-      this.homeRuns = player.homeRuns;
+      this.homeruns = player.homeruns;
       this.walks = player.walks;
-      this.outs = player.plateAppearances - singles - doubles - triples - homeRuns - walks;
+      this.outs = player.plateAppearances - singles - doubles - triples - homeruns - walks;
       return this;
     }
 
@@ -137,8 +164,8 @@ public class Player {
       return this;
     }
 
-    public Builder homeRuns(int homeRuns) {
-      this.homeRuns = homeRuns;
+    public Builder homeruns(int homeRuns) {
+      this.homeruns = homeRuns;
       return this;
     }
 
@@ -150,6 +177,11 @@ public class Player {
     public Builder outs(int outs) {
       this.outs = outs;
       return this;
+    }
+    
+    public Builder gender(String gender) {
+    	this.gender = gender;
+    	return this;
     }
   }
 }

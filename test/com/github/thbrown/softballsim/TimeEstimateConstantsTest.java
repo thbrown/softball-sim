@@ -6,17 +6,19 @@ import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-
+import org.apache.commons.math3.fitting.PolynomialCurveFitter;
+import org.apache.commons.math3.fitting.WeightedObservedPoints;
 import org.junit.Test;
 
 import com.github.thbrown.softballsim.CombinatoricsUtil;
 import com.github.thbrown.softballsim.StatsUtil;
+import com.github.thbrown.softballsim.commands.CompleteOptimizationCommand;
+import com.github.thbrown.softballsim.commands.ReadyOptimizationCommand;
 import com.github.thbrown.softballsim.helpers.MonteCarloSimulationDataBuilder;
-import com.github.thbrown.softballsim.helpers.PlayerBuilder;
-import com.github.thbrown.softballsim.helpers.ServerMethods;
+import com.github.thbrown.softballsim.helpers.ProcessHooks;
 import com.github.thbrown.softballsim.helpers.TestServer;
 
 /**
@@ -35,36 +37,34 @@ public class TimeEstimateConstantsTest {
         .withLineupType(1);
    
     final int playerCount = 6;
-    PlayerBuilder[] players = new PlayerBuilder[playerCount];
+    Player[] players = new Player[playerCount];
     
     /*
     for (int k = 0; k < playerCount; k++) {
-      players[k] = new PlayerBuilder().withId("player" + k).withOuts(10).withHomeruns(17);
+      players[k] = new PlayerBuilder().withId("player" + k).outs(10).homeruns(17);
     }
     //*/
     
     ///*
-    players[0] = new PlayerBuilder().withId("player" + 0).withOuts(11).withSingles(13).withDoubles(5).withTriples(3).withHomeruns(1);
-    players[1] = new PlayerBuilder().withId("player" + 1).withOuts(11).withSingles(2).withDoubles(8).withTriples(1).withHomeruns(4);
-    players[2] = new PlayerBuilder().withId("player" + 2).withOuts(8).withSingles(12).withDoubles(2).withTriples(2).withHomeruns(0);
-    players[3] = new PlayerBuilder().withId("player" + 3).withOuts(13).withSingles(8).withDoubles(0).withTriples(0).withHomeruns(0);
-    players[4] = new PlayerBuilder().withId("player" + 4).withOuts(13).withSingles(11).withDoubles(7).withTriples(3).withHomeruns(0);
-    players[5] = new PlayerBuilder().withId("player" + 5).withOuts(8).withSingles(20).withDoubles(6).withTriples(1).withHomeruns(1);
+    players[0] = new Player.Builder("player" + 0).outs(11).singles(13).doubles(5).triples(3).homeruns(1).build();
+    players[1] = new Player.Builder("player" + 1).outs(11).singles(2).doubles(8).triples(1).homeruns(4).build();
+    players[2] = new Player.Builder("player" + 2).outs(8).singles(12).doubles(2).triples(2).homeruns(0).build();
+    players[3] = new Player.Builder("player" + 3).outs(13).singles(8).doubles(0).triples(0).homeruns(0).build();
+    players[4] = new Player.Builder("player" + 4).outs(13).singles(11).doubles(7).triples(3).homeruns(0).build();
+    players[5] = new Player.Builder("player" + 5).outs(8).singles(20).doubles(6).triples(1).homeruns(1).build();
     //*/
     
     mcsdb.withPlayers(players);
 
-    TestServer.runSimulationOverNetwork(new ServerMethods() {
+    TestServer.runSimulationOverNetwork(new ProcessHooks() {
       @Override
-      public void onReady(PrintWriter out) {
+      public boolean onReady(ReadyOptimizationCommand data, PrintWriter out) {
         String json;
         json = mcsdb.toString();
         json = json.replace("\n", "").replace("\r", "");
         out.println(json);
+        return false;
       }
-
-      @Override
-      public void onComplete(Map<String, String> data) throws IOException {}
     });
 
   }
@@ -77,7 +77,7 @@ public class TimeEstimateConstantsTest {
 
     MonteCarloSimulationDataBuilder mcsdb = new MonteCarloSimulationDataBuilder()
         .withInnings(7)
-        .withIterations(100000)
+        .withIterations(10000)
         .withLineupType(1)
         .withThreadCount(1);
 
@@ -88,10 +88,15 @@ public class TimeEstimateConstantsTest {
     final int NUM_AVERAGES = 100;
     final int NUM_STD_DEV = 100;
 
+    final int POLYNOMIAL_REGRESSION_DEGREE = 8;
+
     List<List<List<Integer>>> allDistributions = CombinatoricsUtil.getPartitions(RUNS_MAX, PA_COUNT, PLAYER_COUNT);
     List<List<Integer>> emptyList = new ArrayList<>();
     emptyList.add(Collections.emptyList());
     allDistributions.add(emptyList);
+
+    // Collect data.
+    final WeightedObservedPoints obs = new WeightedObservedPoints();
     
     // Iterate over different averages and standard deviations to get a feel for
     // how they affect simulation time
@@ -118,40 +123,48 @@ public class TimeEstimateConstantsTest {
         System.out.println(
             "Distribution index: " + targetDistribution.get(stdDevIndex) + " " + stedev);
 
-        PlayerBuilder[] players = new PlayerBuilder[PLAYER_COUNT];
+        Player[] players = new Player[PLAYER_COUNT];
         for (int k = 0; k < PLAYER_COUNT; k++) {
-          players[k] = new PlayerBuilder()
-              .withId("player" + k)
-              .withOuts(PA_COUNT - targetDistribution.get(stdDevIndex).get(k))
-              .withSingles(targetDistribution.get(stdDevIndex).get(k));
+          players[k] = new Player.Builder("player" + k)
+              .outs(PA_COUNT - targetDistribution.get(stdDevIndex).get(k))
+              .singles(targetDistribution.get(stdDevIndex).get(k)).build();
         }
         mcsdb.withPlayers(players);
         
-        TestServer.runSimulationOverNetwork(new ServerMethods() {
+        TestServer.runSimulationOverNetwork(new ProcessHooks() {
           @Override
-          public void onReady(PrintWriter out) {
+          public boolean onReady(ReadyOptimizationCommand data, PrintWriter out) {
             String json;
             json = mcsdb.toString();
             json = json.replace("\n", "").replace("\r", "");
             out.println(json);
+            return false;
           }
 
           @Override
-          public void onComplete(Map<String, String> data) throws IOException {
+          public boolean onComplete(CompleteOptimizationCommand data, PrintWriter out) throws IOException {
             PrintWriter writer = null;
             try {
               writer = new PrintWriter(new FileWriter(logFileName, true), true);
-              writer.println("DATA: " + String.valueOf(data.get("elapsedTimeMs")) + " " + avg + " " + stedev);
+              writer.println("DATA: " + data.getElapsedTimeMs() + " " + avg + " " + stedev);
+              obs.add(avg, data.getElapsedTimeMs());
             } finally {
               writer.close();
             }
 
-            System.out.println("DATA: " + String.valueOf(data.get("elapsedTimeMs")) + " " + avg + " " + stedev );
+            System.out.println("DATA: " + String.valueOf(data.getElapsedTimeMs()) + " " + avg + " " + stedev );
             System.out.println(data);
+            return true;
           }
         });
       }
     }
+
+    // Retrieve fitted parameters (coefficients of the polynomial function).
+    final PolynomialCurveFitter fitter = PolynomialCurveFitter.create(POLYNOMIAL_REGRESSION_DEGREE);
+    final double[] coeff = fitter.fit(obs.toList());
+    System.out.println("Coefficients (" + POLYNOMIAL_REGRESSION_DEGREE + " degree polynomial)");
+    System.out.println(Arrays.toString(coeff));
   }
   
   @Test
@@ -170,38 +183,40 @@ public class TimeEstimateConstantsTest {
 
       for (int playerCount = 5; playerCount <= 9; playerCount++) {
 
-        PlayerBuilder[] players = new PlayerBuilder[playerCount];
+        Player[] players = new Player[playerCount];
         for (int k = 0; k < playerCount; k++) {
-          players[k] = new PlayerBuilder().withId("player" + k).withGender(k%2 == 0 ? "M" : "F").withOuts(5).withSingles(5);
+          players[k] = new Player.Builder("player" + k).gender(k%2 == 0 ? "M" : "F").outs(5).singles(5).build();
         }
 
         mcsdb.withPlayers(players);
 
         final int lineupTypeFinal = lineupType;
 
-        TestServer.runSimulationOverNetwork(new ServerMethods() {
+        TestServer.runSimulationOverNetwork(new ProcessHooks() {
           @Override
-          public void onReady(PrintWriter out) {
+          public boolean onReady(ReadyOptimizationCommand data, PrintWriter out) {
             String json;
             json = mcsdb.toString();
             json = json.replace("\n", "").replace("\r", "");
             out.println(json);
+            return false;
           }
 
           @Override
-          public void onComplete(Map<String, String> data) throws IOException {
+          public boolean onComplete(CompleteOptimizationCommand data, PrintWriter out) throws IOException {
             PrintWriter writer = null;
             try {
               writer = new PrintWriter(new FileWriter(logFileName, true), true);
-              writer.println("DATA: " + String.valueOf(data.get("elapsedTimeMs")) + " " + lineupTypeFinal + " "
-                  + String.valueOf(data.get("total")));
+              writer.println("DATA: " + data.getElapsedTimeMs() + " " + lineupTypeFinal + " "
+                  + String.valueOf(data.getTotal()));
             } finally {
               writer.close();
             }
 
-            System.out.println("DATA: " + String.valueOf(data.get("elapsedTimeMs")) + " " + lineupTypeFinal + " "
-                + String.valueOf(data.get("total")));
+            System.out.println("DATA: " + String.valueOf(data.getElapsedTimeMs()) + " " + lineupTypeFinal + " "
+                + String.valueOf(data.getTotal()));
             System.out.println(data);
+            return true;
           }
         });
       }
@@ -219,9 +234,9 @@ public class TimeEstimateConstantsTest {
         .withLineupType(1);
     
     final int playerCount = 8;
-    PlayerBuilder[] players = new PlayerBuilder[playerCount];
+    Player[] players = new Player[playerCount];
     for (int k = 0; k < playerCount; k++) {
-      players[k] = new PlayerBuilder().withId("player" + k).withOuts(5).withSingles(5);
+      players[k] = new Player.Builder("player" + k).outs(5).singles(5).build();
     }
     mcsdb.withPlayers(players);
 
@@ -230,27 +245,29 @@ public class TimeEstimateConstantsTest {
       
       final int threadCountFinal = threadCount;
 
-      TestServer.runSimulationOverNetwork(new ServerMethods() {
+      TestServer.runSimulationOverNetwork(new ProcessHooks() {
         @Override
-        public void onReady(PrintWriter out) {
+        public boolean onReady(ReadyOptimizationCommand data, PrintWriter out) {
           String json;
           json = mcsdb.toString();
           json = json.replace("\n", "").replace("\r", "");
           out.println(json);
+          return false;
         }
 
         @Override
-        public void onComplete(Map<String, String> data) throws IOException {
+        public boolean onComplete(CompleteOptimizationCommand data, PrintWriter out) throws IOException {
           PrintWriter writer = null;
           try {
             writer = new PrintWriter(new FileWriter(logFileName, true), true);
-            writer.println("DATA: " + String.valueOf(data.get("elapsedTimeMs")) + " " + threadCountFinal);
+            writer.println("DATA: " + String.valueOf(data.getElapsedTimeMs()) + " " + threadCountFinal);
           } finally {
             writer.close();
           }
 
-          System.out.println("DATA: " + String.valueOf(data.get("elapsedTimeMs")) + " " + threadCountFinal);
+          System.out.println("DATA: " + String.valueOf(data.getElapsedTimeMs()) + " " + threadCountFinal);
           System.out.println(data);
+          return true;
         }
       });
     }

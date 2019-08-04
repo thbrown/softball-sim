@@ -1,36 +1,37 @@
 package com.github.thbrown.softballsim.helpers;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Map;
 
 import com.github.thbrown.softballsim.SoftballSim;
+import com.github.thbrown.softballsim.commands.BaseOptimizationCommand;
+import com.github.thbrown.softballsim.commands.OptimizationCommandDeserializer;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 public class TestServer implements Runnable {
   
   private Object lock;
-  private ServerMethods methods;
+  private ProcessHooks hooks;
   
-  public TestServer(Object lock, ServerMethods methods) {
+  public TestServer(Object lock, ProcessHooks hooks) {
     this.lock = lock;
-    this.methods = methods;
+    this.hooks = hooks;
   }
 
   @Override
   public void run() {
     try {
       this.start();
-    } catch (IOException e) {
+    } catch (Exception e) {
       throw new RuntimeException(e);
     }
   }
   
-  private void start() throws IOException {
+  private void start() throws Exception {
     System.out.println("Server starting!");
     ServerSocket serverSocket = new ServerSocket(8414);
     
@@ -43,26 +44,17 @@ public class TestServer implements Runnable {
     BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
     String inputLine;
     
-    
     while ((inputLine = in.readLine()) != null) {
-      //System.out.println("SERVER: " + inputLine);
+      // System.out.println("SERVER: " + inputLine);
       
-      Gson gson = new Gson();
-      Map<String, String> data = gson.fromJson(inputLine, Map.class);
-      String command = data.get("command");
-
-      if (command.equals("READY")) {
-        try {
-          methods.onReady(out);
-        } catch (Exception e) {
-          throw new RuntimeException(e);
-        }
-      } else if (command.equals("COMPLETE")) {
-        try {
-          methods.onComplete(data);
-        } catch (Exception e) {
-          throw new RuntimeException(e);
-        }
+      // Each command will process itself, you can pass in desired behavior via a your own implementation of hooks
+      final GsonBuilder gsonBuilder = new GsonBuilder();
+      gsonBuilder.registerTypeAdapter(BaseOptimizationCommand.class, new OptimizationCommandDeserializer());
+      Gson gson = gsonBuilder.create();
+      
+      BaseOptimizationCommand command = gson.fromJson(inputLine, BaseOptimizationCommand.class);
+      boolean done = command.process(hooks, out);
+      if (done) {
         break;
       }
     }
@@ -73,7 +65,7 @@ public class TestServer implements Runnable {
     serverSocket.close();
   }
   
-  public static void runSimulationOverNetwork(ServerMethods sm) {
+  public static void runSimulationOverNetwork(ProcessHooks sm) {
     try {
       
       // Start the server in its own thread

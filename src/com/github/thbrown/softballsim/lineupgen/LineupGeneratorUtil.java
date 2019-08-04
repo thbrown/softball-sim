@@ -33,7 +33,7 @@ public class LineupGeneratorUtil {
         .triples(
             (int) Arrays.stream(hitList)
                 .filter(e -> e.equals(AtBatOutcome.TRIPLE.getStringValue())).count())
-        .homeRuns(
+        .homeruns(
             (int) Arrays.stream(hitList)
                 .filter(e -> e.equals(AtBatOutcome.HOME_RUN.getStringValue())).count())
         .walks(
