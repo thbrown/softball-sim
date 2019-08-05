@@ -143,14 +143,8 @@ public class TimeEstimateConstantsTest {
 
           @Override
           public boolean onComplete(CompleteOptimizationCommand data, PrintWriter out) throws IOException {
-            PrintWriter writer = null;
-            try {
-              writer = new PrintWriter(new FileWriter(logFileName, true), true);
-              writer.println("DATA: " + data.getElapsedTimeMs() + " " + avg + " " + stedev);
-              obs.add(avg, data.getElapsedTimeMs());
-            } finally {
-              writer.close();
-            }
+            obs.add(avg, data.getElapsedTimeMs());
+            appendToFile(logFileName,"DATA: " + data.getElapsedTimeMs() + " " + avg + " " + stedev);
 
             System.out.println("DATA: " + String.valueOf(data.getElapsedTimeMs()) + " " + avg + " " + stedev );
             System.out.println(data);
@@ -165,6 +159,9 @@ public class TimeEstimateConstantsTest {
     final double[] coeff = fitter.fit(obs.toList());
     System.out.println("Coefficients (" + POLYNOMIAL_REGRESSION_DEGREE + " degree polynomial)");
     System.out.println(Arrays.toString(coeff));
+    
+    appendToFile(logFileName,"Coefficients (" + POLYNOMIAL_REGRESSION_DEGREE + " degree polynomial)");
+    appendToFile(logFileName,Arrays.toString(coeff));
   }
   
   @Test
@@ -204,14 +201,8 @@ public class TimeEstimateConstantsTest {
 
           @Override
           public boolean onComplete(CompleteOptimizationCommand data, PrintWriter out) throws IOException {
-            PrintWriter writer = null;
-            try {
-              writer = new PrintWriter(new FileWriter(logFileName, true), true);
-              writer.println("DATA: " + data.getElapsedTimeMs() + " " + lineupTypeFinal + " "
-                  + String.valueOf(data.getTotal()));
-            } finally {
-              writer.close();
-            }
+            appendToFile(logFileName,"DATA: " + data.getElapsedTimeMs() + " " + lineupTypeFinal + " "
+                + String.valueOf(data.getTotal()));
 
             System.out.println("DATA: " + String.valueOf(data.getElapsedTimeMs()) + " " + lineupTypeFinal + " "
                 + String.valueOf(data.getTotal()));
@@ -225,12 +216,13 @@ public class TimeEstimateConstantsTest {
 
   @Test
   public void threadCount() throws IOException {
-    String logFileName = "threadCount.log";
+    final int coresToTest = Runtime.getRuntime().availableProcessors() + 5;
+    final String logFileName = "threadCount.log";
     Files.deleteIfExists(Paths.get(logFileName));
 
     MonteCarloSimulationDataBuilder mcsdb = new MonteCarloSimulationDataBuilder()
         .withInnings(7)
-        .withIterations(1000)
+        .withIterations(100)
         .withLineupType(1);
     
     final int playerCount = 8;
@@ -239,8 +231,11 @@ public class TimeEstimateConstantsTest {
       players[k] = new Player.Builder("player" + k).outs(5).singles(5).build();
     }
     mcsdb.withPlayers(players);
+    
+    Double[] errorsConstants = new Double[coresToTest];
+    List<Long> wrapper = new ArrayList<>();
 
-    for (int threadCount = 1; threadCount <= 20; threadCount++) {
+    for (int threadCount = 1; threadCount <= coresToTest; threadCount++) {
       mcsdb.withThreadCount(threadCount);
       
       final int threadCountFinal = threadCount;
@@ -257,21 +252,26 @@ public class TimeEstimateConstantsTest {
 
         @Override
         public boolean onComplete(CompleteOptimizationCommand data, PrintWriter out) throws IOException {
-          PrintWriter writer = null;
-          try {
-            writer = new PrintWriter(new FileWriter(logFileName, true), true);
-            writer.println("DATA: " + String.valueOf(data.getElapsedTimeMs()) + " " + threadCountFinal);
-          } finally {
-            writer.close();
+          if(wrapper.isEmpty()) {
+            wrapper.add(data.getElapsedTimeMs());
           }
+          long linearImprovementTime = wrapper.get(0) / threadCountFinal;
+          errorsConstants[threadCountFinal - 1] = (((double)(data.getElapsedTimeMs()) / (double)linearImprovementTime));
+          
+          appendToFile(logFileName,"DATA: " + String.valueOf(data.getElapsedTimeMs()) + " " + threadCountFinal);
 
-          System.out.println("DATA: " + String.valueOf(data.getElapsedTimeMs()) + " " + threadCountFinal);
+          System.out.println("DATA: " + String.valueOf(data.getElapsedTimeMs()) + " " + threadCountFinal + " " + (errorsConstants[threadCountFinal - 1])*linearImprovementTime);
           System.out.println(data);
           return true;
         }
       });
     }
-
+    
+    appendToFile(logFileName,"Error Coefficients");
+    appendToFile(logFileName,Arrays.toString(errorsConstants));
+    
+    System.out.println("Error Coefficients");
+    System.out.println(Arrays.toString(errorsConstants));
   }
   
   /**
@@ -285,6 +285,16 @@ public class TimeEstimateConstantsTest {
     double c = (double) newMin;
     double d = (double) newMax;
     return (int)((x - a)*(d - c)/(b - a) + c);
+  }
+  
+  private void appendToFile(String fileName, String toAppend) throws IOException {
+    PrintWriter writer = null;
+    try {
+      writer = new PrintWriter(new FileWriter(fileName, true), true);
+      writer.println(toAppend);
+    } finally {
+      writer.close();
+    }
   }
 
 }
