@@ -1,6 +1,5 @@
 package com.github.thbrown.softballsim;
 
-import java.util.Map;
 import java.util.concurrent.Callable;
 
 import com.github.thbrown.softballsim.lineup.BattingLineup;
@@ -130,7 +129,6 @@ public class Simulation implements Callable<Result> {
     // There 3 bases (2^3) that may or may not be holding a player
     // There are 4 non-out hit types (single, double, triple, hr) for 32 possibilities
     // We can enumerate all possibilities here for quick computation.
-    /*
     int index = 0;
     // First three bits represent the presence (1) or absence (0) of runners on each base
     index |= this.first ? 1 : 0;
@@ -145,8 +143,6 @@ public class Simulation implements Callable<Result> {
     this.second = result.second;
     this.third = result.third;
     return result.runsScored;
-    */
-    return 0;
   }
 
   private void clearBases() {

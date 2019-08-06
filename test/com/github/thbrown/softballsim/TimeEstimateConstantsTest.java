@@ -222,7 +222,7 @@ public class TimeEstimateConstantsTest {
 
     MonteCarloSimulationDataBuilder mcsdb = new MonteCarloSimulationDataBuilder()
         .withInnings(7)
-        .withIterations(100)
+        .withIterations(1000)
         .withLineupType(1);
     
     final int playerCount = 8;
