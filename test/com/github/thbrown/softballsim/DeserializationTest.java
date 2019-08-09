@@ -12,12 +12,14 @@ import com.github.thbrown.softballsim.Logger;
 import com.github.thbrown.softballsim.gson.BaseOptimizationDefinition;
 import com.github.thbrown.softballsim.gson.MonteCarloExaustiveOptimizatonDefinition;
 import com.github.thbrown.softballsim.gson.OptimizationDefinitionDeserializer;
+import com.github.thbrown.softballsim.helpers.TimeEstimationConfig;
+import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 public class DeserializationTest {
   @Test
-  public void givenJsonHasNonMatchingFields_whenDeserializingWithCustomDeserializer_thenCorrect() throws IOException {
-      String json = new String(Files.readAllBytes(Paths.get("./testData/monteCarloExaustiveData")));
+  public void deserializeMonteCarloExaustiveData() throws IOException {
+      String json = new String(Files.readAllBytes(Paths.get("./testData/monteCarloExaustiveData.json")));
       
       GsonBuilder gsonBldr = new GsonBuilder();
       gsonBldr.registerTypeAdapter(BaseOptimizationDefinition.class, new OptimizationDefinitionDeserializer());
@@ -32,6 +34,19 @@ public class DeserializationTest {
       assertEquals(null, data.getInitialScore());
       
       Logger.log(targetObject);
+  }
+  
+  @Test
+  public void serializeTimeEstimationConfig() throws IOException {
+      TimeEstimationConfig config = new TimeEstimationConfig();
+      config.setInnings(7);
+      config.setIterations(10000);
+      config.setThreads(8);
+      config.setLineupType(1);
+      config.setCoefficients(new double[] {1,2,3,4,5});
+      config.setErrorAdjustments(new double[] {0,1,1.1,1.2,1.3,1.4,1.5,1.6,1.7});
+      Gson g = new Gson();
+      Logger.log(g.toJson(config));
   }
 
 }
