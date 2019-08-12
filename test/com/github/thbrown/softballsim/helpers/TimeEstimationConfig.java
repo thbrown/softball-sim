@@ -78,20 +78,30 @@ public class TimeEstimationConfig {
     // Linear adjustments
 
     // Adjust for CPU core count (inverse relationship)
-    y *= this.threads / threads;
-    y *= this.errorAdjustments[threads] + 1;
+    if(this.threads == 0) {
+      return Long.MAX_VALUE;
+    }
+    y *= ((double)this.threads) / ((double)threads);
+    y *= this.errorAdjustments[threads];
 
     // Adjust for number of iterations
-    y *= iterations / this.iterations;
+    y *= ((double)iterations) / ((double)this.iterations);
 
     // Adjust for number of innings simulated
-    y *= innings / this.innings;
+    y *= ((double)innings) / ((double)this.innings);
 
     // Adjust for number for lineups
-    // TODO: add this to lineup gen classes
-    y *= numLineups / this.lineupCount;
+    y *= ((double)numLineups) / ((double)(this.lineupCount));
 
     //Return the time in milliseconds
     return (long)y;
+  }
+  
+  public String getPolynomailEquation() {
+    String[] builder = new String[coefficients.length];
+    for(int i = 0; i < coefficients.length; i++) {
+      builder[i] = String.format ("%.12f", coefficients[i]) + "x^" + i;
+    }
+    return String.join(" + " , builder);
   }
 }

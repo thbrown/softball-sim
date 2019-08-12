@@ -35,14 +35,24 @@ import com.google.gson.GsonBuilder;
  * parameters.
  */
 public class TimeEstimateConstantsTest {
+  
+  public final String CONFIG_FILE = "estimated-time-config.json";
 
+  @Test
+  public void printPolynomialEquation() throws Exception {
+    String json = new String(Files.readAllBytes(Paths.get(CONFIG_FILE)));
+    GsonBuilder gsonBldr = new GsonBuilder();
+    TimeEstimationConfig config = gsonBldr.create().fromJson(json, TimeEstimationConfig.class);
+    System.out.println(config.getPolynomailEquation());
+  }
+  
   /**
    * Run this test after the configs have been generated to evaluate how closely they reflect the actual runtime
    */
   @Test
   public void testTimeEstimationConfig() throws Exception {
     
-    String json = new String(Files.readAllBytes(Paths.get("./estimatedTimeConfig.json")));
+    String json = new String(Files.readAllBytes(Paths.get(CONFIG_FILE)));
     
     GsonBuilder gsonBldr = new GsonBuilder();
     TimeEstimationConfig config = gsonBldr.create().fromJson(json, TimeEstimationConfig.class);
@@ -58,37 +68,45 @@ public class TimeEstimateConstantsTest {
         .withLineupType(LINEUP_TYPE)
         .withThreadCount(THREAD_COUNT);
 
-    final int playerCount = 6;
-    Player[] players = new Player[playerCount];
+    final int PLAYER_COUNT = 8;
+    Player[] players = new Player[PLAYER_COUNT];
 
     /*
-     * for (int k = 0; k < playerCount; k++) { players[k] = new
-     * PlayerBuilder().withId("player" + k).outs(10).homeruns(17); } //
-     */
-
-    /// *
-    players[0] = new Player.Builder("player" + 0).outs(11).singles(13).doubles(5).triples(3).homeruns(1).build();
-    players[1] = new Player.Builder("player" + 1).outs(11).singles(2).doubles(8).triples(1).homeruns(4).build();
-    players[2] = new Player.Builder("player" + 2).outs(8).singles(12).doubles(2).triples(2).homeruns(0).build();
-    players[3] = new Player.Builder("player" + 3).outs(13).singles(8).doubles(0).triples(0).homeruns(0).build();
-    players[4] = new Player.Builder("player" + 4).outs(13).singles(11).doubles(7).triples(3).homeruns(0).build();
-    players[5] = new Player.Builder("player" + 5).outs(8).singles(20).doubles(6).triples(1).homeruns(1).build();
-    // */
+    for (int k = 0; k < PLAYER_COUNT; k++) { 
+      players[k] = new Player.Builder("player" + k).outs(k).singles(PLAYER_COUNT-k).build(); 
+    } 
+    */
     
+    ///*
+    for (int k = 0; k < PLAYER_COUNT; k++) { 
+      players[k] = new Player.Builder("player" + k).outs(5).singles(5).build(); 
+    } 
+    //*/
+
+    /*
+    players[0] = new Player.Builder("player" + 0).gender("F").outs(34).singles(26).doubles(0).triples(0).homeruns(0).build();
+    players[1] = new Player.Builder("player" + 1).gender("F").outs(40).singles(13).doubles(3).triples(0).homeruns(0).build();
+    players[2] = new Player.Builder("player" + 2).gender("F").outs(22).singles(22).doubles(0).triples(1).homeruns(0).build();
+    players[3] = new Player.Builder("player" + 3).gender("F").outs(16).singles(4).doubles(1).triples(0).homeruns(0).build();
+    players[4] = new Player.Builder("player" + 4).gender("M").outs(23).singles(14).doubles(6).triples(3).homeruns(6).build();
+    players[5] = new Player.Builder("player" + 5).gender("M").outs(20).singles(22).doubles(9).triples(4).homeruns(6).build();
+    players[6] = new Player.Builder("player" + 6).gender("M").outs(23).singles(22).doubles(8).triples(4).homeruns(2).build();
+    players[7] = new Player.Builder("player" + 7).gender("M").outs(11).singles(9).doubles(1).triples(1).homeruns(1).build();
+    players[7] = new Player.Builder("player" + 8).gender("M").outs(10).singles(7).doubles(5).triples(1).homeruns(1).build();
+    players[7] = new Player.Builder("player" + 9).gender("F").outs(9).singles(1).doubles(0).triples(0).homeruns(0).build();
+    */
+    
+    mcsdb.withPlayers(players);
     
     // Determine team avg
     double teamHits = 0;
     double teamOuts = 0;
     for(int i = 0; i < players.length; i++) {
-      teamHits = players[i].getSingles() + players[i].getDoubles() + players[i].getTriples() + players[i].getHomeruns();
-      teamOuts = players[i].getOuts();
+      teamHits = teamHits + players[i].getSingles() + players[i].getDoubles() + players[i].getTriples() + players[i].getHomeruns();
+      teamOuts = teamOuts + players[i].getOuts();
     }
     double teamAverage = teamHits / (teamHits + teamOuts);
     
-    // Determine lineupCount
-    mcsdb.withPlayers(players);
-    
-
     final Map<String, Long> wrapper = new HashMap<>();
     TestServer.runSimulationOverNetwork(new ProcessHooks() {
       @Override
@@ -112,7 +130,7 @@ public class TimeEstimateConstantsTest {
     long lineupCount = wrapper.get("lineupCount");
     long estimatedTime = config.estimateSimulationTimeInMillis(THREAD_COUNT, teamAverage, INNINGS, ITERATIONS, LINEUP_TYPE, lineupCount);
 
-   System.out.println("Estimated" + estimatedTime + " Actual " + elapsedTime + " Error: " + percentChange(estimatedTime,elapsedTime) );
+    System.out.println("Estimated " + estimatedTime + " Actual " + elapsedTime + " Error: " + percentChange(estimatedTime,elapsedTime) + "%");
 
   }
 
@@ -122,9 +140,6 @@ public class TimeEstimateConstantsTest {
    */
   @Test
   public void generateTimeEstimationConfig() throws IOException {
-
-    final String configFileName = "estimatedTimeConfig.json";
-    Files.deleteIfExists(Paths.get(configFileName));
 
     final int INNINGS = 7;
     final int ITERATIONS = 100;
@@ -147,10 +162,10 @@ public class TimeEstimateConstantsTest {
       final int PA_COUNT = 4;
       final int RUNS_MAX = PLAYER_COUNT * PA_COUNT;
 
-      final int NUM_AVERAGES = 50;
-      final int NUM_STD_DEV = 50;
+      final int NUM_AVERAGES = 100;
+      final int NUM_STD_DEV = 100;
 
-      final int POLYNOMIAL_REGRESSION_DEGREE = 8;
+      final int POLYNOMIAL_REGRESSION_DEGREE = 10;
 
       List<List<List<Integer>>> allDistributions = CombinatoricsUtil.getPartitions(RUNS_MAX, PA_COUNT, PLAYER_COUNT);
       List<List<Integer>> emptyList = new ArrayList<>();
@@ -246,9 +261,10 @@ public class TimeEstimateConstantsTest {
       mcsdb.withPlayers(players);
 
       errorsConstants = new double[coresToTest];
+      errorsConstants[0] = 1.0; // Value doesn't matter, this is just to make the threadCount = index in the array
       Map<String, Long> wrapper = new HashMap<>();
 
-      for (int threadCount = 1; threadCount <= coresToTest; threadCount++) {
+      for (int threadCount = 1; threadCount < coresToTest; threadCount++) {
         mcsdb.withThreadCount(threadCount);
 
         final int threadCountFinal = threadCount;
@@ -267,15 +283,18 @@ public class TimeEstimateConstantsTest {
           public boolean onComplete(CompleteOptimizationCommand data, PrintWriter out) throws IOException {
             wrapper.put("elapsedTime", data.getElapsedTimeMs());
             wrapper.put("lineupCount", data.getTotal());
+            
+            if(threadCountFinal == 1) {
+              wrapper.put("singleThreadTime", data.getElapsedTimeMs());
+            }
 
-            long linearImprovementTime = wrapper.get(0) / threadCountFinal;
-            errorsConstants[threadCountFinal
-                - 1] = (((double) (data.getElapsedTimeMs()) / (double) linearImprovementTime));
+            long linearImprovementTime = wrapper.get("singleThreadTime") / threadCountFinal;
+            errorsConstants[threadCountFinal] = (((double) (data.getElapsedTimeMs()) / (double) linearImprovementTime));
 
             appendToFile(logFileName, "DATA: " + String.valueOf(data.getElapsedTimeMs()) + " " + threadCountFinal);
 
             System.out.println("DATA: " + String.valueOf(data.getElapsedTimeMs()) + " " + threadCountFinal + " "
-                + (errorsConstants[threadCountFinal - 1]) * linearImprovementTime);
+                + (errorsConstants[threadCountFinal]) * linearImprovementTime);
             System.out.println(data);
             return true;
           }
@@ -284,10 +303,7 @@ public class TimeEstimateConstantsTest {
         lineupCount = wrapper.get("lineupCount");
       }
 
-
       appendToFile(logFileName, "Error Coefficients");
-      appendToFile(logFileName, Arrays.toString(errorsConstants));
-
       appendToFile(logFileName, Arrays.toString(errorsConstants));
 
       System.out.println("Error Coefficients");
@@ -295,6 +311,8 @@ public class TimeEstimateConstantsTest {
     }
 
     // Save the config information to a file
+    final String configFileName = CONFIG_FILE;
+    Files.deleteIfExists(Paths.get(configFileName));
     TimeEstimationConfig config = new TimeEstimationConfig();
     config.setInnings(INNINGS);
     config.setIterations(ITERATIONS);
@@ -335,41 +353,5 @@ public class TimeEstimateConstantsTest {
     nf.setMaximumFractionDigits(3);
     return nf.format(Math.abs(A - B)/((A+B)/2) * 100);
   }
-  
-  // TODO: move this to lineup gen classes
-  private long getLineupCount(int lineupType, int maleCount, int femaleCount) {
-
-      long numberOfLineups = 0;
-      if (lineupType == 1) {
-        numberOfLineups = CombinatoricsUtils.factorial(maleCount + femaleCount);
-      } else if (lineupType == 2) {
-        numberOfLineups =
-            CombinatoricsUtil.factorial(maleCount) * CombinatoricsUtil.factorial(femaleCount);
-      } else if (lineupType == 3) {
-        // All three of these cases are invalid and won't be processed on the server anyways,
-        if (femaleCount < 0) {
-          // No females? Then it's just a normal lineup for the men
-          return CombinatoricsUtils.factorial(maleCount);
-        }
-        if (maleCount < 0) {
-          // No males? If there is one female than there is one possible lineup. If there are any other number of females there are 0 possible lineups.
-          // That difference doesn't matter much for time estimation purposes.
-          return 1;
-        }
-        if (maleCount <= femaleCount) {
-          // There are no lineups where females don't bat back-to-back
-          return 0;
-        }
-
-        numberOfLineups =
-            CombinatoricsUtil.factorial(maleCount) *
-          CombinatoricsUtil.factorial(femaleCount) *
-          (CombinatoricsUtil.binomial(maleCount, femaleCount) +
-              CombinatoricsUtil.binomial(maleCount - 1, femaleCount - 1));
-      } else {
-        throw new Error("Unrecognized lineup type " + lineupType);
-      }
-      return numberOfLineups;
-    };
 
 }
