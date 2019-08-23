@@ -123,7 +123,7 @@ public class TimeEstimateConstantsTest {
         wrapper.put("lineupCount", data.getComplete());
         return true;
       }
-    });
+    }, false);
     
 
     long elapsedTime = wrapper.get("elapsedTime");
@@ -226,7 +226,7 @@ public class TimeEstimateConstantsTest {
               System.out.println(data);
               return true;
             }
-          });
+          }, false);
         }
       }
 
@@ -298,7 +298,7 @@ public class TimeEstimateConstantsTest {
             System.out.println(data);
             return true;
           }
-        });
+        }, false);
         
         lineupCount = wrapper.get("lineupCount");
       }

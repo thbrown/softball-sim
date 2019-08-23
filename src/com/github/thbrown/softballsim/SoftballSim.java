@@ -43,7 +43,7 @@ public class SoftballSim {
       Logger.log("Invalid data source, must be 'NETWORK' or 'FILE_SYSTEM' but was '" + args[0] + "'");
       System.exit(0);
     }
-    
+        
     if(DATA_SOURCE == DataSource.FILE_SYSTEM) {
         int gamesToSimulate = args.length >= 3 ? Integer.parseInt(args[2]) : DEFAULT_GAMES_TO_SIMULATE;
         int inningsToSimulate = args.length >= 4 ? Integer.parseInt(args[3]) : DEFAULT_INNINGS_PER_GAME;
@@ -63,11 +63,55 @@ public class SoftballSim {
 	    }
 
     } else if (DATA_SOURCE == DataSource.NETWORK) {
-      boolean shutdownOnComplete = false;
       try{
         String connectionIp = args.length >= 2 ? args[1] : "127.0.0.1";
         String optimizationId = args.length >= 3 ? args[2] : "0000000000";
-        shutdownOnComplete = args.length >= 4 ? Boolean.parseBoolean(args[3]) : false;
+        final boolean runCleanupScriptOnTerminate = args.length >= 4 ? Boolean.parseBoolean(args[3]) : false;
+        
+        // Register shutdown hook - invoke the cleanup script whenever this application dies. This
+        // is intended to shutdown/delete the cloud instance this application runs after the simulation
+        // finishes it's job or is exited prematurely.
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+          public void run() {
+            System.out.println("Application Terminating ...");
+            if (runCleanupScriptOnTerminate) {
+              try {
+                Logger.log("Attempting to run cleanup script");
+                ProcessBuilder pb = null;
+                String operatingSystem = System.getProperty("os.name");
+                if ("Linux".equals(operatingSystem) || "Mac OS X".equals(operatingSystem)) {
+                  File tmpDir = new File("cleanup.sh");
+                  boolean exists = tmpDir.exists();
+                  if(!exists) {
+                    System.out.println("Could not find cleanup.sh, skiping cleanup");
+                    return;
+                  }
+                  pb = new ProcessBuilder("cleanup.sh");
+                } else if ("Windows".equals(operatingSystem) || "Windows 10".equals(operatingSystem)) {
+                  File tmpDir = new File("cleanup.bat");
+                  boolean exists = tmpDir.exists();
+                  if(!exists) {
+                    System.out.println("Could not find cleanup.bat, skiping cleanup");
+                    return;
+                  }
+                  pb = new ProcessBuilder("cleanup.bat");
+                } else {
+                  System.out.println("Skipping cleanup because OS is not supported: " + operatingSystem);
+                  return;
+                }
+                pb.directory(new File("./"));
+                Process p = pb.start();
+                System.out.println("Cleanup script exited with status " + p.waitFor());
+                
+              } catch (Exception e) {
+                Logger.log("Encountered error while running shutdown hook");
+                e.printStackTrace();
+              }
+            } else {
+              Logger.log("Skipping shutdown");
+            }
+          }
+        });
         
         int port = 8414;
         
@@ -117,31 +161,6 @@ public class SoftballSim {
       } catch (Exception e) {
         Logger.log(e);
         e.printStackTrace();
-      } finally {
-        String shutdownCommand;
-        String operatingSystem = System.getProperty("os.name");
-
-        if ("Linux".equals(operatingSystem) || "Mac OS X".equals(operatingSystem)) {
-            shutdownCommand = "shutdown -h now";
-        }
-        else if ("Windows".equals(operatingSystem) || "Windows 10".equals(operatingSystem)) {
-            shutdownCommand = "shutdown.exe -s -t 0";
-        }
-        else {
-            throw new RuntimeException("Unsupported operating system: " + operatingSystem);
-        }
-
-        if(shutdownOnComplete) {
-          try {
-            Logger.log("Running shutdown command " + shutdownCommand);         
-            Runtime.getRuntime().exec(shutdownCommand);
-          } catch (IOException e) {
-            Logger.log("Encountered error while running shutdown command");
-            e.printStackTrace();
-          }
-        } else {
-          Logger.log("Skipping shutdown");
-        }
       }
     } else {
     	throw new IllegalArgumentException("Unrecognized data source: " + DATA_SOURCE);

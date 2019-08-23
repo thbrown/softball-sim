@@ -21,4 +21,7 @@ stdDevAndAvg.log
 threadCount.log
 
 # Configs
-estimatedTimeConfig.json
+estimated-time-config.json
+
+# Test artifacts
+testCleanupScriptFile

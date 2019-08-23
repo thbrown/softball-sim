@@ -65,10 +65,10 @@ public class TestServer implements Runnable {
     serverSocket.close();
   }
   
-  public static void runSimulationOverNetwork(ProcessHooks sm) {
+  public static void runSimulationOverNetwork(ProcessHooks sm, boolean invokeCleanupScript) {
     try {
       
-      // Start the server in its own thread
+      // Start the server on its own thread
       Object lock = new Object();
       TestServer server = new TestServer(lock, sm);
       Thread t = new Thread(server);
@@ -76,9 +76,7 @@ public class TestServer implements Runnable {
       synchronized(lock) {
         lock.wait();
       }
-      
-      // Then start the simulator (the client)
-      SoftballSim.main(new String[] {"NETWORK"});
+      SoftballSim.main(new String[] {"NETWORK", "127.0.0.1", "0000000000", String.valueOf(invokeCleanupScript)});
       
     } catch(Exception e) {
       throw new RuntimeException(e);
