@@ -5,5 +5,5 @@ DELETE_ON_SHUTDOWN=$(curl http://metadata.google.internal/computeMetadata/v1/ins
 if [ DELETE_ON_SHUTDOWN = "true" ] 
   gcloud --quiet compute instances delete $NAME --zone=$ZONE
 else
-  echo "delete sckiped because metadata value DELETE_ON_SHUTDOWN was not set to true
+  echo "delete skiped because metadata value DELETE_ON_SHUTDOWN was not set to true
 end

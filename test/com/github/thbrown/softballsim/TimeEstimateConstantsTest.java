@@ -36,103 +36,7 @@ import com.google.gson.GsonBuilder;
  */
 public class TimeEstimateConstantsTest {
   
-  public final String CONFIG_FILE = "estimated-time-config.json";
-
-  @Test
-  public void printPolynomialEquation() throws Exception {
-    String json = new String(Files.readAllBytes(Paths.get(CONFIG_FILE)));
-    GsonBuilder gsonBldr = new GsonBuilder();
-    TimeEstimationConfig config = gsonBldr.create().fromJson(json, TimeEstimationConfig.class);
-    System.out.println(config.getPolynomailEquation());
-  }
-  
-  /**
-   * Run this test after the configs have been generated to evaluate how closely they reflect the actual runtime
-   */
-  @Test
-  public void testTimeEstimationConfig() throws Exception {
-    
-    String json = new String(Files.readAllBytes(Paths.get(CONFIG_FILE)));
-    
-    GsonBuilder gsonBldr = new GsonBuilder();
-    TimeEstimationConfig config = gsonBldr.create().fromJson(json, TimeEstimationConfig.class);
-    
-    final int INNINGS = 7;
-    final int ITERATIONS = 100;
-    final int LINEUP_TYPE = 1;
-    final int THREAD_COUNT = 1;
-    
-    MonteCarloSimulationDataBuilder mcsdb = new MonteCarloSimulationDataBuilder()
-        .withInnings(INNINGS)
-        .withIterations(ITERATIONS)
-        .withLineupType(LINEUP_TYPE)
-        .withThreadCount(THREAD_COUNT);
-
-    final int PLAYER_COUNT = 8;
-    Player[] players = new Player[PLAYER_COUNT];
-
-    /*
-    for (int k = 0; k < PLAYER_COUNT; k++) { 
-      players[k] = new Player.Builder("player" + k).outs(k).singles(PLAYER_COUNT-k).build(); 
-    } 
-    */
-    
-    ///*
-    for (int k = 0; k < PLAYER_COUNT; k++) { 
-      players[k] = new Player.Builder("player" + k).outs(5).singles(5).build(); 
-    } 
-    //*/
-
-    /*
-    players[0] = new Player.Builder("player" + 0).gender("F").outs(34).singles(26).doubles(0).triples(0).homeruns(0).build();
-    players[1] = new Player.Builder("player" + 1).gender("F").outs(40).singles(13).doubles(3).triples(0).homeruns(0).build();
-    players[2] = new Player.Builder("player" + 2).gender("F").outs(22).singles(22).doubles(0).triples(1).homeruns(0).build();
-    players[3] = new Player.Builder("player" + 3).gender("F").outs(16).singles(4).doubles(1).triples(0).homeruns(0).build();
-    players[4] = new Player.Builder("player" + 4).gender("M").outs(23).singles(14).doubles(6).triples(3).homeruns(6).build();
-    players[5] = new Player.Builder("player" + 5).gender("M").outs(20).singles(22).doubles(9).triples(4).homeruns(6).build();
-    players[6] = new Player.Builder("player" + 6).gender("M").outs(23).singles(22).doubles(8).triples(4).homeruns(2).build();
-    players[7] = new Player.Builder("player" + 7).gender("M").outs(11).singles(9).doubles(1).triples(1).homeruns(1).build();
-    players[7] = new Player.Builder("player" + 8).gender("M").outs(10).singles(7).doubles(5).triples(1).homeruns(1).build();
-    players[7] = new Player.Builder("player" + 9).gender("F").outs(9).singles(1).doubles(0).triples(0).homeruns(0).build();
-    */
-    
-    mcsdb.withPlayers(players);
-    
-    // Determine team avg
-    double teamHits = 0;
-    double teamOuts = 0;
-    for(int i = 0; i < players.length; i++) {
-      teamHits = teamHits + players[i].getSingles() + players[i].getDoubles() + players[i].getTriples() + players[i].getHomeruns();
-      teamOuts = teamOuts + players[i].getOuts();
-    }
-    double teamAverage = teamHits / (teamHits + teamOuts);
-    
-    final Map<String, Long> wrapper = new HashMap<>();
-    TestServer.runSimulationOverNetwork(new ProcessHooks() {
-      @Override
-      public boolean onReady(ReadyOptimizationCommand data, PrintWriter out) {
-        String json;
-        json = mcsdb.toString();
-        json = json.replace("\n", "").replace("\r", "");
-        out.println(json);
-        return false;
-      }
-      @Override
-      public boolean onComplete(CompleteOptimizationCommand data, PrintWriter out) throws Exception {
-        wrapper.put("elapsedTime", data.getElapsedTimeMs());
-        wrapper.put("lineupCount", data.getComplete());
-        return true;
-      }
-    }, false);
-    
-
-    long elapsedTime = wrapper.get("elapsedTime");
-    long lineupCount = wrapper.get("lineupCount");
-    long estimatedTime = config.estimateSimulationTimeInMillis(THREAD_COUNT, teamAverage, INNINGS, ITERATIONS, LINEUP_TYPE, lineupCount);
-
-    System.out.println("Estimated " + estimatedTime + " Actual " + elapsedTime + " Error: " + percentChange(estimatedTime,elapsedTime) + "%");
-
-  }
+  public final String CONFIG_FILE = "estimated-time-config.js";
 
   /**
    * This test generates the time estimation constants and saves them, serialized as JSON to a 
@@ -321,8 +225,105 @@ public class TimeEstimateConstantsTest {
     config.setCoefficients(coeff);
     config.setLineupCount(lineupCount);
     config.setErrorAdjustments(errorsConstants);
-    Gson g = new Gson();
-    appendToFile(configFileName, g.toJson(config));
+    Gson g = new GsonBuilder().setPrettyPrinting().create();
+    appendToFile(configFileName, "exports.config = JSON.parse(`" + g.toJson(config) + "`)");
+  }
+  
+
+  @Test
+  public void printPolynomialEquation() throws Exception {
+    String json = new String(Files.readAllBytes(Paths.get(CONFIG_FILE)));
+    GsonBuilder gsonBldr = new GsonBuilder();
+    TimeEstimationConfig config = gsonBldr.create().fromJson(json, TimeEstimationConfig.class);
+    System.out.println(config.getPolynomailEquation());
+  }
+  
+  /**
+   * Run this test after the configs have been generated to evaluate how closely they reflect the actual runtime
+   */
+  @Test
+  public void testTimeEstimationConfig() throws Exception {
+    
+    String json = new String(Files.readAllBytes(Paths.get(CONFIG_FILE)));
+    
+    GsonBuilder gsonBldr = new GsonBuilder();
+    TimeEstimationConfig config = gsonBldr.create().fromJson(json, TimeEstimationConfig.class);
+    
+    final int INNINGS = 7;
+    final int ITERATIONS = 100;
+    final int LINEUP_TYPE = 1;
+    final int THREAD_COUNT = 1;
+    
+    MonteCarloSimulationDataBuilder mcsdb = new MonteCarloSimulationDataBuilder()
+        .withInnings(INNINGS)
+        .withIterations(ITERATIONS)
+        .withLineupType(LINEUP_TYPE)
+        .withThreadCount(THREAD_COUNT);
+
+    final int PLAYER_COUNT = 8;
+    Player[] players = new Player[PLAYER_COUNT];
+
+    /*
+    for (int k = 0; k < PLAYER_COUNT; k++) { 
+      players[k] = new Player.Builder("player" + k).outs(k).singles(PLAYER_COUNT-k).build(); 
+    } 
+    */
+    
+    ///*
+    for (int k = 0; k < PLAYER_COUNT; k++) { 
+      players[k] = new Player.Builder("player" + k).outs(5).singles(5).build(); 
+    } 
+    //*/
+
+    /*
+    players[0] = new Player.Builder("player" + 0).gender("F").outs(34).singles(26).doubles(0).triples(0).homeruns(0).build();
+    players[1] = new Player.Builder("player" + 1).gender("F").outs(40).singles(13).doubles(3).triples(0).homeruns(0).build();
+    players[2] = new Player.Builder("player" + 2).gender("F").outs(22).singles(22).doubles(0).triples(1).homeruns(0).build();
+    players[3] = new Player.Builder("player" + 3).gender("F").outs(16).singles(4).doubles(1).triples(0).homeruns(0).build();
+    players[4] = new Player.Builder("player" + 4).gender("M").outs(23).singles(14).doubles(6).triples(3).homeruns(6).build();
+    players[5] = new Player.Builder("player" + 5).gender("M").outs(20).singles(22).doubles(9).triples(4).homeruns(6).build();
+    players[6] = new Player.Builder("player" + 6).gender("M").outs(23).singles(22).doubles(8).triples(4).homeruns(2).build();
+    players[7] = new Player.Builder("player" + 7).gender("M").outs(11).singles(9).doubles(1).triples(1).homeruns(1).build();
+    players[7] = new Player.Builder("player" + 8).gender("M").outs(10).singles(7).doubles(5).triples(1).homeruns(1).build();
+    players[7] = new Player.Builder("player" + 9).gender("F").outs(9).singles(1).doubles(0).triples(0).homeruns(0).build();
+    */
+    
+    mcsdb.withPlayers(players);
+    
+    // Determine team avg
+    double teamHits = 0;
+    double teamOuts = 0;
+    for(int i = 0; i < players.length; i++) {
+      teamHits = teamHits + players[i].getSingles() + players[i].getDoubles() + players[i].getTriples() + players[i].getHomeruns();
+      teamOuts = teamOuts + players[i].getOuts();
+    }
+    double teamAverage = teamHits / (teamHits + teamOuts);
+    
+    final Map<String, Long> wrapper = new HashMap<>();
+    TestServer.runSimulationOverNetwork(new ProcessHooks() {
+      @Override
+      public boolean onReady(ReadyOptimizationCommand data, PrintWriter out) {
+        String json;
+        json = mcsdb.toString();
+        json = json.replace("\n", "").replace("\r", "");
+        out.println(json);
+        return false;
+      }
+      @Override
+      public boolean onComplete(CompleteOptimizationCommand data, PrintWriter out) throws Exception {
+        wrapper.put("elapsedTime", data.getElapsedTimeMs());
+        wrapper.put("lineupCount", data.getComplete());
+        return true;
+      }
+    }, false);
+    
+
+    long elapsedTime = wrapper.get("elapsedTime");
+    long lineupCount = wrapper.get("lineupCount");
+    long estimatedTime = config.estimateSimulationTimeInMillis(THREAD_COUNT, teamAverage, INNINGS, ITERATIONS, LINEUP_TYPE, lineupCount);
+
+    System.out.println("Estimated " + estimatedTime + " Actual " + elapsedTime + " Error: " + percentChange(estimatedTime,elapsedTime) + "%");
+
   }
 
   /**
