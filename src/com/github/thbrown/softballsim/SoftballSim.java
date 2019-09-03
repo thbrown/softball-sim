@@ -82,8 +82,10 @@ public class SoftballSim {
                 File cleanupScript = null;
                 if ("Linux".equals(operatingSystem) || "Mac OS X".equals(operatingSystem)) {
                   cleanupScript = new File("cleanup.sh");
+                  pb = new ProcessBuilder("/bin/sh", cleanupScript.getName());
                 } else if ("Windows".equals(operatingSystem) || "Windows 10".equals(operatingSystem)) {
                   cleanupScript = new File("cleanup.bat");
+                  pb = new ProcessBuilder(cleanupScript.getName());
                 } 
                 
                 boolean exists = cleanupScript.exists();
@@ -92,8 +94,8 @@ public class SoftballSim {
                   return;
                 }
                 
-                pb = new ProcessBuilder(cleanupScript.getName());
                 pb.directory(cleanupScript.getAbsoluteFile().getParentFile());
+                System.out.println(pb.command());
                 Process p = pb.start();
                 System.out.println("Cleanup script exited with status " + p.waitFor());
                 
