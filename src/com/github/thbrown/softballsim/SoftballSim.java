@@ -79,27 +79,21 @@ public class SoftballSim {
                 Logger.log("Attempting to run cleanup script");
                 ProcessBuilder pb = null;
                 String operatingSystem = System.getProperty("os.name");
+                File cleanupScript = null;
                 if ("Linux".equals(operatingSystem) || "Mac OS X".equals(operatingSystem)) {
-                  File tmpDir = new File("cleanup.sh");
-                  boolean exists = tmpDir.exists();
-                  if(!exists) {
-                    System.out.println("Could not find cleanup.sh, skiping cleanup");
-                    return;
-                  }
-                  pb = new ProcessBuilder("cleanup.sh");
+                  cleanupScript = new File("cleanup.sh");
                 } else if ("Windows".equals(operatingSystem) || "Windows 10".equals(operatingSystem)) {
-                  File tmpDir = new File("cleanup.bat");
-                  boolean exists = tmpDir.exists();
-                  if(!exists) {
-                    System.out.println("Could not find cleanup.bat, skiping cleanup");
-                    return;
-                  }
-                  pb = new ProcessBuilder("cleanup.bat");
-                } else {
-                  System.out.println("Skipping cleanup because OS is not supported: " + operatingSystem);
+                  cleanupScript = new File("cleanup.bat");
+                } 
+                
+                boolean exists = cleanupScript.exists();
+                if(!exists) {
+                  System.out.println("Could not find cleanup.sh, skipping cleanup");
                   return;
                 }
-                pb.directory(new File("./"));
+                
+                pb = new ProcessBuilder(cleanupScript.getName());
+                pb.directory(cleanupScript.getAbsoluteFile().getParentFile());
                 Process p = pb.start();
                 System.out.println("Cleanup script exited with status " + p.waitFor());
                 
