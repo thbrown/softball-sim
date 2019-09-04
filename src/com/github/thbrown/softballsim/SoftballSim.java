@@ -266,7 +266,7 @@ public class SoftballSim {
             counter++;
         }
     }
-
+    executor.shutdown();
     return new OptimizationResult(bestResult, histo, tracker.getTotalElapsedTimeMs());
   }
 }
