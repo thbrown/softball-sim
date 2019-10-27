@@ -4,7 +4,6 @@ import java.io.PrintWriter;
 import java.util.List;
 import java.util.Map;
 
-import com.github.thbrown.softballsim.Player;
 import com.github.thbrown.softballsim.helpers.ProcessHooks;
 
 public class InProgressOptimizationCommand extends BaseOptimizationCommand {

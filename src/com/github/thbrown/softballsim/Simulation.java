@@ -3,6 +3,7 @@ package com.github.thbrown.softballsim;
 import java.util.concurrent.Callable;
 
 import com.github.thbrown.softballsim.lineup.BattingLineup;
+import com.github.thbrown.softballsim.util.Logger;
 
 public class Simulation implements Callable<Result> {
   

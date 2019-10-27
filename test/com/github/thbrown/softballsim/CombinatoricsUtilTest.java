@@ -10,7 +10,7 @@ import java.util.Set;
 
 import org.junit.Test;
 
-import com.github.thbrown.softballsim.CombinatoricsUtil;
+import com.github.thbrown.softballsim.util.CombinatoricsUtil;
 
 public class CombinatoricsUtilTest {
 

@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
 
-import com.github.thbrown.softballsim.Logger;
+import com.github.thbrown.softballsim.CommandLineOptions;
 import com.github.thbrown.softballsim.OptimizationResult;
 import com.github.thbrown.softballsim.Player;
 import com.github.thbrown.softballsim.Result;
@@ -16,9 +16,11 @@ import com.github.thbrown.softballsim.datasource.ProgressTracker;
 import com.github.thbrown.softballsim.lineup.DummyAlternatingBattingLineup;
 import com.github.thbrown.softballsim.lineup.DummyOrdinaryBattingLineup;
 import com.github.thbrown.softballsim.lineupgen.LineupGenerator;
+import com.github.thbrown.softballsim.lineupgen.LineupTypeEnum;
+import com.github.thbrown.softballsim.util.Logger;
 import com.google.gson.Gson;
 
-public class MonteCarloExaustiveOptimizatonDefinition extends BaseOptimizationDefinition {
+public class MonteCarloExhaustiveOptimizatonDefinition extends BaseOptimizationDefinition {
   private int innings;
   private int iterations;
   private int lineupType;
@@ -70,10 +72,10 @@ public class MonteCarloExaustiveOptimizatonDefinition extends BaseOptimizationDe
 
   @Override
   public void runSimulation(Gson gson, PrintWriter network) {
-    int gamesToSimulate = this.getIterations() == 0 ? SoftballSim.DEFAULT_GAMES_TO_SIMULATE : this.getIterations();
-    int inningsToSimulate = this.getInnings() == 0 ? SoftballSim.DEFAULT_INNINGS_PER_GAME : this.getInnings();
+    int gamesToSimulate = this.getIterations() == 0 ? Integer.parseInt(CommandLineOptions.GAMES_DEFAULT) : this.getIterations();
+    int inningsToSimulate = this.getInnings() == 0 ? Integer.parseInt(CommandLineOptions.INNINGS_DEFAULT) : this.getInnings();
     int lineupType = this.getLineupType();
-    int threadCount = this.threadCount == null ? SoftballSim.DEFAULT_THREADS : this.threadCount;
+    int threadCount = this.threadCount == null ? Integer.parseInt(CommandLineOptions.THREADS_DEFAULT) : this.threadCount;
     
     // Transform the json lineup given by the network to the comma separated form this program expects
     StringBuilder transformedData = new StringBuilder();
@@ -104,7 +106,7 @@ public class MonteCarloExaustiveOptimizatonDefinition extends BaseOptimizationDe
       throw new UnsupportedOperationException("Unrecognized lineup type " + this.getLineupType());
     }
     
-    LineupGenerator generator = SoftballSim.getLineupGenerator(String.valueOf(this.getLineupType()));
+    LineupGenerator generator = LineupTypeEnum.getEnumFromIdOrName(String.valueOf(this.getLineupType())).getLineupGenerator();
     generator.readDataFromString(transformedData.toString());
     
     if(generator.size() <= 0) {

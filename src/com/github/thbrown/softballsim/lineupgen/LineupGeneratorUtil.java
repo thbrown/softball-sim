@@ -13,8 +13,8 @@ import java.util.Scanner;
 import java.util.function.BiFunction;
 
 import com.github.thbrown.softballsim.AtBatOutcome;
-import com.github.thbrown.softballsim.Logger;
 import com.github.thbrown.softballsim.Player;
+import com.github.thbrown.softballsim.util.Logger;
 
 public class LineupGeneratorUtil {
 

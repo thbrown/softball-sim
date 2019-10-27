@@ -1,13 +1,13 @@
 package com.github.thbrown.softballsim.lineupgen;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import com.github.thbrown.softballsim.CombinatoricsUtil;
+
 import com.github.thbrown.softballsim.Player;
 import com.github.thbrown.softballsim.lineup.AlternatingBattingLineup;
 import com.github.thbrown.softballsim.lineup.BattingLineup;
+import com.github.thbrown.softballsim.util.CombinatoricsUtil;
 
 public class AlternatingBattingLineupGenerator implements LineupGenerator {
 

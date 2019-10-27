@@ -1,9 +1,10 @@
-package com.github.thbrown.softballsim;
+package com.github.thbrown.softballsim.util;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
+import com.github.thbrown.softballsim.Player;
 
 public class CombinatoricsUtil {
 

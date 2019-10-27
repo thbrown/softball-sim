@@ -2,55 +2,104 @@ package com.github.thbrown.softballsim;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.Socket;
 import java.text.DecimalFormat;
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
-import com.github.thbrown.softballsim.datasource.DataSource;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.MissingArgumentException;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+
+import com.github.thbrown.softballsim.datasource.DataSourceEnum;
 import com.github.thbrown.softballsim.datasource.ProgressTracker;
 import com.github.thbrown.softballsim.gson.BaseOptimizationDefinition;
 import com.github.thbrown.softballsim.gson.OptimizationDefinitionDeserializer;
 import com.github.thbrown.softballsim.lineup.BattingLineup;
 import com.github.thbrown.softballsim.lineupgen.LineupGenerator;
-import com.github.thbrown.softballsim.lineupgen.LineupType;
+import com.github.thbrown.softballsim.lineupgen.LineupTypeEnum;
+import com.github.thbrown.softballsim.util.Logger;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 public class SoftballSim {
   // Config
-  public static int DEFAULT_GAMES_TO_SIMULATE = 1000;
-  public static int DEFAULT_INNINGS_PER_GAME = 7;
   public static int DEFAULT_START_INDEX = 0;
   public static int DEFAULT_UPDATE_FREQUENCY_MS = 5000;
   
   private static int TASK_BUFFER_SIZE = 1000;
   
-  private static DataSource DATA_SOURCE = DataSource.FILE_SYSTEM;
   private static final String STATS_FILE_PATH = System.getProperty("user.dir") + File.separator + "stats";
-  public static final int DEFAULT_THREADS = Runtime.getRuntime().availableProcessors();
   
-  public static void main(String[] args) {
-    // Args
-    validateArgs(args);
-    try {
-      DATA_SOURCE = DataSource.valueOf(args[0]);
-    } catch (IllegalArgumentException e) {
-      Logger.log("Invalid data source, must be 'NETWORK' or 'FILE_SYSTEM' but was '" + args[0] + "'");
-      System.exit(0);
-    }
-        
-    if(DATA_SOURCE == DataSource.FILE_SYSTEM) {
-        int gamesToSimulate = args.length >= 3 ? Integer.parseInt(args[2]) : DEFAULT_GAMES_TO_SIMULATE;
-        int inningsToSimulate = args.length >= 4 ? Integer.parseInt(args[3]) : DEFAULT_INNINGS_PER_GAME;
-        int threads = args.length >= 4 ? Integer.parseInt(args[4]) : DEFAULT_THREADS;
+  public static void main(String[] args) throws ParseException {
+	 
+	// The valid command line flags change based on which optimizer and data source are supplied.
+	CommandLineOptions commandLineOptions = CommandLineOptions.getInstance();
+	CommandLineParser parser = new DefaultParser();
+		
+	// If there were no arguments supplied, show help with only the common options (i.e. no additional flags for optimizer, and the default flags for data source)
+	Options availableOptions = commandLineOptions.getOptionsForFlags(DataSourceEnum.getEnumFromName(CommandLineOptions.SOURCE_DEFAULT), null);
+	if(args.length == 0) {
+		HelpFormatter formatter = new HelpFormatter();
+		formatter.printHelp(CommandLineOptions.APPLICATION_NAME, CommandLineOptions.HELP_HEADER_1, availableOptions, CommandLineOptions.HELP_FOOTER);
+		return;
+	}
+	
+	// Some arguments have been supplied, parse only the common arguments for now
+	Options commonOptions = commandLineOptions.getOptionsForFlags(null, null);
+	String[] filterdArgs = commandLineOptions.filterArgsArray(args, commonOptions);
+	CommandLine commonCmd = parser.parse(commonOptions, filterdArgs, true);
+	
+	String dataSourceString = commonCmd.getOptionValue(CommandLineOptions.DATA_SOURCE, CommandLineOptions.SOURCE_DEFAULT);
+	DataSourceEnum dataSource = DataSourceEnum.getEnumFromName(dataSourceString);
+
+	OptimizerEnum optimizer = null;
+	if(commonCmd.hasOption(CommandLineOptions.OPTIMIZER)) {
+		String optimizerString = commonCmd.getOptionValue(CommandLineOptions.OPTIMIZER);
+		optimizer = OptimizerEnum.getEnumFromIdOrName(optimizerString);
+	}
+	
+	// Help will show the valid flags based on what optimizer and data source are supplied.
+	availableOptions = commandLineOptions.getOptionsForFlags(dataSource, optimizer);
+	if(commonCmd.hasOption(CommandLineOptions.HELP)) {
+		String helpHeader = (optimizer == null) ? CommandLineOptions.HELP_HEADER_1 : CommandLineOptions.HELP_HEADER_2 + optimizer;
+		HelpFormatter formatter = new HelpFormatter();
+		formatter.printHelp(CommandLineOptions.APPLICATION_NAME, helpHeader, availableOptions, CommandLineOptions.HELP_FOOTER);
+		return;
+	}
+	
+	// Manually enforce optimizer as a required flag. Other required flags should be specified in their options definition so their presents
+	// is enforced during parse. Enforcing the optimizer flag here manually here lets us work with a null optimizer above.
+	if(optimizer == null) {
+		throw new MissingArgumentException("Optimizer (-o) is a required flag. Please specify one of the following options either as a name or as an ordinal. " + OptimizerEnum.getValuesAsString());
+	}
+	
+	// Parse command line arguments - this time include the optimizer and dataSource specific flags
+	CommandLine allCmd = parser.parse(availableOptions, args, false);
+	     
+    if(dataSource == DataSourceEnum.FILE_SYSTEM) {
+        int gamesToSimulate = Integer.parseInt(allCmd.getOptionValue(CommandLineOptions.GAMES, CommandLineOptions.GAMES_DEFAULT));
+        int inningsToSimulate = Integer.parseInt(allCmd.getOptionValue(CommandLineOptions.INNINGS, CommandLineOptions.INNINGS_DEFAULT));
+        int threads = Integer.parseInt(allCmd.getOptionValue(CommandLineOptions.THREADS, CommandLineOptions.THREADS_DEFAULT));
         int startIndex = DEFAULT_START_INDEX;
         
-        LineupGenerator generator = getLineupGenerator(args[1]);
+	    	String lineupTypeString = allCmd.getOptionValue(CommandLineOptions.LINEUP_TYPE, CommandLineOptions.TYPE_LINEUP_DEFAULT);
+	    	LineupTypeEnum lineupType = LineupTypeEnum.getEnumFromIdOrName(String.valueOf(lineupTypeString));
+	    	
+        LineupGenerator generator = lineupType.getLineupGenerator();
         generator.readDataFromFile(STATS_FILE_PATH);
         
         ProgressTracker tracker = new ProgressTracker(generator.size(), DEFAULT_UPDATE_FREQUENCY_MS, startIndex, 0);
@@ -62,11 +111,11 @@ public class SoftballSim {
 	      Logger.log("Local simulation time: " + tracker.getLocalElapsedTimeMs() + " milliseconds");
 	    }
 
-    } else if (DATA_SOURCE == DataSource.NETWORK) {
+    } else if (dataSource == DataSourceEnum.NETWORK) {
       try{
-        String connectionIp = args.length >= 2 ? args[1] : "127.0.0.1";
-        String optimizationId = args.length >= 3 ? args[2] : "0000000000";
-        final boolean runCleanupScriptOnTerminate = args.length >= 4 ? Boolean.parseBoolean(args[3]) : false;
+        String connectionIp = allCmd.getOptionValue(CommandLineOptions.LOCAL_IP_ADDRESS, CommandLineOptions.LOCAL_IP_ADDRESS_DEFAULT);
+        String optimizationId = allCmd.getOptionValue(CommandLineOptions.OPTIMIZATION_ID, CommandLineOptions.OPTIMIZATION_ID_DEFAULT);
+        final boolean runCleanupScriptOnTerminate = commonCmd.hasOption(CommandLineOptions.CLEANUP_SCRIPT);
         
         // Register shutdown hook - invoke the cleanup script whenever this application dies. This
         // is intended to shutdown/delete the cloud instance this application runs after the simulation
@@ -159,48 +208,11 @@ public class SoftballSim {
         e.printStackTrace();
       }
     } else {
-    	throw new IllegalArgumentException("Unrecognized data source: " + DATA_SOURCE);
+    	  throw new IllegalArgumentException("Unrecognized data source: " + dataSource);
     }
     
     // Java isn't exiting for some reason. Force close.
     //System.exit(0);
-  }
-
-  public static LineupGenerator getLineupGenerator(String lineupTypeString) {
-    LineupType lineupType = null;
-    try {
-      lineupType = LineupType.valueOf(lineupTypeString.toUpperCase());
-    } catch (IllegalArgumentException e) {
-      try {
-        // This is brittle, but should be fairly stable.
-        int ordinal = Integer.parseInt(lineupTypeString);
-        lineupType = LineupType.values()[ordinal-1];
-      } catch (IndexOutOfBoundsException | NumberFormatException unused) {
-        Logger.log(String.format("Invalid LineupType. Was \"%s\".", lineupTypeString));
-        printAvailableLineupTypes();
-        System.exit(1);
-      }
-    }
-
-    LineupGenerator generator = lineupType.getLineupGenerator();
-    return generator;
-  }
-
-  private static void validateArgs(String[] args) {
-    if (args.length == 0) {
-      Logger.log("Usage: java SoftballSim <DataSource> <LineupType> <GamesToSimulate default=10000> <InningsToSimulate default=7>");
-      Logger.log("\tExpecting input files in " + STATS_FILE_PATH);
-      printAvailableLineupTypes();
-      System.exit(0);
-    }
-  }
-
-  public static void printAvailableLineupTypes() {
-    Logger.log("\tAvailable lineup generators:");
-    LineupType[] lineupTypes = LineupType.values();
-    for (int i = 0; i < lineupTypes.length; i++) {
-      Logger.log(String.format("\t\t\"%s\" or \"%s\"", lineupTypes[i], i+1));
-    }
   }
   
   public static OptimizationResult simulateLineups(LineupGenerator generator, int gamesToSimulate, int inningsPerGame, long startIndex, ProgressTracker tracker, Result initialResult, Map<Long, Long> initialHisto, int threads) {

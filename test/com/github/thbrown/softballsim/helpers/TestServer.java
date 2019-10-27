@@ -12,6 +12,12 @@ import com.github.thbrown.softballsim.commands.OptimizationCommandDeserializer;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+/**
+ * Class for testing the NETWORK data source mode.
+ * 
+ * This starts a server on the localhost that supplies data to the softball-sim application. The application expects to receive
+ * information in this manner when it is started and the 'NETWORK' options is supplied as an argument for with the -s flag.
+ */
 public class TestServer implements Runnable {
   
   private Object lock;
@@ -67,7 +73,6 @@ public class TestServer implements Runnable {
   
   public static void runSimulationOverNetwork(ProcessHooks sm, boolean invokeCleanupScript) {
     try {
-      
       // Start the server on its own thread
       Object lock = new Object();
       TestServer server = new TestServer(lock, sm);
@@ -76,8 +81,7 @@ public class TestServer implements Runnable {
       synchronized(lock) {
         lock.wait();
       }
-      SoftballSim.main(new String[] {"NETWORK", "127.0.0.1", "0000000000", String.valueOf(invokeCleanupScript)});
-      
+      SoftballSim.main(new String[] {"-o", "0", "-d", "NETWORK", "-l" , "127.0.0.1", "-i", "0000000000", "-c", String.valueOf(invokeCleanupScript)});
     } catch(Exception e) {
       throw new RuntimeException(e);
     }

@@ -3,8 +3,8 @@ package com.github.thbrown.softballsim.datasource;
 import java.io.PrintWriter;
 import java.util.Map;
 
-import com.github.thbrown.softballsim.Logger;
 import com.github.thbrown.softballsim.Result;
+import com.github.thbrown.softballsim.util.Logger;
 import com.google.gson.Gson;
 
 /**

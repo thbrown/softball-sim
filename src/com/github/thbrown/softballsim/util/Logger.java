@@ -1,4 +1,4 @@
-package com.github.thbrown.softballsim;
+package com.github.thbrown.softballsim.util;
 
 import java.io.FileWriter;
 import java.io.IOException;

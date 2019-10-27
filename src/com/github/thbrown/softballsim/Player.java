@@ -2,6 +2,8 @@ package com.github.thbrown.softballsim;
 
 import java.util.concurrent.*;
 
+import com.github.thbrown.softballsim.util.Logger;
+
 public class Player {
 
   private final String id; // Used to be name

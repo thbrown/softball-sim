@@ -1,4 +1,4 @@
-package com.github.thbrown.softballsim;
+package com.github.thbrown.softballsim.util;
 
 import java.util.Comparator;
 import java.util.List;

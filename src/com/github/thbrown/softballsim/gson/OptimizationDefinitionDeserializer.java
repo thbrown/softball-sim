@@ -2,7 +2,7 @@ package com.github.thbrown.softballsim.gson;
 
 import java.lang.reflect.Type;
 
-import com.github.thbrown.softballsim.OptimizationTypeEnum;
+import com.github.thbrown.softballsim.OptimizerEnum;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
@@ -22,7 +22,7 @@ public class OptimizationDefinitionDeserializer implements JsonDeserializer<Base
       // Figure out what type of optimization we were given data for
       JsonObject jsonObject = json.getAsJsonObject();
       JsonElement optimizationType = jsonObject.get(JSON_OPTIMIZATION_TYPE);
-      OptimizationTypeEnum type = OptimizationTypeEnum.getEnumFromApiValue(optimizationType.getAsInt());
+      OptimizerEnum type = OptimizerEnum.getEnumFromIdThrowOnInvalid(optimizationType.getAsInt());
       
       // Deserialize that data based on the type
       JsonObject data = jsonObject.getAsJsonObject();

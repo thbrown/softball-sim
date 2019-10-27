@@ -2,8 +2,9 @@ package com.github.thbrown.softballsim.helpers;
 
 import com.google.gson.Gson;
 
+@SuppressWarnings("unused") // Unused fields are serialized
 public class PlayerBuilder {
-
+  
   private String id;
   private String gender;
   private String outs = "0";

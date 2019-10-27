@@ -1,6 +1,4 @@
-package com.github.thbrown.softballsim;
-
-import com.github.thbrown.softballsim.lineupgen.LineupGenerator;
+package com.github.thbrown.softballsim.lineupgen;
 
 /**
  * Functional interface used for registering lineup generators with the CLI.

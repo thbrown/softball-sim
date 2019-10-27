@@ -4,8 +4,8 @@ import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.github.thbrown.softballsim.Logger;
 import com.github.thbrown.softballsim.Result;
+import com.github.thbrown.softballsim.util.Logger;
 
 /**
  * This class allows the main thread to print a progress message
