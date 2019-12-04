@@ -22,9 +22,9 @@ public class StatsUtil {
 
     return Math.sqrt(num / list.length);
   }
-  
+
   public static double stdev(List<Integer> list) {
-    return stdev(list.stream().mapToInt(i->i).toArray());
+    return stdev(list.stream().mapToInt(i -> i).toArray());
   }
 
   public static double mean(int[] list) {

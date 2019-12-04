@@ -1,0 +1,44 @@
+{
+  "name": "Monte Carlo Exhaustive",
+  "className": "MonteCarloExhaustive",
+  "description": "Runs Monte Carlo simulations of games for all possible lineups. The optimizer then averages the runs scored acrosss all possible lineups and returns the lineup with the highest average runs scored.",
+  "supported-lineup-types": [
+    "NORMAL",
+    "ALTERNATING_GENDER",
+    "NO_CONSECUTIVE_FEMALES"
+  ],
+  "machine": "g4-high-compute",
+  "arguments": [
+    {
+      "type": "String",
+      "shortLabel": "g",
+      "longLabel": "games",
+      "description": "Number of games to simulate for each lineup. An optimization run with more games will take longer but be more accurate.",
+      "defaultValue": "10000",
+      "pattern": "^[1-9]\\d*$"
+    },
+    {
+      "type": "String",
+      "shortLabel": "i",
+      "longLabel": "innings",
+      "description": "Number of innings to be played in each simulated game. More innings will increase the estimated completion time.",
+      "defaultValue": "7",
+      "pattern": "^[1-9]\\d*$"
+    },
+    {
+      "type": "Boolean",
+      "shortLabel": "l",
+      "longLabel": "lowest",
+      "description": "If this field is true, the optimizer will attempt to provide the lowest scoring lineup instead of the highest"
+    },
+    {
+      "type": "String",
+      "shortLabel": "t",
+      "longLabel": "threads",
+      "description": "Number of threads that will be used to run the simulation. For best performance, this should = the number of logical cores (which is the default). You can lower this if you don't want the optimization hoggin' all your CPU cores.",
+      "defaultValue": "$getLogicalCPUCores",
+      "pattern": "^([1-9]\\d*|\\$getLogicalCPUCores)$",
+      "hideInUi": "true"
+    }
+  ]
+}

@@ -1,80 +1,80 @@
 package com.github.thbrown.softballsim.datasource;
 
-import java.text.DecimalFormat;
-import java.util.HashMap;
-import java.util.Map;
-
 import com.github.thbrown.softballsim.Result;
+import com.github.thbrown.softballsim.util.CircularArray;
 import com.github.thbrown.softballsim.util.Logger;
 
 /**
- * This class allows the main thread to print a progress message
- * every updateInterval milliseconds
+ * Define how the application provides updates on progress to the user.
  */
-public class ProgressTracker {
-    
-  protected final long totalChunks;
-  protected final long updateInterval;
+public abstract class ProgressTracker implements Runnable {
 
-  protected long chunkCounter;
-  protected long nextUpdateTime;
-  protected long lastChunkCompletedCount = 0;
-  
-  protected final long startingElapsedTimeMs;
-  protected final long startTimeMs;
-  
-  protected DecimalFormat df = new DecimalFormat("#.##"); 
-  
-  public ProgressTracker(long totalOperations, long updateFrequency, long startIndex, long startingElapsedTimeMs ) {
-    this.totalChunks = totalOperations;
-    this.updateInterval = updateFrequency;
-    this.chunkCounter = startIndex;
-    this.lastChunkCompletedCount = startIndex;
-    this.nextUpdateTime = System.currentTimeMillis() + updateFrequency;
-    this.startTimeMs = System.currentTimeMillis();
-    this.startingElapsedTimeMs = startingElapsedTimeMs;
+  private final static int UPDATE_PERIOD_MS = 5000;
+  private final static int RESULTS_SIZE = 5;
+
+  // These variable are written by one thread an read by another
+  private CircularArray<Result> results = new CircularArray<>(RESULTS_SIZE);
+  private Long estimatedSecondsRemaining = null;
+
+  public ProgressTracker(Result initialResult) {
+    results.add(initialResult);
   }
-  
-  public void markOperationAsComplete(Result bestResult, Map<Long, Long> histo) {
-    chunkCounter++;
-    long time = System.currentTimeMillis();
-    if(time > nextUpdateTime) {
-      onMilestone(bestResult, histo);
-      nextUpdateTime = time + updateInterval;
-      lastChunkCompletedCount = chunkCounter;
+
+  public void updateProgress(Result updatedResult) {
+    synchronized (this) {
+      results.add(updatedResult);
     }
   }
-  
-  /**
-   * Returns a progress report about the current state of the optimization
-   */
-  public Map<String,Object> onMilestone(Result bestResult, Map<Long, Long> histo) {
-    long remainingChunks = this.totalChunks - this.chunkCounter;
-    double rate = ((double)(chunkCounter - lastChunkCompletedCount))/ (this.updateInterval/1000);
-    long remainingSeconds = (long) (remainingChunks / rate);
-    
-    Logger.log(df.format(chunkCounter*100/totalChunks) + "% complete (~" + String.format( "%.2f", (double)remainingSeconds/60.0/60.0 ) + " hours remaining) Rate:" + rate + " lineups per sec");
-    
-    // TODO: This needs to move to some optimization specific file
-    Map<String,Object> progressReport = new HashMap<>();
-    progressReport.put("command", "IN_PROGRESS");
-    progressReport.put("complete", chunkCounter);
-    progressReport.put("total", totalChunks);
-    progressReport.put("histogram", histo);
-    progressReport.put("lineup", bestResult.getLineup().toMap());
-    progressReport.put("score", bestResult.getScore());
-    progressReport.put("remainingTimeSec", remainingSeconds);
-    progressReport.put("elapsedTimeMs", this.startingElapsedTimeMs + (System.currentTimeMillis() - this.startTimeMs));
-    Logger.log(progressReport);
-    return progressReport;
+
+  @Override
+  public void run() {
+    // The parent thread interrupts this progress updater thread when the progress updater is no longer
+    // needed
+    while (!Thread.interrupted()) {
+      Result oldResult;
+      Result recentResult;
+      synchronized (this) {
+        oldResult = results.earliest();
+        recentResult = results.get(0);
+      }
+
+      if (oldResult != null && recentResult != null && !recentResult.equals(oldResult)) {
+        long calculationsDoneBetweenUpdates = recentResult.getCountCompleted() - oldResult.getCountCompleted();
+        long timeBetweenUpdates = recentResult.getElapsedTimeMs() - oldResult.getElapsedTimeMs();
+        long remainingCalculations = recentResult.getCountTotal() - recentResult.getCountCompleted();
+        double rate = ((double) calculationsDoneBetweenUpdates) / ((double) timeBetweenUpdates / 1000.0);
+        this.estimatedSecondsRemaining = (long) (remainingCalculations / rate);
+      }
+
+      this.onUpdate();
+      try {
+        Thread.sleep(UPDATE_PERIOD_MS);
+      } catch (InterruptedException e) {
+        break;
+      }
+    }
+    this.onComplete();
+    Logger.log("Updater Completed");
   }
 
-  public long getLocalElapsedTimeMs() {
-    return this.startingElapsedTimeMs + (System.currentTimeMillis() - this.startTimeMs);
+  public Result getCurrentResult() {
+    synchronized (this) {
+      return results.get(0);
+    }
   }
-  
-  public long getTotalElapsedTimeMs() {
-    return System.currentTimeMillis() - this.startTimeMs;
+
+  public Long getEstimatedMsRemaining() {
+    synchronized (this) {
+      if (estimatedSecondsRemaining != null) {
+        return new Long(estimatedSecondsRemaining);
+      }
+      return null;
+    }
   }
-  
+
+  public abstract void onUpdate();
+
+  // TODO: Do we want this here? Or somewhere else?
+  public abstract void onComplete();
+
 }

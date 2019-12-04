@@ -1,18 +1,29 @@
 # SoftballSim
 Monte Carlo simulation tool for making sure you choose the best lineup for your softball, baseball, or kickball team. Used by softball.app for lineup optimizations but can also be run from the command line on file system data.
 
-Build and Run (requires java, replace `./gradlew` with `./gradlew.bat` for windows machines):
+Build (requires java, replace `./gradlew` with `./gradlew.bat` for windows machines):
 ```
+# Build (this also runs tests)
 ./gradlew build
 
+# Or build without running tests
+./gradlew build -x test
+```
+
+Run 
+
+```
 # Example
 java -jar ./build/libs/softball-sim.jar -o MONTE_CARLO_EXHAUSTIVE --games 10000 --innings 7
 
 # See help for available options
 java -jar ./build/libs/softball-sim.jar --help
+
+# Or use gradle, be sure to provide arguments to the run task in the build.gradle file
+./gradlew run
 ```
 
-To run tests:
+Test
 ```
 ./gradlew clean test --info
 ```
@@ -54,26 +65,11 @@ Flags (more command line flags will be available based on which optimizer and da
 
 #### lineupType Options
 
-Available lineup generators:
+Available lineup types:
 *  1 - ORDINARY
-   *  Expects data formated like: `Bashful,4,0,0,0`
-   *  Which is interpreted as *(name, hits... (homerun, out, out, out)*
 *  2 - ALTERNATING_GENDER
-   *  Expects data formated like: `Hermione Granger,B,1,0,2,1` 
-   *  Which is interpreted as *(name, group \[e.g. A=male, B=female\], hits... (single, out, double, single)*
 *  3 - NO_CONSECUTIVE_FEMALES
-   *  Expects data formatted the same way as AlternatingBattingLineupGenerator except expect second value must be gender (A=male, B=female)
 
-## Notes
+## Contributing
 
-Hit data is an integer 0-4 (inclusive) that represents the number of bases the player reached in each of their at bats. Explicitly:
-*  0 => out/error/fielder's choice
-*  1 => single/walk
-*  2 => double
-*  3 => triple
-*  4 => homerun
-		
-## Extending the simulation
-To add your own lineup generator:
-1. Implement BattingLienup and LineupGenerator.
-1. Register your new generator in the static map in the LineupType class.
+See CONTRIBUTING.md

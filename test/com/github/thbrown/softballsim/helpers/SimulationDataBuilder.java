@@ -17,7 +17,7 @@ abstract class SimulationDataBuilder {
     // Not using gson here :(
     return "{\"optimizationType\":" + optimizationType + ",\"optimizationData\":" + getOptimizationData() + "}";
   }
-  
+
   // OptimizationData is the serialized class
   public String getOptimizationData() {
     Gson gson = new Gson();

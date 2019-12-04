@@ -1,6 +1,7 @@
 plugins {
   id 'java'
   id 'application'
+  id 'com.diffplug.gradle.spotless' version '3.25.0'
 }
 
 repositories {
@@ -15,7 +16,7 @@ dependencies {
 }
 
 run {
-    args = ["-o", "MONTE_CARLO_EXHAUSTIVE", "-ga", "10000", "-in", "7", "--help"]
+  args = ["-O", "MONTE_CARLO_EXHAUSTIVE", "-P", "1OiRCCmrn16iyK,00000000000001,0000000000000f,0000000000000k,1CV6WRyspDjA7Z","1MPJ24EEyS0g6p", "-g", "10000000", "-i", "7"]
 }
 
 jar {
@@ -41,6 +42,13 @@ sourceSets {
     resources {
       srcDirs = ['test/resources']
     }
+  }
+}
+
+spotless {
+  java {
+  	//removeUnusedImports()
+  	eclipse().configFile 'code-format.xml'
   }
 }
 
