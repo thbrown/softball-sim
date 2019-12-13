@@ -4,18 +4,21 @@ import java.io.PrintWriter;
 import com.github.thbrown.softballsim.Result;
 import com.github.thbrown.softballsim.util.Logger;
 
-public class NetworkProgressTracker extends ProgressTracker {
+/**
+ * Network data source prints data to the console via the logger on each event and sends those
+ * events back over the network supplied on construction.
+ */
+public class DataSourceFunctionsNetwork implements DataSourceFunctions {
 
   private final PrintWriter network;
 
-  public NetworkProgressTracker(Result initialResult, PrintWriter network) {
-    super(initialResult);
+  public DataSourceFunctionsNetwork(Result initialResult, PrintWriter network) {
     this.network = network;
   }
 
   @Override
-  public void onUpdate() {
-    Result latestResult = super.getCurrentResult();
+  public void onUpdate(ProgressTracker tracker) {
+    Result latestResult = tracker.getCurrentResult();
     network.println(latestResult);
     Logger.log("SENT: \t\t" + latestResult);
 
@@ -36,9 +39,13 @@ public class NetworkProgressTracker extends ProgressTracker {
   }
 
   @Override
-  public void onComplete() {
+  public void onComplete(Result finalResult) {
     // TODO Auto-generated method stub
+  }
 
+  @Override
+  public void onEstimationReady(ProgressTracker tracker) {
+    // TODO Auto-generated method stub
   }
 
 }

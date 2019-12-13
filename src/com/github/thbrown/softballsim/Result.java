@@ -3,6 +3,17 @@ package com.github.thbrown.softballsim;
 import java.util.Optional;
 import com.github.thbrown.softballsim.lineup.BattingLineup;
 
+/**
+ * This class contains the output of an optimization. It's used for reporting to the end user as
+ * well as for the resumption of a partially complete optimization. It may be a final result or it
+ * may contain a partial result for an incomplete optimization.
+ * 
+ * This class is immutable as instance are shared between threads by
+ * {@link com.github.thbrown.softballsim.datasource.ProgressTracker}
+ * 
+ * Optimizer implementations may need to store additional information, if so, implementers can
+ * extend this extend this class. Subclasses should be careful to maintain immutability.
+ */
 public class Result {
   private final BattingLineup lineup;
   private final double lineupScore;

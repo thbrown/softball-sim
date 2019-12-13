@@ -7,6 +7,12 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import com.github.thbrown.softballsim.util.StringUtils;
 
+/**
+ * Defines where the application gets it's stats data to feed to an optimizer and what it does with
+ * optimization results
+ * 
+ * TODO: Rename IOMode?
+ */
 public enum DataSourceEnum {
   FILE_SYSTEM(new DataSourceFileSystem()),
   NETWORK(new DataSourceNetwork());

@@ -1,7 +1,6 @@
 package com.github.thbrown.softballsim.optimizer.impl.montecarloexhaustive;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

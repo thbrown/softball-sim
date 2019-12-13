@@ -7,14 +7,14 @@ import java.util.Map;
 /**
  * Defines which subclass OptimizerDefinitionInput elements should be deserialised into
  */
-public enum OptimizerDefinitionInputEnum {
-  BOOLEAN("Boolean", OptimizerDefinitionInputBoolean.class),
-  STRING("String", OptimizerDefinitionInputString.class);
+public enum OptimizerDefinitionArgumentEnum {
+  BOOLEAN("Boolean", OptimizerDefinitionArgumentBoolean.class),
+  STRING("String", OptimizerDefinitionArgumentString.class);
 
   private String jsonType;
   private Class<? extends OptimizerDefinitionArgument> deserializationTarget;
 
-  OptimizerDefinitionInputEnum(String jsonType, Class<? extends OptimizerDefinitionArgument> deserializationTarget) {
+  OptimizerDefinitionArgumentEnum(String jsonType, Class<? extends OptimizerDefinitionArgument> deserializationTarget) {
     this.jsonType = jsonType;
     this.deserializationTarget = deserializationTarget;
   }
@@ -27,16 +27,16 @@ public enum OptimizerDefinitionInputEnum {
     return jsonType;
   }
 
-  private static final Map<String, OptimizerDefinitionInputEnum> ENUM_TYPE_MAP;
+  private static final Map<String, OptimizerDefinitionArgumentEnum> ENUM_TYPE_MAP;
   static {
-    Map<String, OptimizerDefinitionInputEnum> nameMap = new HashMap<>();
-    for (OptimizerDefinitionInputEnum instance : OptimizerDefinitionInputEnum.values()) {
+    Map<String, OptimizerDefinitionArgumentEnum> nameMap = new HashMap<>();
+    for (OptimizerDefinitionArgumentEnum instance : OptimizerDefinitionArgumentEnum.values()) {
       nameMap.put(instance.getJsonType(), instance);
     }
     ENUM_TYPE_MAP = Collections.unmodifiableMap(nameMap);
   }
 
-  public static OptimizerDefinitionInputEnum getEnumByJsonType(String jsonType) {
+  public static OptimizerDefinitionArgumentEnum getEnumByJsonType(String jsonType) {
     return ENUM_TYPE_MAP.get(jsonType);
   }
 

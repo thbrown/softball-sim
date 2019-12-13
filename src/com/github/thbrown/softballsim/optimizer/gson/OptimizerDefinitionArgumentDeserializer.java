@@ -26,7 +26,7 @@ public class OptimizerDefinitionArgumentDeserializer implements JsonDeserializer
     // Figure out what type of input we were given data for
     JsonObject jsonObject = json.getAsJsonObject();
     JsonElement optimizationType = jsonObject.get(INPUT_TYPE);
-    OptimizerDefinitionInputEnum type = OptimizerDefinitionInputEnum.getEnumByJsonType(optimizationType.getAsString());
+    OptimizerDefinitionArgumentEnum type = OptimizerDefinitionArgumentEnum.getEnumByJsonType(optimizationType.getAsString());
 
     // Validate shortLabel
     String shortLabel = jsonObject.get(SHORT_LABEL).getAsString();

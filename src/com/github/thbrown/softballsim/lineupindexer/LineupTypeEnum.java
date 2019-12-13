@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import com.github.thbrown.softballsim.data.gson.DataStats;
-import com.github.thbrown.softballsim.optimizer.OptimizerEnum;
 import com.github.thbrown.softballsim.util.StringUtils;
 
 public enum LineupTypeEnum implements LineupIndexerFactory {
@@ -88,7 +87,7 @@ public enum LineupTypeEnum implements LineupIndexerFactory {
   }
 
   public static String getValuesAsString() {
-    List<String> valuesString = Arrays.stream(OptimizerEnum.values())
+    List<String> valuesString = Arrays.stream(LineupTypeEnum.values())
         .map(v -> String.join(" ", v.toString(), "- " + v.getId())).collect(Collectors.toList());
     return "[" + String.join(", ", valuesString) + "]";
   }

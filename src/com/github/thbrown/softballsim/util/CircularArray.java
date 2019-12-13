@@ -2,7 +2,6 @@ package com.github.thbrown.softballsim.util;
 
 import java.util.ArrayList;
 import java.util.List;
-import com.github.thbrown.softballsim.Result;
 
 public class CircularArray<T> {
 
@@ -16,6 +15,9 @@ public class CircularArray<T> {
   }
 
   public void add(T toAdd) {
+    if(toAdd == null) {
+      return;
+    }
     index = (index + 1) % size;
     if (data.size() != this.size) {
       data.add(index, toAdd);
@@ -50,6 +52,9 @@ public class CircularArray<T> {
    * Get the earliest element added to the the array
    */
   public T earliest() {
+    if(this.data.size() == 0) {
+      return null;
+    }
     T elem = this.get(this.size - 1);
     if (elem == null) {
       return this.data.get(0);

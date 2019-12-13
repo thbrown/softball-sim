@@ -58,9 +58,8 @@ public class SoftballSim {
     }
 
     // Manually enforce optimizer as a required flag. Other required flags should be specified in their
-    // options definition so their presents
-    // is enforced during parse. Enforcing the optimizer flag here manually here lets us work with a
-    // null optimizer above.
+    // options definition so their presents is enforced during parse. Enforcing the optimizer flag here
+    // manually here lets us work with a null optimizer above.
     if (optimizer == null) {
       throw new MissingArgumentException(
           "Optimizer (-O) is a required flag. Please specify one of the following options either as a name or as an ordinal. "

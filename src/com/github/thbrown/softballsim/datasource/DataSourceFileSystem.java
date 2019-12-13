@@ -15,12 +15,10 @@ import com.github.thbrown.softballsim.data.gson.DataStats;
 import com.github.thbrown.softballsim.data.gson.DataStatsDeserializer;
 import com.github.thbrown.softballsim.lineupindexer.LineupTypeEnum;
 import com.github.thbrown.softballsim.optimizer.OptimizerEnum;
-import com.github.thbrown.softballsim.util.Logger;
 import com.google.gson.GsonBuilder;
 
 public class DataSourceFileSystem implements DataSource {
 
-  // DataSource - FILE_SYSTEM
   public final static String FILE_PATH = "F";
 
   public final static String FILE_PATH_DEFAULT = "./stats/exampleData.json";
@@ -67,12 +65,21 @@ public class DataSourceFileSystem implements DataSource {
 
     Map<String, String> arguments = optimizer.getArgumentsAndValuesAsMap(allCmd);
 
-    ProgressTracker tracker = new LocalProgressTracker(null); // TODO: save optimizer run results to file system
+    // TODO: save optimizer run results to file system
+    DataSourceFunctions functions = new DataSourceFunctionsFileSystem();
+    ProgressTracker tracker = new ProgressTracker(new Result(null, 0, 0, 0, 0), functions);
     Thread trackerThread = new Thread(tracker);
     trackerThread.start();
-    Result result = optimizer.optimize(players, lineupType, stats, arguments, tracker, null);
-    trackerThread.interrupt();
-    Logger.log(result.toString());
+    
+    if(allCmd.hasOption(CommandLineOptions.ESTIMATE_ONLY)) {
+      // This will terminate the application
+      EstimateOnlyExecutionWrapper wrapper = new EstimateOnlyExecutionWrapper(optimizer, functions);
+      wrapper.optimize(players, lineupType, stats, arguments, tracker, null);
+    } else {
+      Result result = optimizer.optimize(players, lineupType, stats, arguments, tracker, null);
+      trackerThread.interrupt();
+      functions.onComplete(result);
+    }
   }
 
 }

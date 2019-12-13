@@ -10,13 +10,12 @@ public class DataSourceTest {
   @Test
   public void testDataSourceFileSystem() throws Exception {
     String[] args = {"-O", "MONTE_CARLO_EXHAUSTIVE", "-P",
-        "1OiRCCmrn16iyK,00000000000001,0000000000000f,0000000000000k,1CV6WRyspDjA7Z", "1MPJ24EEyS0g6p", "-g", "1000",
-        "-i", "7", "-T", "1"};
+        "1OiRCCmrn16iyK,00000000000001,0000000000000f,0000000000000k,1CV6WRyspDjA7Z,1MPJ24EEyS0g6p", "-g", "1000",
+        "-i", "7", "-T", "1", "-t", "4"};
     SoftballSim.main(args);
   }
   /*
    * TODO: Network
-   * 
    * @Test public void testDataSourceNetwork() throws Exception {
    * 
    * final int INNINGS = 7; final int ITERATIONS = 100; final int LINEUP_TYPE = 1; final int
