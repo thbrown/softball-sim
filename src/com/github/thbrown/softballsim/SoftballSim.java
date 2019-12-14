@@ -9,10 +9,20 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import com.github.thbrown.softballsim.datasource.DataSourceEnum;
 import com.github.thbrown.softballsim.optimizer.OptimizerEnum;
+import com.github.thbrown.softballsim.util.Logger;
 
 public class SoftballSim {
 
   public static void main(String[] args) throws ParseException {
+    try {
+      begin(args);
+    } catch (Exception e) {
+      Logger.log(e.getMessage());
+      System.exit(1);
+    }
+  }
+
+  private static void begin(String[] args) throws ParseException {
 
     // The valid command line flags change based on which optimizer and data source are supplied.
     CommandLineOptions commandLineOptions = CommandLineOptions.getInstance();

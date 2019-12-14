@@ -36,6 +36,7 @@ public class DataStatsDeserializer implements JsonDeserializer<DataStats> {
     for (DataPlayer player : stats.getPlayers()) {
       playerLookup.put(player.getId(), player);
     }
+    stats.setPlayerMap(playerLookup);
 
     List<DataTeam> teams = stats.getTeams();
     for (DataTeam team : teams) {

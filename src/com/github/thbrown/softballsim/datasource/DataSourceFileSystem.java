@@ -60,8 +60,11 @@ public class DataSourceFileSystem implements DataSource {
 
     String playerString =
         allCmd.getOptionValue(CommandLineOptions.PLAYERS_IN_LINEUP, stats.getPlayersAsCommaSeparatedString());
-    List<String> players = Arrays.asList(playerString.split(",")); // TODO: should we accept names here too if they are
-                                                                   // unique?
+    List<String> players = Arrays.asList(playerString.split(","));
+
+    // We accept both ids and names for this argument, but the optimizers expect only ids. This resolves
+    // any names to ids.
+    players = stats.convertPlayersListToIds(players);
 
     Map<String, String> arguments = optimizer.getArgumentsAndValuesAsMap(allCmd);
 
@@ -70,8 +73,8 @@ public class DataSourceFileSystem implements DataSource {
     ProgressTracker tracker = new ProgressTracker(new Result(null, 0, 0, 0, 0), functions);
     Thread trackerThread = new Thread(tracker);
     trackerThread.start();
-    
-    if(allCmd.hasOption(CommandLineOptions.ESTIMATE_ONLY)) {
+
+    if (allCmd.hasOption(CommandLineOptions.ESTIMATE_ONLY)) {
       // This will terminate the application
       EstimateOnlyExecutionWrapper wrapper = new EstimateOnlyExecutionWrapper(optimizer, functions);
       wrapper.optimize(players, lineupType, stats, arguments, tracker, null);

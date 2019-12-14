@@ -11,7 +11,7 @@ import com.github.thbrown.softballsim.util.Logger;
  * This class must be thread safe as it is accessed by thread(s) that update the progress and a
  * separate thread that reports the progress.
  * 
- * TODO: It might be good to split the thread safe data storage function of this class and the 
+ * TODO: It might be good to split the thread safe data storage function of this class and the
  * update thread function into separate classes.
  */
 public final class ProgressTracker implements Runnable {
@@ -26,7 +26,7 @@ public final class ProgressTracker implements Runnable {
   private CircularArray<Result> results = new CircularArray<>(RESULTS_BUFFER_SIZE);
   private Long estimatedSecondsRemaining = null;
   private Long estimatedSecondsTotal = null;
-  
+
   private final DataSourceFunctions functions;
 
   public ProgressTracker(Result initialResult, DataSourceFunctions functions) {

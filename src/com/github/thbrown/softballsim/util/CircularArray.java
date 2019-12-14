@@ -15,7 +15,7 @@ public class CircularArray<T> {
   }
 
   public void add(T toAdd) {
-    if(toAdd == null) {
+    if (toAdd == null) {
       return;
     }
     index = (index + 1) % size;
@@ -52,7 +52,7 @@ public class CircularArray<T> {
    * Get the earliest element added to the the array
    */
   public T earliest() {
-    if(this.data.size() == 0) {
+    if (this.data.size() == 0) {
       return null;
     }
     T elem = this.get(this.size - 1);

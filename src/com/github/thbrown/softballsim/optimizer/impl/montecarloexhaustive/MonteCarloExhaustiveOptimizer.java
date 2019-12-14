@@ -37,6 +37,9 @@ public class MonteCarloExhaustiveOptimizer implements Optimizer<MonteCarloExhaus
     // Start the timer
     long startTimestamp = System.currentTimeMillis();
 
+    // Check that the batting data we have is sufficient to run this optmizer
+    validateData(battingData, playersInLineup);
+
     // Get the arguments as their expected types
     MonteCarloExhaustiveArgumentParser parsedArguments = new MonteCarloExhaustiveArgumentParser(arguments);
 
@@ -56,9 +59,11 @@ public class MonteCarloExhaustiveOptimizer implements Optimizer<MonteCarloExhaus
     ExecutorService executor = Executors.newFixedThreadPool(parsedArguments.getThreads());
     Queue<Future<TaskResult>> results = new LinkedList<>();
 
-    // Build a hitGenerator that can be used across threads, this way we only have to parse the stats
-    // data once
-    // Using the first lineup here (index 0) to get a list of players, but we could have used any lineup
+    /*
+     * Build a hitGenerator that can be used across threads, this way we only have to parse the stats
+     * data once Using the first lineup here (index 0) to get a list of players, but we could have used
+     * any lineup
+     */
     List<DataPlayer> someLineup = indexer.getLineup(0).asList();
     HitGenerator hitGenerator = new HitGenerator(someLineup);
 
@@ -119,6 +124,8 @@ public class MonteCarloExhaustiveOptimizer implements Optimizer<MonteCarloExhaus
         MonteCarloExhaustiveTask s = new MonteCarloExhaustiveTask(lineup, parsedArguments.getGames(),
             parsedArguments.getInnings(), hitGenerator);
         results.add(executor.submit(s));
+
+        // Good for debugging
         // ThreadPoolExecutor ex =(ThreadPoolExecutor)executor;
         // Logger.log("Adding task 2 " + ex.getQueue().size() + " " + ex.);
       }
@@ -129,5 +136,16 @@ public class MonteCarloExhaustiveOptimizer implements Optimizer<MonteCarloExhaus
     MonteCarloExhaustiveResult finalResult = new MonteCarloExhaustiveResult(bestResult.getLineup(),
         bestResult.getScore(), indexer.size(), progressCounter, elapsedTime, histo);
     return finalResult;
+  }
+
+  private void validateData(DataStats data, List<String> playersInLineup) {
+    // All players in the lineup must have at least one plate appearance
+    for (String playerId : playersInLineup) {
+      DataPlayer player = data.getPlayerById(playerId);
+      if (player.getPlateAppearanceCount() == 0) {
+        throw new RuntimeException("Can not optimize lineup because player '" + player.getName() + "' ("
+            + player.getId() + ") has no plate appearances");
+      }
+    }
   }
 }
