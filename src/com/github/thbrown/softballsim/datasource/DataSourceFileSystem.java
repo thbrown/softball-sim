@@ -10,6 +10,7 @@ import java.util.Map;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import com.github.thbrown.softballsim.CommandLineOptions;
+import com.github.thbrown.softballsim.Msg;
 import com.github.thbrown.softballsim.Result;
 import com.github.thbrown.softballsim.data.gson.DataStats;
 import com.github.thbrown.softballsim.data.gson.DataStatsDeserializer;
@@ -46,7 +47,7 @@ public class DataSourceFileSystem implements DataSource {
     try {
       json = new String(Files.readAllBytes(Paths.get(statsFileLocation)));
     } catch (IOException e) {
-      throw new RuntimeException("Unable to read the stats file from " + statsFileLocation, e);
+      throw new RuntimeException(Msg.BAD_STATS_FILE_PATH.args(statsFileLocation), e);
     }
     DataStats stats = gsonBldr.create().fromJson(json, DataStats.class);
 
@@ -74,14 +75,17 @@ public class DataSourceFileSystem implements DataSource {
     Thread trackerThread = new Thread(tracker);
     trackerThread.start();
 
-    if (allCmd.hasOption(CommandLineOptions.ESTIMATE_ONLY)) {
-      // This will terminate the application
-      EstimateOnlyExecutionWrapper wrapper = new EstimateOnlyExecutionWrapper(optimizer, functions);
-      wrapper.optimize(players, lineupType, stats, arguments, tracker, null);
-    } else {
-      Result result = optimizer.optimize(players, lineupType, stats, arguments, tracker, null);
+    try {
+      if (allCmd.hasOption(CommandLineOptions.ESTIMATE_ONLY)) {
+        // This will terminate the application
+        EstimateOnlyExecutionWrapper wrapper = new EstimateOnlyExecutionWrapper(optimizer, functions);
+        wrapper.optimize(players, lineupType, stats, arguments, tracker, null);
+      } else {
+        Result result = optimizer.optimize(players, lineupType, stats, arguments, tracker, null);
+        functions.onComplete(result);
+      }
+    } finally {
       trackerThread.interrupt();
-      functions.onComplete(result);
     }
   }
 

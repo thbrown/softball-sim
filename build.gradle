@@ -4,6 +4,13 @@ plugins {
   id 'com.diffplug.gradle.spotless' version '3.25.0'
 }
 
+java {
+  // All code in this repository must build against Java 8 for cloud computing compatibility reasons
+  // If you just want to get the tool running locally w/ a newer version a Java, go ahead and comment out these lines
+  sourceCompatibility = JavaVersion.VERSION_1_8
+  targetCompatibility = JavaVersion.VERSION_1_8
+}
+
 repositories {
   mavenCentral()
 }
@@ -51,6 +58,9 @@ spotless {
   	eclipse().configFile 'code-format.xml'
   }
 }
+
+// Auto format files on build
+assemble.dependsOn spotlessApply
 
 // Define the main class for the application
 mainClassName = 'com.github.thbrown.softballsim.SoftballSim'

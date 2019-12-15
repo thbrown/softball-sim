@@ -71,6 +71,7 @@ public enum OptimizerEnum {
    * 
    * See Wildcard Capture - https://docs.oracle.com/javase/tutorial/java/generics/capture.html
    */
+  @SuppressWarnings("unchecked")
   public <T extends Result> Result optimize(List<String> players, LineupTypeEnum lineupType, DataStats data,
       Map<String, String> arguments,
       ProgressTracker progressTracker, T existingResult) {

@@ -1,9 +1,10 @@
 # SoftballSim
-Monte Carlo simulation tool for making sure you choose the best lineup for your softball, baseball, or kickball team. Used by softball.app for lineup optimizations but can also be run from the command line on file system data.
+Lineup optimization tool for making sure you choose the best batting order for your softball, baseball, or kickball team. Used by softball.app for lineup optimizations but can also be run from the command line on file system data.
 
-Build (requires java, replace `./gradlew` with `./gradlew.bat` for windows machines):
+Build (requires Java 8*, replace `./gradlew` with `./gradlew.bat` for windows machines):
+
 ```
-# Build (this also runs tests)
+# Build (Note: this runs tests and formats code)
 ./gradlew build
 
 # Or build without running tests
@@ -31,26 +32,25 @@ Test
 ### Flags
 
 Flags (more command line flags will be available based on which optimizer and data source are supplied):
+
 ```
- -d,--data-source <arg>   Where to read the source data from. Options are
-                          [FILE_SYSTEM, NETWORK]. Default: FILE_SYSTEM
- -e,--estimate-only       In Development. If this flag is provided,
-                          application will return an estimated completion
-                          time only, not the result.
- -h,--help                Prints the available flags. Help output will
-                          change depending on the optimizer and dataSource
-                          specified.
- -o,--optimizer <arg>     Required. The optimizer to be used to optimize
-                          the lineup. You may specify the name or the id.
-                          Options are [MONTE_CARLO_EXHAUSTIVE - 0].
- -p,--path <arg>          In Development. FILE_SYSTEM: Path to the stats
-                          files. This can be a directory or file. Default:
-                          ./
- -t,--lineup-type <arg>   Type of lineup to be simulated. You may specify
-                          the name or the id. Options are
-                          [MONTE_CARLO_EXHAUSTIVE - 0]. Default: ORDINARY
- -v,--verbose             In development. If present, print debuging
-                          details on error.
+ -D,--Data-source <arg>         Where to read the source data from. Options are [FILE_SYSTEM,
+                                NETWORK]. Default: FILE_SYSTEM
+ -E,--Estimate-only             In Development. If this flag is provided, application will return an
+                                estimated completion time only, not the result.
+ -F,--File-path <arg>           FILE_SYSTEM: Path to the stats files. This can be a directory or
+                                file. Default: ./stats/exampleData.json
+ -H,--Help                      Prints the available flags. Help output will change depending on the
+                                optimizer and dataSource specified.
+ -O,--Optimizer <arg>           Required. The optimizer to be used to optimize the lineup. You may
+                                specify the name or the id. Options are [MONTE_CARLO_EXHAUSTIVE -
+                                0].
+ -P,--Players-in-lineup <arg>   Comma separated list of player ids that should be included in the
+                                optimized lineup. Defaults to all players.
+ -T,--Lineup-type <arg>         Type of lineup to be simulated. You may specify the name or the id.
+                                Options are [ORDINARY - 1, ALTERNATING_GENDER - 2,
+                                NO_CONSECUTIVE_FEMALES - 3]. Default: ORDINARY
+ -V,--Verbose                   In development. If present, print debuging details on error.
 ```
 
 #### optimizer Options
@@ -73,3 +73,9 @@ Available lineup types:
 ## Contributing
 
 See CONTRIBUTING.md
+
+## Other Notes
+
+* *All code checked into this repository must build against Java 8 for cloud computing compatibility reasons, but if you have a newer version of java and just want to get this tool working, you can bypass the Java 8 requirement by commenting out the `sourceCompatibility` and `targetCompatibility` lines in the `java` section of the `build.gradle` file before running the build command.
+
+* This CLI uses ANSI escape sequences to color error messages for readability. These are not enabled by default in common Windows shells. So, on Windows you may see some text artifacts before and after error messages.

@@ -14,7 +14,7 @@ public class DataSourceTest {
     // "-g", "1000",
     // "-i", "7", "-T", "1", "-t", "4"};
 
-    String[] args = {"-P", "Oscar,Molly,Nelly,Dora,Molly,Tim", "-O", "0"};
+    String[] args = {"-P", "Oscar,Molly,Nelly,Dora,Molly,Dilbert", "-O", "0"};
     SoftballSim.main(args);
   }
   /*

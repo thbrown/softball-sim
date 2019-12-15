@@ -15,7 +15,7 @@ The default Monte Carlo optimizer is fine, but I have a better algorithm for lin
 1. Create a class that implements the Optimizer interface. Optimizer is a generic type. If your Optimizer implementation produces data other than an optimized lineup and an estimated score, you'll need to subclass Result. If not you can just use the existing Result class. See the java doc on the relevant classes for additional help. 
 1. Make an enum value for your optimizer in com.github.thbrown.softballsim.optimizer.OptimizerEnum. The enum constructor accepts an id (set this to the next available integer) and an instance of your Optimizer implementation.
 1. Run all the unit tests `./gradlew clean test --info` and fix any failures.
-1. Format your code `./gradlew spotlessApply`
+1. Format your code `./gradlew spotlessApply` (`./gradlew build` will also format code)
 1. Submit the pull request!
 
 ## Add a LineupType
@@ -28,5 +28,5 @@ To add a new lineup type:
 	- In the strage case that your lineup can't be represented by a list of players for functional purposes, you'll need to add a new BattingLineup implementation as well. If you do so, you'll still need to provide a way to represent your lineup as a list for display purposes. The BattingLineup interface enforces this.
 1. If you added a new LineupIndexer, register your new indexer in the static map in the LineupType class.
 1. Run all the unit tests `./gradlew clean test --info` and fix any failures.
-1. Format your code `./gradlew spotlessApply`
+1. Format your code `./gradlew spotlessApply` (`./gradlew build` will also format code)
 1. Submit the pull request!

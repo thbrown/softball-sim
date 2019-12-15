@@ -11,6 +11,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import com.github.thbrown.softballsim.Msg;
 import com.github.thbrown.softballsim.data.gson.DataPlayer;
 import com.github.thbrown.softballsim.data.gson.DataStats;
 import com.github.thbrown.softballsim.datasource.ProgressTracker;
@@ -143,8 +144,7 @@ public class MonteCarloExhaustiveOptimizer implements Optimizer<MonteCarloExhaus
     for (String playerId : playersInLineup) {
       DataPlayer player = data.getPlayerById(playerId);
       if (player.getPlateAppearanceCount() == 0) {
-        throw new RuntimeException("Can not optimize lineup because player '" + player.getName() + "' ("
-            + player.getId() + ") has no plate appearances");
+        throw new RuntimeException(Msg.PLAYER_HAS_NO_PA.args(player.getName(), player.getId()));
       }
     }
   }

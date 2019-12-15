@@ -15,15 +15,13 @@ public class SoftballSim {
 
   public static void main(String[] args) throws ParseException {
     try {
-      begin(args);
+      mainInternal(args);
     } catch (Exception e) {
-      Logger.log(e.getMessage());
-      System.exit(1);
+      Logger.error(e.getMessage());
     }
   }
 
-  private static void begin(String[] args) throws ParseException {
-
+  public static void mainInternal(String[] args) throws ParseException {
     // The valid command line flags change based on which optimizer and data source are supplied.
     CommandLineOptions commandLineOptions = CommandLineOptions.getInstance();
     CommandLineParser parser = new DefaultParser();
@@ -33,8 +31,7 @@ public class SoftballSim {
     Options availableOptions =
         commandLineOptions.getOptionsForFlags(DataSourceEnum.getEnumFromName(CommandLineOptions.SOURCE_DEFAULT), null);
     if (args.length == 0) {
-      HelpFormatter formatter = new HelpFormatter();
-      formatter.setOptionComparator(CommandLineOptions.getInstance().getComparatorHelp());
+      HelpFormatter formatter = CommandLineOptions.getInstance().getHelpFormatter();
       formatter.printHelp(CommandLineOptions.APPLICATION_NAME, CommandLineOptions.HELP_HEADER_1, availableOptions,
           CommandLineOptions.HELP_FOOTER);
       return;
@@ -60,20 +57,18 @@ public class SoftballSim {
     if (commonCmd.hasOption(CommandLineOptions.HELP)) {
       String helpHeader =
           (optimizer == null) ? CommandLineOptions.HELP_HEADER_1 : CommandLineOptions.HELP_HEADER_2 + optimizer;
-      HelpFormatter formatter = new HelpFormatter();
-      formatter.setOptionComparator(CommandLineOptions.getInstance().getComparatorHelp());
+      HelpFormatter formatter = CommandLineOptions.getInstance().getHelpFormatter();
       formatter.printHelp(CommandLineOptions.APPLICATION_NAME, helpHeader, availableOptions,
           CommandLineOptions.HELP_FOOTER);
       return;
     }
 
     // Manually enforce optimizer as a required flag. Other required flags should be specified in their
-    // options definition so their presents is enforced during parse. Enforcing the optimizer flag here
+    // options definition so their presence is enforced during parse. Enforcing the optimizer flag here
     // manually here lets us work with a null optimizer above.
     if (optimizer == null) {
       throw new MissingArgumentException(
-          "Optimizer (-O) is a required flag. Please specify one of the following options either as a name or as an ordinal. "
-              + OptimizerEnum.getValuesAsString());
+          Msg.MISSING_OPTIMIZER.args(OptimizerEnum.getValuesAsString()));
     }
 
     // Parse command line arguments - this time include the optimizer and dataSource specific flags

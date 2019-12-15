@@ -83,7 +83,6 @@ public final class ProgressTracker implements Runnable {
       }
       functions.onUpdate(this);
     }
-    Logger.log("Updater Completed");
   }
 
   public Result getCurrentResult() {

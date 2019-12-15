@@ -34,4 +34,5 @@ public interface Optimizer<R extends Result> {
   public Result optimize(List<String> playersInLineup, LineupTypeEnum lineupType, DataStats battingData,
       Map<String, String> arguments, ProgressTracker progressTracker, R existingResult);
 
+
 }

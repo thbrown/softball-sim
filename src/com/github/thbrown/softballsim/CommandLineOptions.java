@@ -3,6 +3,7 @@ package com.github.thbrown.softballsim;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import com.github.thbrown.softballsim.datasource.DataSourceEnum;
@@ -51,6 +52,15 @@ public class CommandLineOptions {
 
   public static CommandLineOptions getInstance() {
     return INSTANCE;
+  }
+
+  private HelpFormatter helpFormatter;
+
+  private CommandLineOptions() {
+    HelpFormatter formatter = new HelpFormatter();
+    formatter.setOptionComparator(getComparatorHelp());
+    formatter.setWidth(100);
+    this.helpFormatter = formatter;
   }
 
   public List<Option> getCommonOptions() {
@@ -177,7 +187,7 @@ public class CommandLineOptions {
     return validEntries.stream().toArray(String[]::new);
   }
 
-  public Comparator<Option> getComparatorHelp() {
+  private static Comparator<Option> getComparatorHelp() {
     // Case-sensitive, capitals first
     return new Comparator<Option>() {
       @Override
@@ -185,6 +195,10 @@ public class CommandLineOptions {
         return o1.toString().compareTo(o2.toString());
       }
     };
+  }
+
+  public HelpFormatter getHelpFormatter() {
+    return this.helpFormatter;
   }
 
 }
