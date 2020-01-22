@@ -59,6 +59,15 @@ spotless {
   }
 }
 
+task('message') {
+    doLast {
+        println "Build successful: output jar can be found in ./build/libs"
+    }
+}
+
+// Print the message after assembke completes
+assemble.finalizedBy message
+
 // Auto format files on build
 assemble.dependsOn spotlessApply
 

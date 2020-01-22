@@ -23,4 +23,13 @@ public interface BattingLineup {
    */
   public DataPlayer getBatter(int index);
 
+  /**
+   * String used to identify the type of lineup during serialization/deserialization
+   * 
+   * @return
+   */
+  public default String getLineupType() {
+    return AlternatingBattingLineup.class.getSimpleName();
+  }
+
 }

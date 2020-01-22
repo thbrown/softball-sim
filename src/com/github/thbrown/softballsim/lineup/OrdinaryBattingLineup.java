@@ -35,4 +35,8 @@ public class OrdinaryBattingLineup implements BattingLineup {
     return players.get(adjustedIndex);
   }
 
+  public static String getType() {
+    return OrdinaryBattingLineup.class.getSimpleName();
+  }
+
 }

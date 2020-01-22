@@ -5,10 +5,15 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import com.github.thbrown.softballsim.datasource.local.DataSourceFileSystem;
+import com.github.thbrown.softballsim.datasource.network.DataSourceNetwork;
+import com.github.thbrown.softballsim.lineupindexer.LineupTypeEnum;
+import com.github.thbrown.softballsim.optimizer.OptimizerEnum;
 import com.github.thbrown.softballsim.util.StringUtils;
 
 /**
- * Defines where the application gets it's stats data to feed to an optimizer and what it does with
+ * Defines where the application gets its stats data to feed to an optimizer and what it does with
  * optimization results
  * 
  * TODO: Rename IOMode?
@@ -49,7 +54,7 @@ public enum DataSourceEnum {
     return dataSource.getCommandLineOptions();
   }
 
-  public void execute(CommandLine allCmd) {
-    dataSource.execute(allCmd);
+  public void execute(String[] args, LineupTypeEnum lineupType, List<String> players, OptimizerEnum optimizer) {
+    dataSource.execute(args, lineupType, players, optimizer);
   }
 }

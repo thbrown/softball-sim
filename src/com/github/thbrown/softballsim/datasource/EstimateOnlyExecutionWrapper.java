@@ -65,7 +65,7 @@ public class EstimateOnlyExecutionWrapper {
     // We don't want to keep running the optimizations, there is no good way to kill the optimizer
     // thread and any threads it may have spawned, so we'll just terminate the whole application.
     // The alternative to this is to have each optimizer implement a terminate method, but I think
-    // that will make the barrier to add an optimization too high for now
+    // that will make the barrier to add an optimization too high for now - this breaks unit tests
     System.exit(0);
   }
 

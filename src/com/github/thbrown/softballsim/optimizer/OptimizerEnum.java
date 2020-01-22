@@ -20,13 +20,14 @@ import com.github.thbrown.softballsim.optimizer.gson.OptimizerDefinition;
 import com.github.thbrown.softballsim.optimizer.gson.OptimizerDefinitionArgument;
 import com.github.thbrown.softballsim.optimizer.gson.OptimizerDefinitionArgumentDeserializer;
 import com.github.thbrown.softballsim.optimizer.impl.montecarloexhaustive.MonteCarloExhaustiveOptimizer;
+import com.github.thbrown.softballsim.util.GsonAccessor;
 import com.github.thbrown.softballsim.util.StringUtils;
 import com.google.gson.GsonBuilder;
 
 /**
  * An enumeration of all the optimizer implementations.
  * 
- * This enum is used to access those implementations from within the application.
+ * This enum is used to access those implementations.
  */
 public enum OptimizerEnum {
   MONTE_CARLO_EXHAUSTIVE(0, new MonteCarloExhaustiveOptimizer());
@@ -41,9 +42,8 @@ public enum OptimizerEnum {
     try {
       String optimizerDefinitionJson =
           new String(Files.readAllBytes(Paths.get("./json/" + optimizer.getJsonDefinitionFileName())));
-      GsonBuilder gsonBldr = new GsonBuilder();
-      gsonBldr.registerTypeAdapter(OptimizerDefinitionArgument.class, new OptimizerDefinitionArgumentDeserializer());
-      this.optimizerDefinition = gsonBldr.create().fromJson(optimizerDefinitionJson, OptimizerDefinition.class);
+      this.optimizerDefinition =
+          GsonAccessor.getInstance().getCustom().fromJson(optimizerDefinitionJson, OptimizerDefinition.class);
     } catch (IOException e) {
       throw new RuntimeException("Error while deserializing " + optimizer.getJsonDefinitionFileName(), e);
     }

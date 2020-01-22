@@ -1,21 +1,29 @@
-package com.github.thbrown.softballsim.datasource;
+package com.github.thbrown.softballsim.datasource.local;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
 import com.github.thbrown.softballsim.CommandLineOptions;
 import com.github.thbrown.softballsim.Msg;
 import com.github.thbrown.softballsim.Result;
 import com.github.thbrown.softballsim.data.gson.DataStats;
 import com.github.thbrown.softballsim.data.gson.DataStatsDeserializer;
+import com.github.thbrown.softballsim.datasource.DataSource;
+import com.github.thbrown.softballsim.datasource.DataSourceEnum;
+import com.github.thbrown.softballsim.datasource.DataSourceFunctions;
+import com.github.thbrown.softballsim.datasource.EstimateOnlyExecutionWrapper;
+import com.github.thbrown.softballsim.datasource.ProgressTracker;
 import com.github.thbrown.softballsim.lineupindexer.LineupTypeEnum;
 import com.github.thbrown.softballsim.optimizer.OptimizerEnum;
+import com.github.thbrown.softballsim.util.GsonAccessor;
+import com.github.thbrown.softballsim.util.StringUtils;
 import com.google.gson.GsonBuilder;
 
 public class DataSourceFileSystem implements DataSource {
@@ -38,36 +46,29 @@ public class DataSourceFileSystem implements DataSource {
   }
 
   @Override
-  public void execute(CommandLine allCmd) {
+  public void execute(String[] args, LineupTypeEnum lineupType, List<String> players, OptimizerEnum optimizer) {
+    // Parse command line arguments
+    CommandLineOptions commandLineOptions = CommandLineOptions.getInstance();
+    Options allOptions = commandLineOptions.getOptionsForFlags(DataSourceEnum.FILE_SYSTEM, optimizer);
+    CommandLine allCmd = commandLineOptions.parse(allOptions, args, false);
+
     // Read stats data from file
     String statsFileLocation = allCmd.getOptionValue(FILE_PATH, FILE_PATH_DEFAULT);
-    GsonBuilder gsonBldr = new GsonBuilder();
-    gsonBldr.registerTypeAdapter(DataStats.class, new DataStatsDeserializer());
     String json;
     try {
       json = new String(Files.readAllBytes(Paths.get(statsFileLocation)));
     } catch (IOException e) {
       throw new RuntimeException(Msg.BAD_STATS_FILE_PATH.args(statsFileLocation), e);
     }
-    DataStats stats = gsonBldr.create().fromJson(json, DataStats.class);
+    DataStats stats = GsonAccessor.getInstance().getCustom().fromJson(json, DataStats.class);
 
-    // Get players, optimizer, and lineup type from the cmd line flags
-    String optimizerString = allCmd.getOptionValue(CommandLineOptions.OPTIMIZER);// Required, no default needed
-    OptimizerEnum optimizer = OptimizerEnum.getEnumFromIdOrName(optimizerString);
-
-    String lineupTypeString =
-        allCmd.getOptionValue(CommandLineOptions.LINEUP_TYPE, CommandLineOptions.TYPE_LINEUP_DEFAULT);
-    LineupTypeEnum lineupType = LineupTypeEnum.getEnumFromIdOrName(lineupTypeString);
-
-    String playerString =
-        allCmd.getOptionValue(CommandLineOptions.PLAYERS_IN_LINEUP, stats.getPlayersAsCommaSeparatedString());
-    List<String> players = Arrays.asList(playerString.split(","));
+    // Convert arguments list to map
+    Map<String, String> arguments = optimizer.getArgumentsAndValuesAsMap(allCmd);
 
     // We accept both ids and names for this argument, but the optimizers expect only ids. This resolves
     // any names to ids.
+    validatePlayersList(players, stats);
     players = stats.convertPlayersListToIds(players);
-
-    Map<String, String> arguments = optimizer.getArgumentsAndValuesAsMap(allCmd);
 
     // TODO: save optimizer run results to file system
     DataSourceFunctions functions = new DataSourceFunctionsFileSystem();
@@ -87,6 +88,28 @@ public class DataSourceFileSystem implements DataSource {
     } finally {
       trackerThread.interrupt();
     }
+  }
+
+  /**
+   * Validates the players list. Right now this just checks to see if the list is empty or filled with
+   * blanks and prints the available options.
+   */
+  private void validatePlayersList(List<String> players, DataStats stats) {
+    boolean effectivlyBlank = true;
+    for (String s : players) {
+      if (!StringUtils.isBlank(s)) {
+        effectivlyBlank = false;
+      }
+    }
+    if (effectivlyBlank) {
+      String playersAsString = stats.getPlayers().stream().map(v -> v.getName() + " - " + v.getId())
+          .collect(Collectors.joining(System.lineSeparator()));
+      throw new RuntimeException(
+          "No players were specified. Please specify a comma separated list of player names or ids using the -"
+              + CommandLineOptions.PLAYERS_IN_LINEUP + " flag. Avaliable players " + System.lineSeparator()
+              + playersAsString);
+    }
+
   }
 
 }

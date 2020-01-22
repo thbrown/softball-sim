@@ -81,8 +81,7 @@ public class CliFlagTest {
 
   @Test
   public void testInvalidFlagThrowsError() throws Exception {
-    ByteArrayOutputStream outContent = new ByteArrayOutputStream();
-    System.setOut(new PrintStream(outContent));
+    ByteArrayOutputStream outContent = TestUtil.redirectStdOut();
     SoftballSim.main(new String[] {"-O", "0", "--pizza"});
     assertThat(outContent.toString(), CoreMatchers.containsString("Unrecognized option:"));
   }

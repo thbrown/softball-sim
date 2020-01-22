@@ -1,5 +1,6 @@
 package com.github.thbrown.softballsim;
 
+import java.util.List;
 import java.util.Optional;
 import com.github.thbrown.softballsim.lineup.BattingLineup;
 
@@ -8,7 +9,7 @@ import com.github.thbrown.softballsim.lineup.BattingLineup;
  * well as for the resumption of a partially complete optimization. It may be a final result or it
  * may contain a partial result for an incomplete optimization.
  * 
- * This class is immutable as instance are shared between threads by
+ * This class is immutable as instances are shared between threads by
  * {@link com.github.thbrown.softballsim.datasource.ProgressTracker}
  * 
  * Optimizer implementations may need to store additional information, if so, implementers can

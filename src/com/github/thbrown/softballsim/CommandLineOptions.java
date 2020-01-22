@@ -3,9 +3,14 @@ package com.github.thbrown.softballsim;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import com.github.thbrown.softballsim.datasource.DataSourceEnum;
 import com.github.thbrown.softballsim.lineupindexer.LineupTypeEnum;
 import com.github.thbrown.softballsim.optimizer.OptimizerEnum;
@@ -25,7 +30,7 @@ import com.github.thbrown.softballsim.optimizer.impl.montecarloexhaustive.MonteC
  */
 public class CommandLineOptions {
 
-  public final static String APPLICATION_NAME = "java -jar softball-sim";
+  public final static String APPLICATION_NAME = "java -jar softball-sim.jar";
 
   // Common Flags
   public final static String DATA_SOURCE = "D";
@@ -45,10 +50,12 @@ public class CommandLineOptions {
       "An application for optimizing batting lineups using historical hitting data. Powered by by open source optimization engines at https://github.com/thbrown/softball-sim. For more options, specify an optimizer.";
   public final static String HELP_HEADER_2 = "Showing additional flags for ";
   public final static String HELP_FOOTER = String.join(" ", "Example:", APPLICATION_NAME, "-" + DATA_SOURCE,
-      "FILE_SYSTEM", "-" + OPTIMIZER, "MONTE_CARLO_EXHAUSTIVE", "-" + MonteCarloExhaustiveArgumentParser.GAMES,
-      String.valueOf(10000), "-" + MonteCarloExhaustiveArgumentParser.INNINGS, String.valueOf(9));
+      "FILE_SYSTEM", "-" + OPTIMIZER, "MONTE_CARLO_EXHAUSTIVE", "-", PLAYERS_IN_LINEUP, "Maya,PJ,Rex,Bodie,Lizzy,Julia",
+      "-" + MonteCarloExhaustiveArgumentParser.GAMES,
+      String.valueOf(10000), "-" + MonteCarloExhaustiveArgumentParser.INNINGS, String.valueOf(7));
 
   private final static CommandLineOptions INSTANCE = new CommandLineOptions();
+  private final static CommandLineParser parser = new DefaultParser();
 
   public static CommandLineOptions getInstance() {
     return INSTANCE;
@@ -162,7 +169,7 @@ public class CommandLineOptions {
    * command line arguments that may be valid for a particular optimizer or data source but are not
    * applicable for all optimizers/data sources.
    */
-  public String[] filterArgsArray(String[] args, Options options) {
+  private String[] filterArgsArray(String[] args, Options options) {
     List<String> validEntries = new ArrayList<>();
     int flagArgs = 0;
     for (String arg : args) {
@@ -180,6 +187,12 @@ public class CommandLineOptions {
         if (nakedArg.equals(o.getOpt()) || nakedArg.equals(o.getLongOpt())) {
           validEntries.add(arg);
           flagArgs = o.getArgs();
+          if (flagArgs == Option.UNLIMITED_VALUES) {
+            // TODO: handle UNINITIALIZED and UNLIMITED_VALUES better?
+            // UNLIMITED_VALUES is currently treated as no-arg
+            throw new UnsupportedOperationException(
+                "Unlimited args are not currently supported, consider accepting a quoted string and spliting it manually");
+          }
           break;
         }
       }
@@ -199,6 +212,25 @@ public class CommandLineOptions {
 
   public HelpFormatter getHelpFormatter() {
     return this.helpFormatter;
+  }
+
+  /**
+   * Wraps the Apache CLI parse method so we don't have to worry about the checked ParseException or
+   * instantiating the default parser every time. This also provides alternate behavior for ignoring
+   * spurious commands.
+   * 
+   * @param ignoreNonOptions when true commands in the arguments array that are not specified in
+   *        options are ignored. When false these spurious commands throw an exception.
+   */
+  public CommandLine parse(Options options, String[] arguments, boolean ignoreNonOptions) {
+    try {
+      if (ignoreNonOptions) {
+        arguments = this.filterArgsArray(arguments, options);
+      }
+      return parser.parse(options, arguments, false);
+    } catch (ParseException e) {
+      throw new RuntimeException(e);
+    }
   }
 
 }

@@ -3,6 +3,10 @@ package com.github.thbrown.softballsim.util;
 import java.util.Comparator;
 import java.util.List;
 
+/**
+ * Use StatUtils
+ */
+@Deprecated
 public class StatsUtil {
   public static double stdev(int[] list) {
     double sum = 0.0;

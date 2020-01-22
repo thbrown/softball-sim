@@ -1,6 +1,8 @@
-package com.github.thbrown.softballsim.datasource;
+package com.github.thbrown.softballsim.datasource.local;
 
 import com.github.thbrown.softballsim.Result;
+import com.github.thbrown.softballsim.datasource.DataSourceFunctions;
+import com.github.thbrown.softballsim.datasource.ProgressTracker;
 import com.github.thbrown.softballsim.util.Logger;
 import com.github.thbrown.softballsim.util.StringUtils;
 

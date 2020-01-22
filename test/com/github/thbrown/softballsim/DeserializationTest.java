@@ -14,6 +14,7 @@ import com.github.thbrown.softballsim.data.gson.DataTeam;
 import com.github.thbrown.softballsim.optimizer.gson.OptimizerDefinition;
 import com.github.thbrown.softballsim.optimizer.gson.OptimizerDefinitionArgument;
 import com.github.thbrown.softballsim.optimizer.gson.OptimizerDefinitionArgumentDeserializer;
+import com.github.thbrown.softballsim.util.GsonAccessor;
 import com.github.thbrown.softballsim.util.Logger;
 import com.google.gson.GsonBuilder;
 
@@ -40,9 +41,7 @@ public class DeserializationTest {
   public void deserializeExampleStatsData() throws IOException {
     String json = new String(Files.readAllBytes(Paths.get("./stats/exampleData.json")));
 
-    GsonBuilder gsonBldr = new GsonBuilder();
-    gsonBldr.registerTypeAdapter(DataStats.class, new DataStatsDeserializer());
-    DataStats targetObject = gsonBldr.create().fromJson(json, DataStats.class);
+    DataStats targetObject = GsonAccessor.getInstance().getCustom().fromJson(json, DataStats.class);
 
     // Spot check some fields - this is tightly coupled to the sample data
     DataPlayer somePlayer = targetObject.getPlayers().get(0);
@@ -70,10 +69,8 @@ public class DeserializationTest {
   public void deserializeJsonData() throws IOException {
     String json = new String(Files.readAllBytes(Paths.get("./json/monte-carlo-exhaustive.json")));
 
-    GsonBuilder gsonBldr = new GsonBuilder();
-    gsonBldr.registerTypeAdapter(OptimizerDefinitionArgument.class, new OptimizerDefinitionArgumentDeserializer());
 
-    OptimizerDefinition targetObject = gsonBldr.create().fromJson(json, OptimizerDefinition.class);
+    OptimizerDefinition targetObject = GsonAccessor.getInstance().getCustom().fromJson(json, OptimizerDefinition.class);
 
     // TODO: assert some fields
 

@@ -77,4 +77,8 @@ public class AlternatingBattingLineup implements BattingLineup {
 
   }
 
+  public static String getType() {
+    return AlternatingBattingLineup.class.getSimpleName();
+  }
+
 }

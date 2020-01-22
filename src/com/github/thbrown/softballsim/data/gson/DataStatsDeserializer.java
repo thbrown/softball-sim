@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import com.github.thbrown.softballsim.util.GsonAccessor;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
@@ -26,8 +27,7 @@ public class DataStatsDeserializer implements JsonDeserializer<DataStats> {
       throws JsonParseException {
 
     // First, deserialise StatsData using the gson's default deserialization
-    GsonBuilder gsonBldr = new GsonBuilder();
-    DataStats stats = gsonBldr.create().fromJson(json, DataStats.class);
+    DataStats stats = GsonAccessor.getInstance().getDefault().fromJson(json, DataStats.class);
 
     // Then, create references for the relationships between objects
 
