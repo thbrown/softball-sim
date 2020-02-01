@@ -17,6 +17,11 @@ repositories {
 
 dependencies {
   testCompile group: 'junit', name: 'junit', version: '4.12'
+  testCompile group: 'com.j2html', name: 'j2html', version: '1.4.0'
+  testCompile group: 'com.vladsch.flexmark', name: 'flexmark', version: '0.50.50'
+  testCompile group: 'com.vladsch.flexmark', name: 'flexmark-all', version: '0.50.50'
+  testCompile group: 'com.googlecode.owasp-java-html-sanitizer', name: 'owasp-java-html-sanitizer', version: 'r136'
+  
   compile group: 'com.google.code.gson', name: 'gson', version: '2.8.5'
   compile group: 'org.apache.commons', name: 'commons-math3', version: '3.6'
   compile group: 'commons-cli', name: 'commons-cli', version: '1.4'
@@ -50,6 +55,13 @@ sourceSets {
       srcDirs = ['test/resources']
     }
   }
+  gallery {
+  	java {
+      srcDirs = ['gallery']
+  	}
+  	compileClasspath += sourceSets.main.output + configurations.testCompile
+    runtimeClasspath += output + compileClasspath + configurations.testRuntime
+  }
 }
 
 spotless {
@@ -59,14 +71,39 @@ spotless {
   }
 }
 
-task('message') {
-    doLast {
-        println "Build successful: output jar can be found in ./build/libs"
+task message {
+  doLast {
+    println "Build successful: output jar can be found in ./build/libs"
+  }
+}
+
+task generateGalleryHtml(type: Test) {  
+  testClassesDirs = sourceSets.gallery.output.classesDirs
+  classpath = sourceSets.gallery.runtimeClasspath
+  outputs.upToDateWhen { false } // Gradle doesn't know that changes in the ./json affects the output html
+  doFirst {
+    println "Generating ./index.html for Optimization Gallery..."
+  }
+}
+
+// This used to be more valuable when needed to make requests to load json from the webserver, not just opting the .html file in the browser works just as well.
+task serve {
+	doLast {
+		int port = 8085;
+	    SimpleHttpFileServerFactory factory = new SimpleHttpFileServerFactory()
+	    println("Serving " + System.getProperty("user.dir"));
+	    HttpFileServer server = factory.start(new File(System.getProperty("user.dir")), port)
+	    println("Running on port " + port + " See gallery on http://localhost:" + port + "/index.html ");
+	    println("Stop server with ctrl+c (this may not work on windows, in which case you'll have to stop the process in Task Manager :( ) ");
+	    java.lang.Thread.sleep(Long.MAX_VALUE);
     }
 }
 
-// Print the message after assembke completes
+// Print the message after assembly completes
 assemble.finalizedBy message
+
+// Generate the gallery html as part of the build process
+assemble.finalizedBy generateGalleryHtml
 
 // Auto format files on build
 assemble.dependsOn spotlessApply

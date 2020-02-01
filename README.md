@@ -53,22 +53,22 @@ Flags (more command line flags will be available based on which optimizer and da
  -V,--Verbose                   In development. If present, print debuging details on error.
 ```
 
-#### optimizer Options
+#### Available optimizer Options
 
-* 0 - MONTE_CARLO_EXHAUSTIVE
+* 0 - MONTE\_CARLO\_EXHAUSTIVE
 
-#### dataSource Options
+#### Available dataSource Options
 
 * FILE_SYSTEM - Gets data from files in the `./stats` directory. See the `stats` directory in this repository for example files. Application will attempt to read data of all files in the `./stats` directory.
 
 * NETWORK - Gets data from a network connection. This option is intended to be used mostly by softball-scorer app (https://github.com/thbrown/softball-scorer).
 
-#### lineupType Options
+#### Available lineupType Options
 
 Available lineup types:
 *  1 - ORDINARY
 *  2 - ALTERNATING_GENDER
-*  3 - NO_CONSECUTIVE_FEMALES
+*  3 - NO\_CONSECUTIVE\_FEMALES
 
 ## Contributing
 
@@ -76,6 +76,6 @@ See CONTRIBUTING.md
 
 ## Other Notes
 
-* *All code checked into this repository must build against Java 8 for cloud computing compatibility reasons, but if you have a newer version of java and just want to get this tool working, you can bypass the Java 8 requirement by commenting out the `sourceCompatibility` and `targetCompatibility` lines in the `java` section of the `build.gradle` file before running the build command.
+* *All code checked into this repository must build against Java 8 for cloud computing compatibility reasons, but if you have a newer version of Java and just want to get this tool working, you can bypass the Java 8 requirement by commenting out the `sourceCompatibility` and `targetCompatibility` lines in the `java` section of the `build.gradle` file before running the build command.
 
 * This CLI uses ANSI escape sequences to color error messages for readability. These are not enabled by default in common Windows shells. So, on Windows you may see some text artifacts before and after error messages.

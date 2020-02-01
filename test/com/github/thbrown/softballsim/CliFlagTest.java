@@ -2,9 +2,6 @@ package com.github.thbrown.softballsim;
 
 import static org.junit.Assert.assertThat;
 import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-import org.apache.commons.cli.MissingArgumentException;
-import org.apache.commons.cli.UnrecognizedOptionException;
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 import com.github.thbrown.softballsim.helpers.TestUtil;

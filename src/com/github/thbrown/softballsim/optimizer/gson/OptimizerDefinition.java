@@ -8,12 +8,18 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 
 public class OptimizerDefinition {
+  private String id;
   private String name;
   private String description;
+  private String img;
   private List<String> supportedLineupTypes;
   private String machine;
   private List<OptimizerDefinitionArgument> arguments;
   private boolean hideInUi;
+
+  public String getId() {
+    return id;
+  }
 
   public String getName() {
     return name;
@@ -21,6 +27,10 @@ public class OptimizerDefinition {
 
   public String getDescription() {
     return description;
+  }
+
+  public String getImageUrl() {
+    return img;
   }
 
   public List<String> getSupportedLineupTypes() {

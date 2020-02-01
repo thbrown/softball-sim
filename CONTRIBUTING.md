@@ -15,6 +15,8 @@ The default Monte Carlo optimizer is fine, but I have a better algorithm for lin
 1. Create a class that implements the Optimizer interface. Optimizer is a generic type. If your Optimizer implementation produces data other than an optimized lineup and an estimated score, you'll need to subclass Result. If not you can just use the existing Result class. See the java doc on the relevant classes for additional help. 
 1. Make an enum value for your optimizer in com.github.thbrown.softballsim.optimizer.OptimizerEnum. The enum constructor accepts an id (set this to the next available integer) and an instance of your Optimizer implementation.
 1. Run all the unit tests `./gradlew clean test --info` and fix any failures.
+1. Re-generate the index.html for the gallery `./gradlew generateGalleryHtml`. 
+1. Make sure your entry in the gallery looks the way you like it. Open index.html in your browser. Alternatively, Run the built-in Gradle web-server `./gradlew serve` and checkout `http://localhost:8085/index.html` in your browser.
 1. Format your code `./gradlew spotlessApply` (`./gradlew build` will also format code)
 1. Submit the pull request!
 

@@ -1,5 +1,7 @@
 {
+  "id": "0",
   "name": "Monte Carlo Exhaustive",
+  "img": "https://i.imgur.com/35aPFzD.jpg",
   "className": "MonteCarloExhaustive",
   "description": "Runs Monte Carlo simulations of games for all possible lineups. The optimizer then averages the runs scored acrosss all possible lineups and returns the lineup with the highest average runs scored.",
   "supported-lineup-types": [
