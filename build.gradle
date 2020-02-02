@@ -74,6 +74,7 @@ spotless {
 task message {
   doLast {
     println "Build successful: output jar can be found in ./build/libs"
+    println "Run with `java -jar ./build/libs/softball-sim.jar`"
   }
 }
 

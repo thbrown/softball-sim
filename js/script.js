@@ -36,4 +36,16 @@ function addButtonClick(id, event) {
   	win.focus();
 }
 
-mermaid.initialize({startOnLoad:true});
+// The auto render katex script wasn't working, so this manually searches for divs w/ the "katex" class and renders them all after the katex script loads.
+function renderKatex() {
+	let katexElems = document.getElementsByClassName("katex");
+	let katexElemsArr = Array.prototype.slice.call( katexElems, 0 );
+	for(let i = 0; i < katexElemsArr.length; i++) {
+		var html = katex.renderToString(katexElemsArr[i].innerText, {
+		    throwOnError: false
+		});
+		katexElemsArr[i].innerHTML = html;
+	}
+}
+
+//mermaid.initialize({startOnLoad:true});

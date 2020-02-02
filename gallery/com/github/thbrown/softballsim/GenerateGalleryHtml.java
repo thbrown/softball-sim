@@ -50,10 +50,8 @@ public class GenerateGalleryHtml {
                 .withHref("https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/3.0.1/github-markdown.min.css"),
             script().withType("text/javascript").attr("defer")
                 .withSrc("https://cdnjs.cloudflare.com/ajax/libs/mermaid/8.4.4/mermaid.min.js"),
-            script().withType("text/javascript").attr("defer")
-                .withSrc("https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js"),
-            script().withType("text/javascript").attr("defer").attr("onoad", "renderMathInElement(document.body);")
-                .withSrc("https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js")),
+            script().withType("text/javascript").attr("defer").attr("onload", "renderKatex()")
+                .withSrc("https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js")),
         body(
             main(attrs("#main.content"),
                 div(attrs(".gallery-header-wrapper"),
