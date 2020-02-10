@@ -62,8 +62,8 @@ public class MonteCarloExhaustiveOptimizer implements Optimizer<MonteCarloExhaus
 
     /*
      * Build a hitGenerator that can be used across threads, this way we only have to parse the stats
-     * data once Using the first lineup here (index 0) to get a list of players, but we could have used
-     * any lineup
+     * data once. We're using the first lineup here (index 0) to get a list of players, but we could
+     * have used any lineup.
      */
     List<DataPlayer> someLineup = indexer.getLineup(0).asList();
     HitGenerator hitGenerator = new HitGenerator(someLineup);
@@ -72,8 +72,9 @@ public class MonteCarloExhaustiveOptimizer implements Optimizer<MonteCarloExhaus
     long startIndex = Optional.ofNullable(existingResult).map(v -> v.getCountCompleted()).orElse(0L);
     long max = indexer.size() - startIndex > TASK_BUFFER_SIZE ? TASK_BUFFER_SIZE + startIndex : indexer.size();
     for (long l = startIndex; l < max; l++) {
-      MonteCarloExhaustiveTask task = new MonteCarloExhaustiveTask(indexer.getLineup(l), parsedArguments.getGames(),
-          parsedArguments.getInnings(), hitGenerator);
+      MonteCarloMultiGameSimulationTask task =
+          new MonteCarloMultiGameSimulationTask(indexer.getLineup(l), parsedArguments.getGames(),
+              parsedArguments.getInnings(), hitGenerator);
       results.add(executor.submit(task));
     }
 
@@ -83,8 +84,8 @@ public class MonteCarloExhaustiveOptimizer implements Optimizer<MonteCarloExhaus
     TaskResult bestResult = new TaskResult(initialScore, initialLineup);
     Map<Long, Long> histo =
         Optional.ofNullable(existingResult).map(v -> v.getHistogram()).orElse(new HashMap<Long, Long>());
-    long progressCounter = startIndex;
-    long lineupQueueCounter = max;
+    long progressCounter = startIndex; // Lineups completed
+    long lineupQueueCounter = max; // Lineups ready to be enqueued
     while (!results.isEmpty()) {
       // Wait for the result
       TaskResult result = null;
@@ -122,7 +123,7 @@ public class MonteCarloExhaustiveOptimizer implements Optimizer<MonteCarloExhaus
       BattingLineup lineup = indexer.getLineup(lineupQueueCounter);
       if (lineup != null) {
         lineupQueueCounter++;
-        MonteCarloExhaustiveTask s = new MonteCarloExhaustiveTask(lineup, parsedArguments.getGames(),
+        MonteCarloMultiGameSimulationTask s = new MonteCarloMultiGameSimulationTask(lineup, parsedArguments.getGames(),
             parsedArguments.getInnings(), hitGenerator);
         results.add(executor.submit(s));
 

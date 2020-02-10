@@ -1,0 +1,51 @@
+{
+  "id": "1",
+  "name": "Monte Carlo Adaptive",
+  "img": "https://upload.wikimedia.org/wikipedia/commons/4/49/Gaussian_distribution_thick_lines.svg",
+  "className": "MonteCarloAdaptive",
+  "description": "
+Employs the same approach as the Monte Carlo Exhaustive optimizer but instead of simulating a fixed number of games for each lineup, 
+performs a variable number of simulated games. The exact number of games simulated for each lineup is determined by continuing to do simulations
+on a lineup until a statistical t-tests determines that the expected run totals for two lineups are significantly different (by some configurable alpha value).
+The lineup with the lower mean is then rejected and the larger one remembered as the best so far.
+",
+  "supported-lineup-types": [
+    "NORMAL",
+    "ALTERNATING_GENDER",
+    "NO_CONSECUTIVE_FEMALES"
+  ],
+  "machine": "g4-high-compute",
+  "arguments": [
+    {
+      "type": "String",
+      "shortLabel": "a",
+      "longLabel": "alpha",
+      "description": "Confidence value at which point to reject the null hypotheses (lineups have equal means). Lower alpha will give more accurate results but take longer to run.",
+      "defaultValue": ".05",
+      "pattern": ".*"
+    },
+    {
+      "type": "String",
+      "shortLabel": "i",
+      "longLabel": "innings",
+      "description": "Number of innings to be played in each simulated game. More innings will increase the estimated completion time.",
+      "defaultValue": "7",
+      "pattern": "^[1-9]\\d*$"
+    },
+    {
+      "type": "Boolean",
+      "shortLabel": "l",
+      "longLabel": "lowest",
+      "description": "If this field is true, the optimizer will attempt to provide the lowest scoring lineup instead of the highest"
+    },
+    {
+      "type": "String",
+      "shortLabel": "t",
+      "longLabel": "threads",
+      "description": "Number of threads that will be used to run the simulation. For best performance, this should = the number of logical cores (which is the default). You can lower this if you don't want the optimization hoggin' all your CPU cores.",
+      "defaultValue": "$getLogicalCPUCores",
+      "pattern": "^([1-9]\\d*|\\$getLogicalCPUCores)$",
+      "hideInUi": "true"
+    }
+  ]
+}

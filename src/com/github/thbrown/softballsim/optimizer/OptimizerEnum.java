@@ -17,12 +17,11 @@ import com.github.thbrown.softballsim.data.gson.DataStats;
 import com.github.thbrown.softballsim.datasource.ProgressTracker;
 import com.github.thbrown.softballsim.lineupindexer.LineupTypeEnum;
 import com.github.thbrown.softballsim.optimizer.gson.OptimizerDefinition;
-import com.github.thbrown.softballsim.optimizer.gson.OptimizerDefinitionArgument;
-import com.github.thbrown.softballsim.optimizer.gson.OptimizerDefinitionArgumentDeserializer;
 import com.github.thbrown.softballsim.optimizer.impl.montecarloexhaustive.MonteCarloExhaustiveOptimizer;
+import com.github.thbrown.softballsim.optimizer.impl.montecarloadaptive.MonteCarloAdaptiveOptimizer;
 import com.github.thbrown.softballsim.util.GsonAccessor;
+import com.github.thbrown.softballsim.util.Logger;
 import com.github.thbrown.softballsim.util.StringUtils;
-import com.google.gson.GsonBuilder;
 
 /**
  * An enumeration of all the optimizer implementations.
@@ -30,7 +29,9 @@ import com.google.gson.GsonBuilder;
  * This enum is used to access those implementations.
  */
 public enum OptimizerEnum {
-  MONTE_CARLO_EXHAUSTIVE(0, new MonteCarloExhaustiveOptimizer());
+  // TODO: Can't we just use the id from the json?
+  MONTE_CARLO_EXHAUSTIVE(0, new MonteCarloExhaustiveOptimizer()),
+  MONTE_CARLO_ADAPTIVE(1, new MonteCarloAdaptiveOptimizer());
 
   private final int id;
   private final Optimizer<? extends Result> optimizerImplementation;
@@ -81,6 +82,17 @@ public enum OptimizerEnum {
     // extends Result>). With this new reference we can pass that optimizer a specific subclass of
     // result (T).
     Optimizer<T> optimizer = this.optimizerImplementation.getClass().cast(this.optimizerImplementation);
+
+    // Print the arguments we are using for this optimization before we start
+    // TODO: Use 
+    Logger.log("*********************************************************************");
+    Logger.log("Optimizer: " + this.optimizerDefinition.getName());
+    Logger.log("*********************************************************************");
+    for (String key : arguments.keySet()) {
+      // TODO: Some left pad here to make the value align
+      Logger.log(key + ": " + arguments.get(key));
+    }
+    Logger.log("*********************************************************************");
 
     return optimizer.optimize(players, lineupType, data, arguments, progressTracker, existingResult);
   }

@@ -37,7 +37,7 @@ public class HitGenerator {
         resultBucket.add(0);
       }
 
-      // We get slightly better access performance from an array over an arraylist
+      // We get slightly better access performance from an array over an Arraylist
       Integer[] resultBucketArray = new Integer[resultBucket.size()];
       hitValues.put(player.getId(), resultBucket.toArray(resultBucketArray));
     }
@@ -46,6 +46,7 @@ public class HitGenerator {
 
   public int hit(String playerId) {
     // TODO: Using a length that is a power of 2 is about 25% faster, there could be some optimization
+    // vector here.
     Integer[] hitBucket = hitValues.get(playerId);
     int randomValue = ThreadLocalRandom.current().nextInt(hitBucket.length);
     return hitBucket[randomValue];

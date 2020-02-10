@@ -30,6 +30,17 @@ public class Result {
     this.elapsedTimeMs = elapsedTimeMs;
   }
 
+  /**
+   * Copy constructor
+   */
+  public Result(Result toCopy) {
+    this.lineup = toCopy.lineup;
+    this.lineupScore = toCopy.lineupScore;
+    this.countTotal = toCopy.countTotal;
+    this.countCompleted = toCopy.countCompleted;
+    this.elapsedTimeMs = toCopy.elapsedTimeMs;
+  }
+
   @Override
   public String toString() {
     return "Optimal lineup: \n"

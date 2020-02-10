@@ -1,4 +1,4 @@
-package com.github.thbrown.softballsim;
+package com.github.thbrown.softballsim.optimizer;
 
 import com.github.thbrown.softballsim.optimizer.gson.OptimizerDefinition;
 

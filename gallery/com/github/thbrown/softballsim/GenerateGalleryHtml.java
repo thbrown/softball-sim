@@ -10,6 +10,7 @@ import java.util.List;
 import org.junit.Test;
 import org.owasp.html.PolicyFactory;
 import org.owasp.html.Sanitizers;
+import com.github.thbrown.softballsim.optimizer.OptimizerDefinitionComposite;
 import com.github.thbrown.softballsim.optimizer.gson.OptimizerDefinition;
 import com.github.thbrown.softballsim.util.GsonAccessor;
 import j2html.tags.ContainerTag;
