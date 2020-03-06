@@ -33,8 +33,10 @@ public class MonteCarloAdaptiveOptimizer implements Optimizer<MonteCarloAdaptive
     return "monte-carlo-adaptive.json";
   }
 
-  private static final int TASK_MAX_LINEUP_COUNT = 100;
-  private static final int TASK_MIN_LINEUP_COUNT = 2;
+  private static final int TASK_MAX_LINEUP_COUNT = 10;
+  private static final int TASK_MIN_LINEUP_COUNT = 1;
+
+  private static final int TASK_BUFFER_SIZE = 2000;
 
 
   @Override
@@ -50,34 +52,36 @@ public class MonteCarloAdaptiveOptimizer implements Optimizer<MonteCarloAdaptive
 
     // Get the arguments as their expected types
     MonteCarloAdaptiveArgumentParser parsedArguments = new MonteCarloAdaptiveArgumentParser(arguments);
-    final int TASK_BUFFER_SIZE = 1000;
     final double ALPHA = parsedArguments.getAlpha();
 
     // Since this optimizer involves iterating over all possible lineups, we'll use the lineup indexer
     BattingLineupIndexer indexer = lineupType.getLineupIndexer(battingData, playersInLineup);
-    
-    // It might make sense to take a best guess at the optimal lineup by sorting each batter by AVG. 
+
+    // It might make sense to take a best guess at the optimal lineup by sorting each batter by AVG.
     // If the first lineup is a reasonably good one, we'll be comparing new lineups against it and since
-    // it's more likely there will be a greater difference between mean runs scored for this lineup we'll
-    // have to run less simulations to detect that difference. This would be better if we only had one best lineup
+    // it's more likely there will be a greater difference between mean runs scored for this lineup
+    // we'll
+    // have to run less simulations to detect that difference. This would be better if we only had one
+    // best lineup
     // instead of one best lineup for each thread like we have now.
-    
+
     List<DataPlayer> firstLineup = indexer.getLineup(0).asList();
-    Collections.sort(firstLineup,new Comparator<DataPlayer>() {
+    Collections.sort(firstLineup, new Comparator<DataPlayer>() {
       @Override
       public int compare(DataPlayer o1, DataPlayer o2) {
         double diff = (o2.getBattingAverage() - o1.getBattingAverage());
-        if(diff < 0) {
+        if (diff < 0) {
           return -1;
-        } else if(diff > 0) {
+        } else if (diff > 0) {
           return 1;
         }
         return 0;
       }
     });
-    List<String> playerIdsSortedByBattingAverage = firstLineup.stream().map(v -> v.getId()).collect(Collectors.toList());
+    List<String> playerIdsSortedByBattingAverage =
+        firstLineup.stream().map(v -> v.getId()).collect(Collectors.toList());
     indexer = lineupType.getLineupIndexer(battingData, playerIdsSortedByBattingAverage);
-    
+
 
     // Our optimizer is parallelizable so we want to take advantage of multiple cores
     ExecutorService executor = Executors.newFixedThreadPool(parsedArguments.getThreads());
@@ -98,6 +102,8 @@ public class MonteCarloAdaptiveOptimizer implements Optimizer<MonteCarloAdaptive
         Optional.ofNullable(existingResult).map(v -> v.getCandidateLineups()).orElse(Collections.emptySet());
 
     long simulationsRun = 0;
+    LineupComposite firstLineupComposite = new LineupComposite(indexer.getLineup(0), hitGenerator, 0L);
+    SynchronizationLineupCompositeWrapper bestLineup = new SynchronizationLineupCompositeWrapper(firstLineupComposite);
     Set<LineupComposite> candidateLineupsGlobal = new LinkedHashSet<>();
     for (Long l : preExistingCandidateLineupIndexes) {
       LineupComposite composite = new LineupComposite(indexer.getLineup(l), hitGenerator, l);
@@ -112,7 +118,9 @@ public class MonteCarloAdaptiveOptimizer implements Optimizer<MonteCarloAdaptive
     for (int i = 0; i < TASK_BUFFER_SIZE; i++) {
       List<LineupComposite> lineupsToTest = new ArrayList<>(10);
 
-      for (int j = 0; j < getNumberOfLineupsToAddToTask(indexer.size() - lineupIndex, parsedArguments.getThreads()); j++) {
+      int taskSize = getNumberOfLineupsToAddToTask(indexer.size() - lineupIndex,
+          parsedArguments.getThreads());
+      for (int j = 0; j < taskSize; j++) {
 
         // First get any in progress lineups from the queue and add them to the task
         if (!inProgressLineups.isEmpty()) {
@@ -134,14 +142,13 @@ public class MonteCarloAdaptiveOptimizer implements Optimizer<MonteCarloAdaptive
         }
       }
 
-      if (lineupsToTest.size() > 1) {
-        TTestTask task = new TTestTask(lineupsToTest, parsedArguments.getInnings(), ALPHA);
-        results.add(executor.submit(task));
-      }
+      TTestTask task = new TTestTask(lineupsToTest, parsedArguments.getInnings(), ALPHA, bestLineup);
+      results.add(executor.submit(task));
     }
 
     // Process results as they finish executing
     long progressCounter = startIndex;
+    LineupComposite bestLineupCompositeSoFar = bestLineup.getCopyOfBestLineupComposite();
     while (!results.isEmpty()) {
       // Wait for the result
       TTestTaskResult result = null;
@@ -156,13 +163,15 @@ public class MonteCarloAdaptiveOptimizer implements Optimizer<MonteCarloAdaptive
 
       // Maintain the list of active lineups
       candidateLineupsGlobal.removeAll(result.getEliminatedLineupComposites());
-      candidateLineupsGlobal.add(result.getBestLineupComposite());
-      inProgressLineups.add(result.getBestLineupComposite());
+      if (result.getBestLineupComposite() != null) {
+        candidateLineupsGlobal.add(result.getBestLineupComposite());
+        inProgressLineups.add(result.getBestLineupComposite());
+      }
       simulationsRun += result.getSimulationsRequired();
-      
+
       // Update the progress tracker
       progressCounter += result.getEliminatedLineupComposites().size();
-      LineupComposite bestLineupCompositeSoFar = candidateLineupsGlobal.iterator().next();
+      bestLineupCompositeSoFar = bestLineup.getCopyOfBestLineupComposite();
       Set<Long> candidateLineupIndexes =
           candidateLineupsGlobal.stream().map(v -> v.lineupIndex()).collect(Collectors.toSet());
       long elapsedTime = (System.currentTimeMillis() - startTimestamp)
@@ -173,8 +182,10 @@ public class MonteCarloAdaptiveOptimizer implements Optimizer<MonteCarloAdaptive
       progressTracker.updateProgress(partialResult);
 
       // Add task - TODO: this is duplicate code from above, clean it up
-      List<LineupComposite> lineupsToTest = new ArrayList<>(10);
-      for (int j = 0; j < getNumberOfLineupsToAddToTask(indexer.size() - lineupIndex, parsedArguments.getThreads()); j++) {
+      int numberOfLineupsToTest =
+          getNumberOfLineupsToAddToTask(indexer.size() - lineupIndex, parsedArguments.getThreads());
+      List<LineupComposite> lineupsToTest = new ArrayList<>(numberOfLineupsToTest);
+      for (int j = 0; j < numberOfLineupsToTest; j++) {
         // First get any in progress lineups from the queue and add them to the task
         if (!inProgressLineups.isEmpty()) {
           LineupComposite toEnqueue = inProgressLineups.remove();
@@ -189,29 +200,28 @@ public class MonteCarloAdaptiveOptimizer implements Optimizer<MonteCarloAdaptive
         }
       }
 
-      if (lineupsToTest.size() > 1) {
-        TTestTask task = new TTestTask(lineupsToTest, parsedArguments.getInnings(), ALPHA);
+      if (lineupsToTest.size() > 0) {
+        TTestTask task = new TTestTask(lineupsToTest, parsedArguments.getInnings(), ALPHA, bestLineup);
         results.add(executor.submit(task));
-      } else if(lineupsToTest.size() == 1) {
-        // Add back the in progress lineup
-        inProgressLineups.add(lineupsToTest.get(0));
       }
 
+
       // Print a warning if the buffer gets low
-      ThreadPoolExecutor ex =(ThreadPoolExecutor)executor;
-      if(ex.getQueue().size() < 10 && (indexer.size() - lineupIndex) > 10) {
-        Logger.log("WARNING: Task buffer is low and this may affect multithreaded performacne. TaskSize " + ex.getQueue().size() + " " + (indexer.size() - lineupIndex));
+      ThreadPoolExecutor ex = (ThreadPoolExecutor) executor;
+      if (ex.getQueue().size() < parsedArguments.getThreads()
+          && (indexer.size() - lineupIndex) > parsedArguments.getThreads()) {
+        Logger.log("WARNING: Task buffer is low and this may affect multithreaded performance. TaskSize "
+            + ex.getQueue().size() + " " + (indexer.size() - lineupIndex));
       }
-      
+
     }
     executor.shutdown();
 
-    if (candidateLineupsGlobal.size() != 1) {
-      throw new RuntimeException(
-          "There should be only one lineup remaining, but there were " + candidateLineupsGlobal.size());
-    }
+    /*
+     * if (candidateLineupsGlobal.size() != 0) { throw new RuntimeException(
+     * "There should no lineups remaining, but there were " + candidateLineupsGlobal.size()); }
+     */
 
-    LineupComposite bestLineupCompositeSoFar = candidateLineupsGlobal.iterator().next();
     Set<Long> candidateLineupIndexes =
         candidateLineupsGlobal.stream().map(v -> v.lineupIndex()).collect(Collectors.toSet());
     long elapsedTime = (System.currentTimeMillis() - startTimestamp)
@@ -225,14 +235,15 @@ public class MonteCarloAdaptiveOptimizer implements Optimizer<MonteCarloAdaptive
 
   private int getNumberOfLineupsToAddToTask(long remainingLineups, int numberOfThreads) {
     long dynamicCap = remainingLineups / numberOfThreads;
-    if(dynamicCap < this.TASK_MAX_LINEUP_COUNT) {
+    if (dynamicCap > TASK_MAX_LINEUP_COUNT) {
       return TASK_MAX_LINEUP_COUNT;
-    } else if(dynamicCap > this.TASK_MAX_LINEUP_COUNT) {
+    } else if (dynamicCap < TASK_MIN_LINEUP_COUNT) {
       return TASK_MIN_LINEUP_COUNT;
+    } else {
+      return Math.toIntExact(dynamicCap);
     }
-    return (int) dynamicCap;
   }
-  
+
   private void validateData(DataStats data, List<String> playersInLineup) {
     // All players in the lineup must have at least one plate appearance
     for (String playerId : playersInLineup) {

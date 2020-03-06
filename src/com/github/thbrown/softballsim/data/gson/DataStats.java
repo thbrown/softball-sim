@@ -69,7 +69,7 @@ public class DataStats {
           // TODO: some cap for distance?
           // TODO: should we check ids for distance as well?
           if (lowestDistance != 0) {
-            Logger.warn("WARNING - assuming lineup player input '" + playerString + "' referes to player "
+            Logger.warn("WARNING - assuming lineup player input '" + playerString + "' refers to player "
                 + lowestDistancePlayers.get(0).getName() + " (" + lowestDistancePlayers.get(0).getId() + ") ");
           }
           result.add(lowestDistancePlayers.get(0).getId());

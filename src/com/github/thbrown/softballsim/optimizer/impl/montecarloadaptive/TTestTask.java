@@ -1,6 +1,8 @@
 package com.github.thbrown.softballsim.optimizer.impl.montecarloadaptive;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -16,6 +18,7 @@ import com.github.thbrown.softballsim.util.Logger;
 public class TTestTask implements Callable<TTestTaskResult> {
 
   // TODO: make these configurable
+  private static int MAX_ITERATIONS = 1000000;
   private static int INITIAL_GAMES_TO_SIMULATE = 10;
   private static int SAMPLE_CHUNK_SIZE = 10;
   private final static TTest tester = new TTest();
@@ -23,23 +26,33 @@ public class TTestTask implements Callable<TTestTaskResult> {
   private final List<LineupComposite> toTest;
   private final int inningsPerGame;
   private final double alpha;
-  
+  private final SynchronizationLineupCompositeWrapper best;
+
+  private final List<Double> bestLineupScores = new LinkedList<>();
+  private LineupComposite originalBestLineup = null;
+
   private long simulationsRequired = 0;
 
-  public TTestTask(List<LineupComposite> toTest, int inningsPerGame, double alpha) {
+  public TTestTask(List<LineupComposite> toTest, int inningsPerGame, double alpha,
+      SynchronizationLineupCompositeWrapper best) {
     this.inningsPerGame = inningsPerGame;
     this.toTest = toTest;
     this.alpha = alpha;
+    this.best = best;
   }
 
   @Override
   public TTestTaskResult call() throws Exception {
+    LineupComposite bestSoFar = (best == null) ? null : best.getCopyOfBestLineupComposite();
+    originalBestLineup = bestSoFar;
 
-    LineupComposite bestSoFar = null;
+    if (bestSoFar != null) {
+      toTest.add(bestSoFar);
+    }
 
-    // Run simulations for the lineups they have none.
+    // Run simulations for the lineups if they have none.
     for (LineupComposite toEvaluate : toTest) {
-      // T-test requires at least 2 samples
+      // T-test requires at least 2 toEvaluate
       if (toEvaluate.getStats().getN() < 2) {
         simulateGames(INITIAL_GAMES_TO_SIMULATE, inningsPerGame, toEvaluate);
       }
@@ -47,10 +60,13 @@ public class TTestTask implements Callable<TTestTaskResult> {
 
     Set<LineupComposite> eleminatedLineups = new HashSet<>();
     for (LineupComposite toEvaluate : toTest) {
-      // If we have no best stored, the very next one becomes the best
       if (bestSoFar == null) {
         bestSoFar = toEvaluate;
-        continue;
+        break;
+      }
+
+      if (toEvaluate.equals(bestSoFar)) {
+        break;
       }
 
       // Run simulations until the difference in mean runs scored is statistically significant
@@ -59,21 +75,23 @@ public class TTestTask implements Callable<TTestTaskResult> {
 
       while (true) {
         double pValue = tester.tTest(statsA, statsB);
-        //Logger.log(statsA.getN() + " " + statsB.getN() + " " + statsA.getMean() + " " + statsB.getMean() + " " + pValue);
-        if(pValue <= alpha) {
-          //Logger.log("DONE! " + pValue + " " + statsA.getN() + " " + statsB.getN());
+        // Logger.log(statsA.getN() + " " + statsB.getN() + " " + statsA.getMean() + " " + statsB.getMean()
+        // + " " + pValue);
+        if (pValue <= alpha) {
+          // Logger.log("DONE! " + pValue + " " + statsA.getN() + " " + statsB.getN());
           break;
         }
-        
-        if(statsA.getN() >= 1000000 && statsB.getN() >= 1000000) {
+
+        if (statsA.getN() >= MAX_ITERATIONS && statsB.getN() >= MAX_ITERATIONS) {
           Logger.log("WARN: Reached simulation limit " + statsA.getMean() + " " + statsB.getMean() + " " + pValue);
           break;
         }
-        
+
         // The different is not yet significant, which one do we need to run more simulations for?
         if (statsA.getN() < statsB.getN()) {
           // Do more simulations for the "bestSoFar" lineup
-          simulateGames(SAMPLE_CHUNK_SIZE, inningsPerGame, bestSoFar);
+          List<Double> gameScores = simulateGames(SAMPLE_CHUNK_SIZE, inningsPerGame, bestSoFar);
+          bestLineupScores.addAll(gameScores);
         } else {
           // Do more simulations for the "toEvaluate" lineup
           simulateGames(SAMPLE_CHUNK_SIZE, inningsPerGame, toEvaluate);
@@ -88,15 +106,30 @@ public class TTestTask implements Callable<TTestTaskResult> {
         eleminatedLineups.add(toEvaluate);
       }
     }
-    return new TTestTaskResult(bestSoFar, eleminatedLineups, simulationsRequired);
+
+    if (bestSoFar.equals(originalBestLineup)) {
+      best.updateIfEqual(bestSoFar, bestLineupScores);
+      return new TTestTaskResult(null, eleminatedLineups, simulationsRequired);
+    } else {
+      boolean success = best.replaceIfEqual(originalBestLineup, bestSoFar);
+      if (success) {
+        return new TTestTaskResult(null, eleminatedLineups, simulationsRequired);
+      } else {
+        return new TTestTaskResult(bestSoFar, eleminatedLineups, simulationsRequired);
+      }
+    }
+
   }
 
-  private void simulateGames(int numberOfGamesToSimulate, int inningsPerGame, LineupComposite composite) {
+  private List<Double> simulateGames(int numberOfGamesToSimulate, int inningsPerGame, LineupComposite composite) {
+    List<Double> simulatedGames = new ArrayList<>(numberOfGamesToSimulate);
     for (int i = 0; i < numberOfGamesToSimulate; i++) {
       double score =
           MonteCarloGameSimulation.simulateGame(composite.getLineup(), inningsPerGame, composite.getHitGenerator());
       composite.addSample(score);
+      simulatedGames.add(score);
     }
     simulationsRequired += numberOfGamesToSimulate;
+    return simulatedGames;
   }
 }

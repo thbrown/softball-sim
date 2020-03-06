@@ -29,6 +29,7 @@ public class MonteCarloAdaptiveResult extends Result {
 
   public String toString() {
     String base = super.toString();
-    return base + "\nAvg simulations per lineup: " + StringUtils.formatDecimal(((double)simulationsRequired/(double)super.getCountCompleted()),2);
+    return base + "\nAvg simulations per lineup: "
+        + StringUtils.formatDecimal(((double) simulationsRequired / (double) super.getCountCompleted()), 2);
   }
 }

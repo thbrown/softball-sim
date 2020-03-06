@@ -2,6 +2,7 @@ package com.github.thbrown.softballsim.lineup;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import com.github.thbrown.softballsim.data.gson.DataPlayer;
 
 /**
@@ -79,6 +80,22 @@ public class AlternatingBattingLineup implements BattingLineup {
 
   public static String getType() {
     return AlternatingBattingLineup.class.getSimpleName();
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(groupA, groupB);
+  }
+
+  @Override
+  public boolean equals(Object other) {
+    if (other instanceof AlternatingBattingLineup) {
+      if (((AlternatingBattingLineup) other).groupB.equals(this.groupB)
+          && ((AlternatingBattingLineup) other).groupA.equals(this.groupA)) {
+        return true;
+      }
+    }
+    return false;
   }
 
 }

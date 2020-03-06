@@ -72,14 +72,6 @@ public class SoftballSim {
       return;
     }
 
-    // Manually enforce optimizer as a required flag. Other required flags should be specified in their
-    // options definition so their presence is enforced during parse. Enforcing the optimizer flag here
-    // manually lets us work with a null optimizer above.
-    if (optimizer == null) {
-      throw new MissingArgumentException(
-          Msg.MISSING_OPTIMIZER.args(OptimizerEnum.getValuesAsString()));
-    }
-
     dataSource.execute(args, lineupType, players, optimizer);
   }
 

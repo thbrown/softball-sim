@@ -1,13 +1,16 @@
 package com.github.thbrown.softballsim.datasource.local;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.MissingArgumentException;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import com.github.thbrown.softballsim.CommandLineOptions;
@@ -30,7 +33,8 @@ public class DataSourceFileSystem implements DataSource {
 
   public final static String FILE_PATH = "F";
 
-  public final static String FILE_PATH_DEFAULT = "./stats/exampleData.json";
+  public final static String FILE_PATH_DEFAULT = "./stats";
+
 
   @Override
   public List<Option> getCommandLineOptions() {
@@ -47,6 +51,12 @@ public class DataSourceFileSystem implements DataSource {
 
   @Override
   public void execute(String[] args, LineupTypeEnum lineupType, List<String> players, OptimizerEnum optimizer) {
+    // Require an optimizer
+    if (optimizer == null) {
+      throw new RuntimeException(
+          Msg.MISSING_OPTIMIZER.args(OptimizerEnum.getValuesAsString()));
+    }
+
     // Parse command line arguments
     CommandLineOptions commandLineOptions = CommandLineOptions.getInstance();
     Options allOptions = commandLineOptions.getOptionsForFlags(DataSourceEnum.FILE_SYSTEM, optimizer);
@@ -54,9 +64,21 @@ public class DataSourceFileSystem implements DataSource {
 
     // Read stats data from file
     String statsFileLocation = allCmd.getOptionValue(FILE_PATH, FILE_PATH_DEFAULT);
-    String json;
+    String json = null;
+    File file = new File(statsFileLocation);
     try {
-      json = new String(Files.readAllBytes(Paths.get(statsFileLocation)));
+      if (file.isDirectory()) {
+        File[] filesInDirectory = file.listFiles();
+        List<File> filesOnly = Arrays.stream(filesInDirectory).filter(f -> f.isFile()).collect(Collectors.toList());
+        if (filesOnly.size() == 1) {
+          json = new String(Files.readAllBytes(Paths.get(filesOnly.get(0).getCanonicalPath())));
+        } else {
+          throw new RuntimeException(
+              "There were " + filesOnly.size() + " files in the directory specified, but this application expects one");
+        }
+      } else {
+        json = new String(Files.readAllBytes(Paths.get(statsFileLocation)));
+      }
     } catch (IOException e) {
       throw new RuntimeException(Msg.BAD_STATS_FILE_PATH.args(statsFileLocation), e);
     }

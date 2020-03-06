@@ -1,6 +1,7 @@
 package com.github.thbrown.softballsim.lineup;
 
 import java.util.List;
+import java.util.Objects;
 import com.github.thbrown.softballsim.data.gson.DataPlayer;
 
 public class OrdinaryBattingLineup implements BattingLineup {
@@ -37,6 +38,21 @@ public class OrdinaryBattingLineup implements BattingLineup {
 
   public static String getType() {
     return OrdinaryBattingLineup.class.getSimpleName();
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(players);
+  }
+
+  @Override
+  public boolean equals(Object other) {
+    if (other instanceof OrdinaryBattingLineup) {
+      if (((OrdinaryBattingLineup) other).players.equals(this.players)) {
+        return true;
+      }
+    }
+    return false;
   }
 
 }

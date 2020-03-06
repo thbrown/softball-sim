@@ -53,6 +53,9 @@ public class GsonAccessor {
 
     // Serializers
     gsonBuilder.registerTypeAdapter(BattingLineup.class, new BattingLineupSerializer());
+
+    // Alow NaN
+    gsonBuilder.serializeSpecialFloatingPointValues();
   }
 
   /**
@@ -61,6 +64,7 @@ public class GsonAccessor {
   public Gson getDefault() {
     if (this.defaultGson == null) {
       GsonBuilder gsonBuilder = new GsonBuilder();
+      gsonBuilder.serializeSpecialFloatingPointValues();
       this.defaultGson = gsonBuilder.create();
     }
     return this.defaultGson;

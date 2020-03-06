@@ -21,7 +21,7 @@ The lineup with the lower mean is then rejected and the larger one remembered as
       "shortLabel": "a",
       "longLabel": "alpha",
       "description": "Confidence value at which point to reject the null hypotheses (lineups have equal means). Lower alpha will give more accurate results but take longer to run.",
-      "defaultValue": ".05",
+      "defaultValue": ".0001",
       "pattern": ".*"
     },
     {

@@ -14,10 +14,10 @@ import com.google.gson.JsonSerializer;
 public class BattingLineupSerializer implements JsonSerializer<BattingLineup> {
 
   @Override
-  public JsonElement serialize(BattingLineup src, Type typeOfSrc, JsonSerializationContext context) {
-    JsonObject obj = new JsonObject();
+  public JsonElement serialize(BattingLineup src, Type typeOfSrc, JsonSerializationContext context) {   
+    JsonObject obj = (JsonObject) context.serialize(src);
     obj.addProperty(BattingLineupDeserializer.JSON_COMMAND_TYPE, src.getLineupType());
-    return null;
+    return obj;
   }
 
 }

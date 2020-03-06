@@ -84,7 +84,7 @@ public enum OptimizerEnum {
     Optimizer<T> optimizer = this.optimizerImplementation.getClass().cast(this.optimizerImplementation);
 
     // Print the arguments we are using for this optimization before we start
-    // TODO: Use 
+    // TODO: Use
     Logger.log("*********************************************************************");
     Logger.log("Optimizer: " + this.optimizerDefinition.getName());
     Logger.log("*********************************************************************");

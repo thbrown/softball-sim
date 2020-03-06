@@ -9,7 +9,8 @@ public class TTestTaskResult {
   private Set<LineupComposite> eliminatedLineupComposites;
   private long simulationsRequired;
 
-  public TTestTaskResult(LineupComposite bestLineupComposite, Set<LineupComposite> eliminatedLineupComposites, long simulationsRequired) {
+  public TTestTaskResult(LineupComposite bestLineupComposite, Set<LineupComposite> eliminatedLineupComposites,
+      long simulationsRequired) {
     this.bestLineupComposite = bestLineupComposite;
     this.eliminatedLineupComposites = eliminatedLineupComposites;
     this.simulationsRequired = simulationsRequired;
@@ -22,7 +23,7 @@ public class TTestTaskResult {
   public Set<LineupComposite> getEliminatedLineupComposites() {
     return this.eliminatedLineupComposites;
   }
-  
+
   public long getSimulationsRequired() {
     return simulationsRequired;
   }

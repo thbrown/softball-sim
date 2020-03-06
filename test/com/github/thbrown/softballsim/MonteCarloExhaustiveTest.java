@@ -1,6 +1,5 @@
 package com.github.thbrown.softballsim;
 
-import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -10,18 +9,13 @@ import com.github.thbrown.softballsim.server.ServerCommandHooks;
 import com.github.thbrown.softballsim.server.ServerComplete;
 import com.github.thbrown.softballsim.server.ServerReady;
 import com.github.thbrown.softballsim.util.Logger;
-import com.google.gson.GsonBuilder;
 import com.github.thbrown.softballsim.data.gson.DataStats;
-import com.github.thbrown.softballsim.data.gson.DataStatsDeserializer;
 import com.github.thbrown.softballsim.datasource.network.DataSourceNetworkCommandData;
 import com.github.thbrown.softballsim.datasource.network.NetworkHelper;
 import com.github.thbrown.softballsim.helpers.TestGsonAccessor;
 import com.github.thbrown.softballsim.server.Server;
 
-/**
- * Tests for the various dataSource values
- */
-public class DataSourceTest {
+public class MonteCarloExhaustiveTest {
 
   @Test
   public void testDataSourceFileSystem() throws Exception {
@@ -55,10 +49,10 @@ public class DataSourceTest {
 
         // Define the network args
         Map<String, String> args = new HashMap<>();
-        args.put("INNINGS", String.valueOf(INNINGS));
-        args.put("GAMES", String.valueOf(GAMES));
-        args.put("LINEUP_TYPE", String.valueOf(LINEUP_TYPE));
-        args.put("THREAD_COUNT", String.valueOf(THREAD_COUNT));
+        args.put("Lineup-type", String.valueOf(LINEUP_TYPE));
+        args.put("innings", String.valueOf(INNINGS));
+        args.put("games", String.valueOf(GAMES));
+        args.put("threads", String.valueOf(THREAD_COUNT));
 
         // Create the corresponding command and write it to the network
         DataSourceNetworkCommandData dataCommand = new DataSourceNetworkCommandData(statsObject, args);

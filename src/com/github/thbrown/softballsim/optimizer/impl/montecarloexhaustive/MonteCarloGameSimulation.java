@@ -66,7 +66,7 @@ public class MonteCarloGameSimulation {
   }
 
   public static double simulateGame(BattingLineup lineup, int inningsPerGame, HitGenerator hitGenerator) {
-    
+
     // Game
     BasesState bases = new BasesState();
     int gameScore = 0;
