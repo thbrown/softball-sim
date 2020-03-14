@@ -12,6 +12,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import com.github.thbrown.softballsim.Msg;
+import com.github.thbrown.softballsim.Result;
 import com.github.thbrown.softballsim.data.gson.DataPlayer;
 import com.github.thbrown.softballsim.data.gson.DataStats;
 import com.github.thbrown.softballsim.datasource.ProgressTracker;
@@ -81,6 +82,9 @@ public class MonteCarloExhaustiveOptimizer implements Optimizer<MonteCarloExhaus
     // Process results as they finish executing
     double initialScore = Optional.ofNullable(existingResult).map(v -> v.getLineupScore()).orElse(0.0);
     BattingLineup initialLineup = Optional.ofNullable(existingResult).map(v -> v.getLineup()).orElse(null);
+    if(existingResult != null) {
+      initialLineup.populateStats(battingData);
+    }
     TaskResult bestResult = new TaskResult(initialScore, initialLineup);
     Map<Long, Long> histo =
         Optional.ofNullable(existingResult).map(v -> v.getHistogram()).orElse(new HashMap<Long, Long>());
@@ -148,5 +152,10 @@ public class MonteCarloExhaustiveOptimizer implements Optimizer<MonteCarloExhaus
         throw new RuntimeException(Msg.PLAYER_HAS_NO_PA.args(player.getName(), player.getId()));
       }
     }
+  }
+  
+  @Override
+  public Class<? extends Result> getResultClass() {
+    return MonteCarloExhaustiveResult.class;
   }
 }

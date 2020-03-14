@@ -18,7 +18,7 @@ import com.github.thbrown.softballsim.util.Logger;
 public class TTestTask implements Callable<TTestTaskResult> {
 
   // TODO: make these configurable
-  private static int MAX_ITERATIONS = 1000000;
+  public static int MAX_ITERATIONS = 1000000;
   private static int INITIAL_GAMES_TO_SIMULATE = 10;
   private static int SAMPLE_CHUNK_SIZE = 10;
   private final static TTest tester = new TTest();

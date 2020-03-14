@@ -25,7 +25,7 @@ public class OrdinaryBattingLineupIndexer implements BattingLineupIndexer {
     } catch (RuntimeException r) {
       throw new RuntimeException("Unable to index all possible lineups with that many players ("
           + stats.getPlayers().size()
-          + "). If you have not specified a list of players, do so using the '" + CommandLineOptions.PLAYERS_IN_LINEUP
+          + "). If you have not specified a list of players, do so using the '" + CommandLineOptions.LINEUP
           + "' flag. Otherwise, don't specify more than 20 players", r);
     }
   }

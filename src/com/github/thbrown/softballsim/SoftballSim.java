@@ -52,7 +52,7 @@ public class SoftballSim {
     LineupTypeEnum lineupType = LineupTypeEnum.getEnumFromIdOrName(lineupTypeString);
 
     String playerString =
-        commonCmd.getOptionValue(CommandLineOptions.PLAYERS_IN_LINEUP, ""); // TODO: make this required?
+        commonCmd.getOptionValue(CommandLineOptions.LINEUP, ""); // TODO: make this required?
     List<String> players = Arrays.asList(playerString.split(","));
 
     OptimizerEnum optimizer = null;

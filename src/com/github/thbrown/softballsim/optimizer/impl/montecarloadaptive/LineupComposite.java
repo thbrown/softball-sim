@@ -2,8 +2,6 @@ package com.github.thbrown.softballsim.optimizer.impl.montecarloadaptive;
 
 import java.util.Objects;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
-import org.apache.commons.math3.stat.descriptive.SynchronizedSummaryStatistics;
-import com.github.thbrown.softballsim.lineup.AlternatingBattingLineup;
 import com.github.thbrown.softballsim.lineup.BattingLineup;
 import com.github.thbrown.softballsim.optimizer.impl.montecarloexhaustive.HitGenerator;
 

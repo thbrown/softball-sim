@@ -2,7 +2,6 @@ package com.github.thbrown.softballsim.datasource;
 
 import com.github.thbrown.softballsim.Result;
 import com.github.thbrown.softballsim.util.CircularArray;
-import com.github.thbrown.softballsim.util.Logger;
 
 /**
  * Maintains a record of an optimization's partial results. When running, sends results on a time
@@ -31,6 +30,9 @@ public final class ProgressTracker implements Runnable {
 
   public ProgressTracker(Result initialResult, DataSourceFunctions functions) {
     this.functions = functions;
+    if (initialResult == null) {
+      initialResult = new Result(null, null, 0, 0, 0, 0);
+    }
     updateFields(initialResult);
   }
 

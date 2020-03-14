@@ -6,18 +6,17 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.MissingArgumentException;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import com.github.thbrown.softballsim.CommandLineOptions;
 import com.github.thbrown.softballsim.Msg;
 import com.github.thbrown.softballsim.Result;
 import com.github.thbrown.softballsim.data.gson.DataStats;
-import com.github.thbrown.softballsim.data.gson.DataStatsDeserializer;
 import com.github.thbrown.softballsim.datasource.DataSource;
 import com.github.thbrown.softballsim.datasource.DataSourceEnum;
 import com.github.thbrown.softballsim.datasource.DataSourceFunctions;
@@ -26,21 +25,21 @@ import com.github.thbrown.softballsim.datasource.ProgressTracker;
 import com.github.thbrown.softballsim.lineupindexer.LineupTypeEnum;
 import com.github.thbrown.softballsim.optimizer.OptimizerEnum;
 import com.github.thbrown.softballsim.util.GsonAccessor;
+import com.github.thbrown.softballsim.util.Logger;
 import com.github.thbrown.softballsim.util.StringUtils;
-import com.google.gson.GsonBuilder;
 
 public class DataSourceFileSystem implements DataSource {
 
-  public final static String FILE_PATH = "F";
+  public final static String PATH = "P";
 
   public final static String FILE_PATH_DEFAULT = "./stats";
-
+  public final static String CACHED_RESULTS_FILE_PATH = "./cached";
 
   @Override
   public List<Option> getCommandLineOptions() {
     List<Option> options = new ArrayList<>();
-    options.add(Option.builder(FILE_PATH)
-        .longOpt("File-path")
+    options.add(Option.builder(PATH)
+        .longOpt("Path")
         .desc(DataSourceEnum.FILE_SYSTEM + ": Path to the stats files. This can be a directory or file. Default: "
             + FILE_PATH_DEFAULT)
         .hasArg(true)
@@ -63,7 +62,7 @@ public class DataSourceFileSystem implements DataSource {
     CommandLine allCmd = commandLineOptions.parse(allOptions, args, false);
 
     // Read stats data from file
-    String statsFileLocation = allCmd.getOptionValue(FILE_PATH, FILE_PATH_DEFAULT);
+    String statsFileLocation = allCmd.getOptionValue(PATH, FILE_PATH_DEFAULT);
     String json = null;
     File file = new File(statsFileLocation);
     try {
@@ -92,9 +91,25 @@ public class DataSourceFileSystem implements DataSource {
     validatePlayersList(players, stats);
     players = stats.convertPlayersListToIds(players);
 
-    // TODO: save optimizer run results to file system
-    DataSourceFunctions functions = new DataSourceFunctionsFileSystem();
-    ProgressTracker tracker = new ProgressTracker(new Result(null, 0, 0, 0, 0), functions);
+    // Check if there is a cached result for a run with the exact same args
+    Result existingResult = null;
+
+    String fileName = getArgsMd5(allCmd);
+    File cacheFile = new File(CACHED_RESULTS_FILE_PATH + File.separatorChar + fileName);
+    if (cacheFile.exists() && !allCmd.hasOption(CommandLineOptions.FORCE)) {
+      Logger.log(
+          "Using Cached Result. Run using the -" + CommandLineOptions.FORCE + " flag to disregard this cached result.");
+      String data = null;
+      try {
+        data = new String(Files.readAllBytes(Paths.get(cacheFile.getCanonicalPath())));
+        existingResult = GsonAccessor.getInstance().getCustom().fromJson(data, Result.class);
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    }
+
+    DataSourceFunctions functions = new DataSourceFunctionsFileSystem(fileName);
+    ProgressTracker tracker = new ProgressTracker(existingResult, functions);
     Thread trackerThread = new Thread(tracker);
     trackerThread.start();
 
@@ -102,9 +117,9 @@ public class DataSourceFileSystem implements DataSource {
       if (allCmd.hasOption(CommandLineOptions.ESTIMATE_ONLY)) {
         // This will terminate the application
         EstimateOnlyExecutionWrapper wrapper = new EstimateOnlyExecutionWrapper(optimizer, functions);
-        wrapper.optimize(players, lineupType, stats, arguments, tracker, null);
+        wrapper.optimize(players, lineupType, stats, arguments, tracker, existingResult);
       } else {
-        Result result = optimizer.optimize(players, lineupType, stats, arguments, tracker, null);
+        Result result = optimizer.optimize(players, lineupType, stats, arguments, tracker, existingResult);
         functions.onComplete(result);
       }
     } finally {
@@ -128,10 +143,17 @@ public class DataSourceFileSystem implements DataSource {
           .collect(Collectors.joining(System.lineSeparator()));
       throw new RuntimeException(
           "No players were specified. Please specify a comma separated list of player names or ids using the -"
-              + CommandLineOptions.PLAYERS_IN_LINEUP + " flag. Avaliable players " + System.lineSeparator()
+              + CommandLineOptions.LINEUP + " flag. Avaliable players " + System.lineSeparator()
               + playersAsString);
     }
 
+  }
+
+  public static String getArgsMd5(CommandLine args) {
+    List<String> argsStringArray =
+        Arrays.stream(args.getOptions()).map(v -> v.getOpt() + v.getValuesList()).collect(Collectors.toList());
+    Collections.sort(argsStringArray);
+    return StringUtils.calculateMd5AsHex(argsStringArray.toString());
   }
 
 }

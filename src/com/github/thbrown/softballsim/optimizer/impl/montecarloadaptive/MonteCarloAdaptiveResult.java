@@ -3,6 +3,7 @@ package com.github.thbrown.softballsim.optimizer.impl.montecarloadaptive;
 import java.util.Set;
 import com.github.thbrown.softballsim.Result;
 import com.github.thbrown.softballsim.lineup.BattingLineup;
+import com.github.thbrown.softballsim.optimizer.OptimizerEnum;
 import com.github.thbrown.softballsim.util.StringUtils;
 
 /**
@@ -18,7 +19,7 @@ public class MonteCarloAdaptiveResult extends Result {
 
   public MonteCarloAdaptiveResult(BattingLineup lineup, double lineupScore, long countTotal, long countCompleted,
       long elapsedTimeMs, Set<Long> candidateLineups, long simulationsRequired) {
-    super(lineup, lineupScore, countTotal, countCompleted, elapsedTimeMs);
+    super(OptimizerEnum.MONTE_CARLO_ADAPTIVE, lineup, lineupScore, countTotal, countCompleted, elapsedTimeMs);
     this.candidateLineups = candidateLineups;
     this.simulationsRequired = simulationsRequired;
   }

@@ -1,5 +1,6 @@
 package com.github.thbrown.softballsim.util;
 
+import com.github.thbrown.softballsim.Result;
 import com.github.thbrown.softballsim.data.gson.DataStats;
 import com.github.thbrown.softballsim.data.gson.DataStatsDeserializer;
 import com.github.thbrown.softballsim.datasource.network.DataSourceNetworkCommand;
@@ -50,6 +51,7 @@ public class GsonAccessor {
     gsonBuilder.registerTypeAdapter(DataSourceNetworkCommand.class, new DataSourceNetworkCommandDeserializer());
     gsonBuilder.registerTypeAdapter(OptimizerDefinitionArgument.class, new OptimizerDefinitionArgumentDeserializer());
     gsonBuilder.registerTypeAdapter(BattingLineup.class, new BattingLineupDeserializer());
+    gsonBuilder.registerTypeAdapter(Result.class, new ResultDeserializer());
 
     // Serializers
     gsonBuilder.registerTypeAdapter(BattingLineup.class, new BattingLineupSerializer());

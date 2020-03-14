@@ -3,7 +3,6 @@ package com.github.thbrown.softballsim.optimizer.impl.montecarloadaptive;
 import java.util.List;
 import org.apache.commons.math3.exception.NumberIsTooSmallException;
 import org.apache.commons.math3.stat.inference.TTest;
-import com.github.thbrown.softballsim.util.Logger;
 
 public class SynchronizationLineupCompositeWrapper {
 

@@ -1,7 +1,6 @@
 package com.github.thbrown.softballsim.datasource.network;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -73,7 +72,7 @@ public class DataSourceNetworkCommandData extends DataSourceNetworkCommand {
     lineupType = LineupTypeEnum.getEnumFromIdOrName(lineupTypeString);
 
     String playerString =
-        allCmd.getOptionValue(CommandLineOptions.PLAYERS_IN_LINEUP, ""); // TODO: make this required?
+        allCmd.getOptionValue(CommandLineOptions.LINEUP, ""); // TODO: make this required?
     players = Arrays.asList(playerString.split(","));
 
     // Convert arguments list to map
@@ -84,7 +83,7 @@ public class DataSourceNetworkCommandData extends DataSourceNetworkCommand {
     players = stats.convertPlayersListToIds(players);
 
     DataSourceFunctions functions = new DataSourceFunctionsNetwork(network);
-    ProgressTracker tracker = new ProgressTracker(new Result(null, 0, 0, 0, 0), functions);
+    ProgressTracker tracker = new ProgressTracker(new Result(null, null, 0, 0, 0, 0), functions);
     Thread trackerThread = new Thread(tracker);
     trackerThread.start();
 

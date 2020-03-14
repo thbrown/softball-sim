@@ -23,13 +23,13 @@ public class MonteCarloAdaptiveTest {
     final double ALPHA = .0001;
     final int LINEUP_TYPE = 2;
     final int THREAD_COUNT = 8;
-    final String PLAYERS = "1OiRCCmrn16iyK,Oscar,Molly,Nelly,1CV6WRyspDjA7Z,1MPJ24EEyS0g6p,Devon,Jordyn";
+    final String LINEUP = "1OiRCCmrn16iyK,Oscar,Molly,Nelly,1CV6WRyspDjA7Z,1MPJ24EEyS0g6p,Devon,Jordyn";
 
-    String[] args = {"-O", "MONTE_CARLO_ADAPTIVE", "-P", PLAYERS, "-a", String.valueOf(ALPHA), "-i",
+    String[] args = {"-O", "MONTE_CARLO_ADAPTIVE", "-L", LINEUP, "-a", String.valueOf(ALPHA), "-i",
         String.valueOf(INNINGS), "-T", String.valueOf(LINEUP_TYPE), "-t", String.valueOf(THREAD_COUNT)};
 
     // Run the same simulation with the exhaustive optimizer, useful for doing a comparison
-    String[] args2 = {"-O", "MONTE_CARLO_EXHAUSTIVE", "-P", PLAYERS, "-g", String.valueOf(100000), "-i",
+    String[] args2 = {"-O", "MONTE_CARLO_EXHAUSTIVE", "-L", LINEUP, "-g", String.valueOf(100000), "-i",
         String.valueOf(INNINGS), "-T", String.valueOf(LINEUP_TYPE), "-t", String.valueOf(THREAD_COUNT)};
 
     SoftballSim.main(args);

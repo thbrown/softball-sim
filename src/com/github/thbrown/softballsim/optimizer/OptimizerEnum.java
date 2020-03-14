@@ -1,6 +1,7 @@
 package com.github.thbrown.softballsim.optimizer;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -164,6 +165,10 @@ public enum OptimizerEnum {
     List<String> valuesString = Arrays.stream(OptimizerEnum.values())
         .map(v -> String.join(" ", v.toString(), "- " + v.getId())).collect(Collectors.toList());
     return "[" + String.join(", ", valuesString) + "]";
+  }
+
+  public Type getResultClass() {
+    return this.optimizerImplementation.getResultClass();
   }
 
 }

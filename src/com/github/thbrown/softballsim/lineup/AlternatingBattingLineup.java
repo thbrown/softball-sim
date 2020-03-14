@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import com.github.thbrown.softballsim.data.gson.DataPlayer;
+import com.github.thbrown.softballsim.data.gson.DataStats;
 
 /**
  * Batting order that strictly alternates between two groups of players. (i.e. women and men or
@@ -96,6 +97,27 @@ public class AlternatingBattingLineup implements BattingLineup {
       }
     }
     return false;
+  }
+
+
+  @Override
+  public void populateStats(DataStats battingData) {
+    for(int i = 0 ; i < groupA.size(); i++) {
+      DataPlayer statslessPlayer = groupA.get(i);
+      DataPlayer statsfullPlayer = battingData.getPlayerById(statslessPlayer.getId());
+      if(statsfullPlayer == null) {
+        throw new RuntimeException("Failed to populate stats for player " + statslessPlayer + " as no stats for this player were found in batting data. Try running the optimization again with the -F flag.");
+      }
+      groupA.set(i, statsfullPlayer);
+    }
+    for(int i = 0 ; i < groupB.size(); i++) {
+      DataPlayer statslessPlayer = groupB.get(i);
+      DataPlayer statsfullPlayer = battingData.getPlayerById(statslessPlayer.getId());
+      if(statsfullPlayer == null) {
+        throw new RuntimeException("Failed to populate stats for player " + statslessPlayer + " as no stats for this player were found in batting data. Try running the optimization again with the -F flag.");
+      }
+      groupB.set(i, statsfullPlayer);
+    }
   }
 
 }

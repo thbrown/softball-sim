@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.Socket;
 import com.github.thbrown.softballsim.datasource.network.NetworkHelper;
 import com.github.thbrown.softballsim.helpers.TestGsonAccessor;
-import com.github.thbrown.softballsim.util.GsonAccessor;
 import com.github.thbrown.softballsim.util.Logger;
 import com.google.gson.Gson;
 

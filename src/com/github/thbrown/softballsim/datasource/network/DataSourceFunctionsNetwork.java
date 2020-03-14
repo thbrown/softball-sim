@@ -1,6 +1,5 @@
 package com.github.thbrown.softballsim.datasource.network;
 
-import java.io.IOException;
 import com.github.thbrown.softballsim.Result;
 import com.github.thbrown.softballsim.datasource.DataSourceFunctions;
 import com.github.thbrown.softballsim.datasource.ProgressTracker;
@@ -22,7 +21,7 @@ public class DataSourceFunctionsNetwork extends DataSourceFunctionsFileSystem im
   private final NetworkHelper network;
 
   public DataSourceFunctionsNetwork(NetworkHelper network) {
-    super();
+    super(null);
     this.network = network;
   }
 

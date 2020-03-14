@@ -1,5 +1,9 @@
 package com.github.thbrown.softballsim.util;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import javax.xml.bind.DatatypeConverter;
+
 /**
  * Using custom stringUtils to avoid using Apache commons to keep jar size down.
  * 
@@ -32,4 +36,16 @@ public class StringUtils {
     return true;
   }
 
+  public static String calculateMd5AsHex(String input) {
+    MessageDigest md;
+    try {
+      md = MessageDigest.getInstance("MD5");
+      md.update(input.getBytes());
+      byte[] digest = md.digest();
+      String hexHash = DatatypeConverter.printHexBinary(digest).toUpperCase();
+      return hexHash;
+    } catch (NoSuchAlgorithmException e) {
+      throw new RuntimeException(e);
+    }
+  }
 }

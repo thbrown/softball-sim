@@ -17,13 +17,16 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
 import com.github.thbrown.softballsim.Msg;
+import com.github.thbrown.softballsim.Result;
 import com.github.thbrown.softballsim.data.gson.DataPlayer;
 import com.github.thbrown.softballsim.data.gson.DataStats;
 import com.github.thbrown.softballsim.datasource.ProgressTracker;
+import com.github.thbrown.softballsim.lineup.BattingLineup;
 import com.github.thbrown.softballsim.lineupindexer.BattingLineupIndexer;
 import com.github.thbrown.softballsim.lineupindexer.LineupTypeEnum;
 import com.github.thbrown.softballsim.optimizer.Optimizer;
 import com.github.thbrown.softballsim.optimizer.impl.montecarloexhaustive.HitGenerator;
+import com.github.thbrown.softballsim.optimizer.impl.montecarloexhaustive.MonteCarloGameSimulation;
 import com.github.thbrown.softballsim.util.Logger;
 
 public class MonteCarloAdaptiveOptimizer implements Optimizer<MonteCarloAdaptiveResult> {
@@ -101,8 +104,15 @@ public class MonteCarloAdaptiveOptimizer implements Optimizer<MonteCarloAdaptive
     Set<Long> preExistingCandidateLineupIndexes =
         Optional.ofNullable(existingResult).map(v -> v.getCandidateLineups()).orElse(Collections.emptySet());
 
-    long simulationsRun = 0;
-    LineupComposite firstLineupComposite = new LineupComposite(indexer.getLineup(0), hitGenerator, 0L);
+    long simulationsRun = Optional.ofNullable(existingResult).map(v -> v.getCountCompleted()).orElse(0L);
+
+    BattingLineup startingLineup =
+        Optional.ofNullable(existingResult).map(v -> v.getLineup()).orElse(indexer.getLineup(0));
+    if (existingResult != null) {
+      // The serialized result does not save the players stats
+      startingLineup.populateStats(battingData);
+    }
+    LineupComposite firstLineupComposite = new LineupComposite(startingLineup, hitGenerator, 0L);
     SynchronizationLineupCompositeWrapper bestLineup = new SynchronizationLineupCompositeWrapper(firstLineupComposite);
     Set<LineupComposite> candidateLineupsGlobal = new LinkedHashSet<>();
     for (Long l : preExistingCandidateLineupIndexes) {
@@ -205,7 +215,6 @@ public class MonteCarloAdaptiveOptimizer implements Optimizer<MonteCarloAdaptive
         results.add(executor.submit(task));
       }
 
-
       // Print a warning if the buffer gets low
       ThreadPoolExecutor ex = (ThreadPoolExecutor) executor;
       if (ex.getQueue().size() < parsedArguments.getThreads()
@@ -221,6 +230,19 @@ public class MonteCarloAdaptiveOptimizer implements Optimizer<MonteCarloAdaptive
      * if (candidateLineupsGlobal.size() != 0) { throw new RuntimeException(
      * "There should no lineups remaining, but there were " + candidateLineupsGlobal.size()); }
      */
+    
+    // Make sure we've run at least MAX_ITERATIONS games on our final result so the expected score is
+    // accurate.
+    // This is especially important when using a cached result. Since stats objects can't be serialized
+    // and cached, a final result will have a score of NaN
+    if (bestLineupCompositeSoFar.getStats().getN() < TTestTask.MAX_ITERATIONS) {
+      for (int i = 0; i < TTestTask.MAX_ITERATIONS - bestLineupCompositeSoFar.getStats().getN(); i++) {
+        double score =
+            MonteCarloGameSimulation.simulateGame(bestLineupCompositeSoFar.getLineup(), parsedArguments.getInnings(),
+                bestLineupCompositeSoFar.getHitGenerator());
+        bestLineupCompositeSoFar.addSample(score);
+      }
+    }
 
     Set<Long> candidateLineupIndexes =
         candidateLineupsGlobal.stream().map(v -> v.lineupIndex()).collect(Collectors.toSet());
@@ -229,6 +251,7 @@ public class MonteCarloAdaptiveOptimizer implements Optimizer<MonteCarloAdaptive
     MonteCarloAdaptiveResult finalResult = new MonteCarloAdaptiveResult(bestLineupCompositeSoFar.getLineup(),
         bestLineupCompositeSoFar.getStats().getMean(), indexer.size(), indexer.size(), elapsedTime,
         candidateLineupIndexes, simulationsRun);
+
     progressTracker.updateProgress(finalResult);
     return finalResult;
   }
@@ -252,6 +275,11 @@ public class MonteCarloAdaptiveOptimizer implements Optimizer<MonteCarloAdaptive
         throw new RuntimeException(Msg.PLAYER_HAS_NO_PA.args(player.getName(), player.getId()));
       }
     }
+  }
+
+  @Override
+  public Class<? extends Result> getResultClass() {
+    return MonteCarloAdaptiveResult.class;
   }
 
 }

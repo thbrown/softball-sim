@@ -89,7 +89,7 @@ public class GenerateGalleryHtml {
     return policy.sanitize(input);
   }
 
-  private Tag getGalleryTile(String id, String imgLink, String name, String description) {
+  private Tag<?> getGalleryTile(String id, String imgLink, String name, String description) {
     // This system to get the appropriate data to the modal is not great, but I don't like the
     // alternatives with either:
     // Current Method: Copy the description html, name, and image from the gallery tile to the modal

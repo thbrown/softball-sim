@@ -19,7 +19,7 @@ import com.github.thbrown.softballsim.util.Logger;
 public class DataSourceNetwork implements DataSource {
 
   // DataSource - NETWORK
-  public final static String LOCAL_IP_ADDRESS = "L";
+  public final static String IP_ADDRESS = "I";
   public final static String OPTIMIZATION_ID = "K";
   public final static String CLEANUP_SCRIPT = "C";
 
@@ -29,7 +29,7 @@ public class DataSourceNetwork implements DataSource {
   @Override
   public List<Option> getCommandLineOptions() {
     List<Option> options = new ArrayList<>();
-    options.add(Option.builder(LOCAL_IP_ADDRESS)
+    options.add(Option.builder(IP_ADDRESS)
         .longOpt("Local-ip-address")
         .desc(DataSourceEnum.NETWORK
             + ": The ip address the application should attempt to connect to in order to get the information required to run the optimization. Default: "
@@ -64,7 +64,7 @@ public class DataSourceNetwork implements DataSource {
     CommandLine commonAndDataSource = commandLineOptions.parse(commonAndDataSourceOptions, args, true);
 
     try {
-      String connectionIp = commonAndDataSource.getOptionValue(LOCAL_IP_ADDRESS, LOCAL_IP_ADDRESS_DEFAULT);
+      String connectionIp = commonAndDataSource.getOptionValue(IP_ADDRESS, LOCAL_IP_ADDRESS_DEFAULT);
       String optimizationId = commonAndDataSource.getOptionValue(OPTIMIZATION_ID, OPTIMIZATION_ID_DEFAULT);
       final boolean runCleanupScriptOnTerminate = commonAndDataSource.hasOption(CLEANUP_SCRIPT);
 

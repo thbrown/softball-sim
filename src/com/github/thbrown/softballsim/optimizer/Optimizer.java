@@ -34,5 +34,12 @@ public interface Optimizer<R extends Result> {
   public Result optimize(List<String> playersInLineup, LineupTypeEnum lineupType, DataStats battingData,
       Map<String, String> arguments, ProgressTracker progressTracker, R existingResult);
 
+  /**
+   * Just return the class of that result generic (Result.class if you are not using a custom result).
+   * 
+   * TODO: See if there is a way to fix this: It's a shame that this has to be specified twice. Once
+   * by overriding this method and once in the declaration of the subclass.
+   */
+  public Class<? extends Result> getResultClass();
 
 }

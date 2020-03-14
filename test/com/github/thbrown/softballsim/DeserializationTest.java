@@ -9,14 +9,10 @@ import com.github.thbrown.softballsim.data.gson.DataGame;
 import com.github.thbrown.softballsim.data.gson.DataPlateAppearance;
 import com.github.thbrown.softballsim.data.gson.DataPlayer;
 import com.github.thbrown.softballsim.data.gson.DataStats;
-import com.github.thbrown.softballsim.data.gson.DataStatsDeserializer;
 import com.github.thbrown.softballsim.data.gson.DataTeam;
 import com.github.thbrown.softballsim.optimizer.gson.OptimizerDefinition;
-import com.github.thbrown.softballsim.optimizer.gson.OptimizerDefinitionArgument;
-import com.github.thbrown.softballsim.optimizer.gson.OptimizerDefinitionArgumentDeserializer;
 import com.github.thbrown.softballsim.util.GsonAccessor;
 import com.github.thbrown.softballsim.util.Logger;
-import com.google.gson.GsonBuilder;
 
 public class DeserializationTest {
   // TODO: once network is implemented

@@ -24,7 +24,7 @@ public class MonteCarloExhaustiveTest {
     final int LINEUP_TYPE = 1;
     final int THREAD_COUNT = 4;
 
-    String[] args = {"-O", "MONTE_CARLO_EXHAUSTIVE", "-P",
+    String[] args = {"-O", "MONTE_CARLO_EXHAUSTIVE", "-L",
         "1OiRCCmrn16iyK,Oscar,Molly,Nelly,1CV6WRyspDjA7Z,1MPJ24EEyS0g6p",
         "-g", String.valueOf(GAMES), "-i", String.valueOf(INNINGS), "-T", String.valueOf(LINEUP_TYPE), "-t",
         String.valueOf(THREAD_COUNT)};
@@ -35,7 +35,7 @@ public class MonteCarloExhaustiveTest {
   @Test
   public void testDataSourceNetwork() throws Exception {
     final int INNINGS = 7;
-    final int GAMES = 100000;
+    final int GAMES = 1000;
     final int LINEUP_TYPE = 1;
     final int THREAD_COUNT = 4;
 
@@ -68,7 +68,7 @@ public class MonteCarloExhaustiveTest {
     };
     Server.start(hooks);
 
-    String[] args = {"-D", "NETWORK", "-O", "MONTE_CARLO_EXHAUSTIVE", "-P",
+    String[] args = {"-D", "NETWORK", "-O", "MONTE_CARLO_EXHAUSTIVE", "-L",
         "1OiRCCmrn16iyK,Oscar,Molly,Nelly,1CV6WRyspDjA7Z,1MPJ24EEyS0g6p"};
 
     SoftballSim.main(args);

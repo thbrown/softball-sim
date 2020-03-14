@@ -1,8 +1,8 @@
 package com.github.thbrown.softballsim;
 
-import java.util.List;
 import java.util.Optional;
 import com.github.thbrown.softballsim.lineup.BattingLineup;
+import com.github.thbrown.softballsim.optimizer.OptimizerEnum;
 
 /**
  * This class contains the output of an optimization. It's used for reporting to the end user as
@@ -16,13 +16,15 @@ import com.github.thbrown.softballsim.lineup.BattingLineup;
  * extend this extend this class. Subclasses should be careful to maintain immutability.
  */
 public class Result {
+  private final OptimizerEnum optimizer;
   private final BattingLineup lineup;
   private final double lineupScore;
   private final long countTotal;
   private final long countCompleted;
   private final long elapsedTimeMs;
 
-  public Result(BattingLineup lineup, double lineupScore, long countTotal, long countCompleted, long elapsedTimeMs) {
+  public Result(OptimizerEnum optimizer, BattingLineup lineup, double lineupScore, long countTotal, long countCompleted, long elapsedTimeMs) {
+    this.optimizer = optimizer;
     this.lineup = lineup;
     this.lineupScore = lineupScore;
     this.countTotal = countTotal;
@@ -34,6 +36,7 @@ public class Result {
    * Copy constructor
    */
   public Result(Result toCopy) {
+    this.optimizer = toCopy.optimizer;
     this.lineup = toCopy.lineup;
     this.lineupScore = toCopy.lineupScore;
     this.countTotal = toCopy.countTotal;

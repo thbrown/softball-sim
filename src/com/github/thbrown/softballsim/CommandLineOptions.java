@@ -3,7 +3,6 @@ package com.github.thbrown.softballsim;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -39,7 +38,7 @@ public class CommandLineOptions {
   public final static String OPTIMIZER = "O";
   public final static String HELP = "H";
   public final static String VERBOSE = "V"; // Should this be 'B' and use 'V' for version?
-  public final static String PLAYERS_IN_LINEUP = "P";
+  public final static String LINEUP = "L";
   public final static String FORCE = "F";
 
   public final static String SOURCE_DEFAULT = "FILE_SYSTEM";
@@ -50,7 +49,7 @@ public class CommandLineOptions {
       "An application for optimizing batting lineups using historical hitting data. Powered by by open source optimization engines at https://github.com/thbrown/softball-sim. For more options, specify an optimizer.";
   public final static String HELP_HEADER_2 = "Showing additional flags for ";
   public final static String HELP_FOOTER = String.join(" ", "Example:", APPLICATION_NAME, "-" + DATA_SOURCE,
-      "FILE_SYSTEM", "-" + OPTIMIZER, "MONTE_CARLO_EXHAUSTIVE", "-", PLAYERS_IN_LINEUP, "Maya,PJ,Rex,Bodie,Lizzy,Julia",
+      "FILE_SYSTEM", "-" + OPTIMIZER, "MONTE_CARLO_EXHAUSTIVE", "-", LINEUP, "Maya,PJ,Rex,Bodie,Lizzy,Julia",
       "-" + MonteCarloExhaustiveArgumentParser.GAMES,
       String.valueOf(10000), "-" + MonteCarloExhaustiveArgumentParser.INNINGS, String.valueOf(7));
 
@@ -89,8 +88,8 @@ public class CommandLineOptions {
         .build());
     commonOptions.add(Option.builder(FORCE)
         .longOpt("Force")
-        .desc("In Development. "
-            + "If this flag is provided, application will not attempt to use any previously calculated results from the /partialOptimizations directory to resume the optimization from its state when it was inturrupted or last run.")
+        .desc(
+            "If this flag is provided, application will not attempt to use any previously calculated results from the /cache directory to resume the optimization from its state when it was inturrupted or last run.")
         .hasArg(false)
         .required(false)
         .build());
@@ -109,7 +108,7 @@ public class CommandLineOptions {
         .hasArg(true)
         .required(false) // This is a required field, but we'll enforce it manually (i.e. no using Apache cli)
         .build());
-    commonOptions.add(Option.builder(PLAYERS_IN_LINEUP)
+    commonOptions.add(Option.builder(LINEUP)
         .longOpt("Players-in-lineup")
         .desc(
             "Comma separated list of player ids that should be included in the optimized lineup. Defaults to all players.")
@@ -191,7 +190,7 @@ public class CommandLineOptions {
             // TODO: handle UNINITIALIZED and UNLIMITED_VALUES better?
             // UNLIMITED_VALUES is currently treated as no-arg
             throw new UnsupportedOperationException(
-                "Unlimited args are not currently supported, consider accepting a quoted string and spliting it manually");
+                "Unlimited args are not currently supported, consider accepting a delimited string and spliting it manually");
           }
           break;
         }
