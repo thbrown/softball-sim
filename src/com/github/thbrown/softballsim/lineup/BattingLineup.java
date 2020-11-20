@@ -5,6 +5,9 @@ import java.util.stream.Collectors;
 import com.github.thbrown.softballsim.data.gson.DataPlayer;
 import com.github.thbrown.softballsim.data.gson.DataStats;
 
+/**
+ * Implementers must make sure this their implementations are immutable.
+ */
 public interface BattingLineup {
 
   /**
@@ -34,9 +37,9 @@ public interface BattingLineup {
   }
 
   /**
-   * Player statistics aren't stored in serialised result data. So players will appear to have no
-   * stats after deserialization. This method replaces the players w/ empty stats objects with their
-   * counterparts from DataStats that do have stats info.
+   * Player statistics aren't stored in serialized result data. So players will appear to have no
+   * stats after deserialization. This method replaces the players that have empty stats objects with
+   * their counterparts from DataStats that do have stats info.
    */
   public void populateStats(DataStats battingData);
 

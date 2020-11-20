@@ -20,6 +20,7 @@ import com.github.thbrown.softballsim.lineupindexer.LineupTypeEnum;
 import com.github.thbrown.softballsim.optimizer.gson.OptimizerDefinition;
 import com.github.thbrown.softballsim.optimizer.impl.montecarloexhaustive.MonteCarloExhaustiveOptimizer;
 import com.github.thbrown.softballsim.optimizer.impl.montecarloadaptive.MonteCarloAdaptiveOptimizer;
+import com.github.thbrown.softballsim.optimizer.impl.montecarloannealing.MonteCarloAnnealingOptimizer;
 import com.github.thbrown.softballsim.util.GsonAccessor;
 import com.github.thbrown.softballsim.util.Logger;
 import com.github.thbrown.softballsim.util.StringUtils;
@@ -32,7 +33,8 @@ import com.github.thbrown.softballsim.util.StringUtils;
 public enum OptimizerEnum {
   // TODO: Can't we just use the id from the json?
   MONTE_CARLO_EXHAUSTIVE(0, new MonteCarloExhaustiveOptimizer()),
-  MONTE_CARLO_ADAPTIVE(1, new MonteCarloAdaptiveOptimizer());
+  MONTE_CARLO_ADAPTIVE(1, new MonteCarloAdaptiveOptimizer()),
+  MONTE_CARLO_ANNEALING(2, new MonteCarloAnnealingOptimizer());
 
   private final int id;
   private final Optimizer<? extends Result> optimizerImplementation;

@@ -49,7 +49,7 @@ public class DataSourceFileSystem implements DataSource {
   }
 
   @Override
-  public void execute(String[] args, LineupTypeEnum lineupType, List<String> players, OptimizerEnum optimizer) {
+  public Result execute(String[] args, LineupTypeEnum lineupType, List<String> players, OptimizerEnum optimizer) {
     // Require an optimizer
     if (optimizer == null) {
       throw new RuntimeException(
@@ -118,9 +118,11 @@ public class DataSourceFileSystem implements DataSource {
         // This will terminate the application
         EstimateOnlyExecutionWrapper wrapper = new EstimateOnlyExecutionWrapper(optimizer, functions);
         wrapper.optimize(players, lineupType, stats, arguments, tracker, existingResult);
+        return null; // Doesn't matter
       } else {
         Result result = optimizer.optimize(players, lineupType, stats, arguments, tracker, existingResult);
         functions.onComplete(result);
+        return result;
       }
     } finally {
       trackerThread.interrupt();

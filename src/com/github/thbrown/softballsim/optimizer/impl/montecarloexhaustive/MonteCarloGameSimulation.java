@@ -91,7 +91,7 @@ public class MonteCarloGameSimulation {
               StringUtils.padRight(p.getName(), NAME_PADDING) +
                   "\t hit:" + mapBasesToHitType(numBases) +
                   "\t outs:" + outs +
-                  "\t score:" + gameScore;
+                  "\t score:" + (gameScore + runsThisInning);
           Logger.log(message);
         }
       }

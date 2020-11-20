@@ -2,6 +2,7 @@ package com.github.thbrown.softballsim.lineupindexer;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.math3.util.Pair;
 import com.github.thbrown.softballsim.data.gson.DataPlayer;
 import com.github.thbrown.softballsim.data.gson.DataStats;
 import com.github.thbrown.softballsim.lineup.AlternatingBattingLineup;
@@ -19,15 +20,14 @@ public class AlternatingGenderLineupIndexer implements BattingLineupIndexer {
 
   public AlternatingGenderLineupIndexer(DataStats stats, List<String> players) {
     // Get the DataPlayers by id, this isn't as efficient as it could be
-    for (DataPlayer player : stats.getPlayers()) {
-      if (players.contains(player.getId())) {
-        if (player.getGender().equals("M")) {
-          men.add(player);
-        } else if (player.getGender().equals("F")) {
-          women.add(player);
-        } else {
-          throw new IllegalArgumentException("Unrecognized gender " + player.getGender());
-        }
+    for (String playerId : players) {
+      DataPlayer player = stats.getPlayerById(playerId);
+      if (player.getGender().equals("M")) {
+        men.add(player);
+      } else if (player.getGender().equals("F")) {
+        women.add(player);
+      } else {
+        throw new IllegalArgumentException("Unrecognized gender " + player.getGender());
       }
     }
 
@@ -62,6 +62,16 @@ public class AlternatingGenderLineupIndexer implements BattingLineupIndexer {
   @Override
   public long size() {
     return this.size;
+  }
+
+  @Override
+  public Pair<Long, BattingLineup> getRandomNeighbor(long index) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public long getIndex(BattingLineup lineup) {
+    throw new UnsupportedOperationException();
   }
 
 }

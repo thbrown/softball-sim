@@ -63,6 +63,7 @@ public class DataPlayer {
   private transient Integer sacCount;
   private transient Integer atBatCount;
   private transient Integer errorCount;
+  private transient Integer strikeoutCount;
   private transient Integer fcCount;
   private transient Integer outCount;
   private transient Integer hitCount;
@@ -119,6 +120,16 @@ public class DataPlayer {
     return sacCount;
   }
 
+  public int getStrikeoutCount() {
+    calculateIfNull(strikeoutCount);
+    return strikeoutCount;
+  }
+
+  public int getReachedOnErrorCount() {
+    calculateIfNull(errorCount);
+    return this.errorCount;
+  }
+
   private void calculateIfNull(Object input) {
     if (input == null) {
       calculatePlayerStats();
@@ -145,13 +156,14 @@ public class DataPlayer {
     this.directOutCount = zeroIfNull(results.get("Out"));
     this.errorCount = zeroIfNull(results.get("E"));
     this.fcCount = zeroIfNull(results.get("FC"));
+    this.strikeoutCount = zeroIfNull(results.get("K"));
     this.sacCount = zeroIfNull(results.get("SAC"));
     this.walkCount = zeroIfNull(results.get("BB"));
     this.singleCount = zeroIfNull(results.get("1B"));
     this.doubleCount = zeroIfNull(results.get("2B"));
     this.tripleCount = zeroIfNull(results.get("3B"));
     this.homerunCount = zeroIfNull(results.get("HRi")) + zeroIfNull(results.get("HRo"));
-    this.outCount = this.directOutCount + this.errorCount + this.fcCount;
+    this.outCount = this.directOutCount + this.fcCount + this.strikeoutCount + this.errorCount; // Omits SAC/BB
     this.hitCount = this.singleCount + this.doubleCount + this.tripleCount + this.homerunCount;
     this.atBatCount = this.hitCount + this.outCount;
     this.totalBases = this.singleCount + this.doubleCount * 2 + this.tripleCount * 3 + this.homerunCount * 4;

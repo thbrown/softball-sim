@@ -12,8 +12,8 @@ import com.google.gson.JsonParseException;
 
 /**
  * Determines what subclass of Result a cached file in json format saved in the cached directory
- * should be deserialized into. This is based on the "optimizer" field in the top level of the
- * json object.
+ * should be deserialized into. This is based on the "optimizer" field in the top level of the json
+ * object.
  */
 public class ResultDeserializer implements JsonDeserializer<Result> {
 

@@ -41,7 +41,7 @@ public class DeserializationTest {
 
     // Spot check some fields - this is tightly coupled to the sample data
     DataPlayer somePlayer = targetObject.getPlayers().get(0);
-    assertEquals(.609, somePlayer.getBattingAverage(), .001);
+    assertEquals(.597, somePlayer.getBattingAverage(), .001);
     assertEquals(115, somePlayer.getSingleCount());
 
     DataTeam someTeam = targetObject.getTeams().get(0);
@@ -64,7 +64,6 @@ public class DeserializationTest {
   @Test
   public void deserializeJsonData() throws IOException {
     String json = new String(Files.readAllBytes(Paths.get("./json/monte-carlo-exhaustive.json")));
-
 
     OptimizerDefinition targetObject = GsonAccessor.getInstance().getCustom().fromJson(json, OptimizerDefinition.class);
 

@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.commons.cli.Option;
+import com.github.thbrown.softballsim.Result;
 import com.github.thbrown.softballsim.datasource.local.DataSourceFileSystem;
 import com.github.thbrown.softballsim.datasource.network.DataSourceNetwork;
 import com.github.thbrown.softballsim.lineupindexer.LineupTypeEnum;
@@ -52,7 +53,7 @@ public enum DataSourceEnum {
     return dataSource.getCommandLineOptions();
   }
 
-  public void execute(String[] args, LineupTypeEnum lineupType, List<String> players, OptimizerEnum optimizer) {
-    dataSource.execute(args, lineupType, players, optimizer);
+  public Result execute(String[] args, LineupTypeEnum lineupType, List<String> players, OptimizerEnum optimizer) {
+    return dataSource.execute(args, lineupType, players, optimizer);
   }
 }

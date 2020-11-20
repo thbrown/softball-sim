@@ -17,7 +17,7 @@ import com.github.thbrown.softballsim.util.GsonAccessor;
 public class OptimizerSuiteTest {
 
   /**
-   * This test verifies the id property in the json for for each optimizer The id property must meet
+   * This test verifies the id property in the json for for each optimizer. The id property must meet
    * the following requirements: 1) It must be defined 2) It must be a positive whole number 3) It
    * must be unique 4) It must be the next available number (i.e no skipping numbers)
    */

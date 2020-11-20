@@ -66,7 +66,8 @@ public class MonteCarloExhaustiveOptimizer implements Optimizer<MonteCarloExhaus
      * data once. We're using the first lineup here (index 0) to get a list of players, but we could
      * have used any lineup.
      */
-    List<DataPlayer> someLineup = indexer.getLineup(0).asList();
+    final long STARTING_INDEX = 0;
+    List<DataPlayer> someLineup = indexer.getLineup(STARTING_INDEX).asList();
     HitGenerator hitGenerator = new HitGenerator(someLineup);
 
     // Queue up a few tasks to process (number of tasks is capped by TASK_BUFFER_SIZE)
@@ -80,9 +81,10 @@ public class MonteCarloExhaustiveOptimizer implements Optimizer<MonteCarloExhaus
     }
 
     // Process results as they finish executing
+    double worstScore = Optional.ofNullable(existingResult).map(v -> v.getWorstScore()).orElse(Double.MAX_VALUE);
     double initialScore = Optional.ofNullable(existingResult).map(v -> v.getLineupScore()).orElse(0.0);
     BattingLineup initialLineup = Optional.ofNullable(existingResult).map(v -> v.getLineup()).orElse(null);
-    if(existingResult != null) {
+    if (existingResult != null) {
       initialLineup.populateStats(battingData);
     }
     TaskResult bestResult = new TaskResult(initialScore, initialLineup);
@@ -100,6 +102,14 @@ public class MonteCarloExhaustiveOptimizer implements Optimizer<MonteCarloExhaus
         }
       } catch (InterruptedException | ExecutionException e) {
         throw new RuntimeException(e);
+      }
+
+      // Print Lineup Index and Score (For research purposes)
+      // Logger.log(indexer.getIndex(result.getLineup()) + "\t" + result.getScore());
+
+      // Update worst score
+      if (result.getScore() < worstScore) {
+        worstScore = result.getScore();
       }
 
       // Update histogram
@@ -120,7 +130,7 @@ public class MonteCarloExhaustiveOptimizer implements Optimizer<MonteCarloExhaus
       long elapsedTime = (System.currentTimeMillis() - startTimestamp)
           + Optional.ofNullable(existingResult).map(v -> v.getElapsedTimeMs()).orElse(0l);
       MonteCarloExhaustiveResult partialResult = new MonteCarloExhaustiveResult(bestResult.getLineup(),
-          bestResult.getScore(), indexer.size(), progressCounter, elapsedTime, histo);
+          bestResult.getScore(), indexer.size(), progressCounter, elapsedTime, histo, worstScore);
       progressTracker.updateProgress(partialResult);
 
       // Add another task to the buffer if there are any left
@@ -140,7 +150,7 @@ public class MonteCarloExhaustiveOptimizer implements Optimizer<MonteCarloExhaus
     long elapsedTime = (System.currentTimeMillis() - startTimestamp)
         + Optional.ofNullable(existingResult).map(v -> v.getElapsedTimeMs()).orElse(0l);
     MonteCarloExhaustiveResult finalResult = new MonteCarloExhaustiveResult(bestResult.getLineup(),
-        bestResult.getScore(), indexer.size(), progressCounter, elapsedTime, histo);
+        bestResult.getScore(), indexer.size(), progressCounter, elapsedTime, histo, worstScore);
     return finalResult;
   }
 
@@ -153,7 +163,7 @@ public class MonteCarloExhaustiveOptimizer implements Optimizer<MonteCarloExhaus
       }
     }
   }
-  
+
   @Override
   public Class<? extends Result> getResultClass() {
     return MonteCarloExhaustiveResult.class;

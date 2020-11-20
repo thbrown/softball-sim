@@ -1,6 +1,7 @@
 package com.github.thbrown.softballsim.util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -37,7 +38,7 @@ public class CombinatoricsUtil {
   }
 
   /**
-   * Calculate how many whys ther are to choose k elements from a set of n elements (n choose k)
+   * Calculate how many ways there are to choose k elements from a set of n elements (n choose k)
    */
   public static long binomial(int n, int k) {
     if (n == 0 || k > n || k < 0) {
@@ -46,6 +47,10 @@ public class CombinatoricsUtil {
     return (factorial(n) / (factorial(k) * factorial(n - k)));
   }
 
+  /**
+   * Maps each element of a list to a new list based of the specification in 'order' e.g. if the 1st
+   * element of 'order' is 8, the 8th element of the return list will be the first element of 'list'
+   */
   public static <T> List<T> mapListToArray(List<T> list, int[] order) {
     List<T> toReturn = new ArrayList<>();
     for (int i = 0; i < order.length; i++) {
@@ -54,8 +59,36 @@ public class CombinatoricsUtil {
     return toReturn;
   }
 
-  // http://webhome.cs.uvic.ca/~ruskey/Publications/RankPerm/MyrvoldRuskey.pdf
+  public static <T> int[] getOrdering(List<T> shuffledList, List<T> originalList) {
+    // TODO: can we do this better than n^2
+    // TODO: check that lists are = length?
+    int[] order = new int[originalList.size()];
+    int counter = 0;
+    for (int i = 0; i < originalList.size(); i++) {
+      T originalElement = originalList.get(i);
+      for (int j = 0; j < shuffledList.size(); j++) {
+        T shuffledElement = shuffledList.get(j);
+        if (originalElement.equals(shuffledElement)) {
+          order[counter] = j;
+          counter++;
+          continue;
+        }
+      }
+    }
+    return order;
+  }
+
+  // TODO: make this return the 0,1,2,3,4 etc... as the first permutation
+  // http://webhome.cs.uvic.ca/~ruskey/Publications/RankPerm/MyrvoldRuskey.pdf - unrank1
   public static int[] getIthPermutation(int size, long i) {
+    // Index adjustment to make the 0th permutation match the initial order
+    if (i == 0) {
+      i = factorial(size) - 1;
+    } else {
+      i -= 1;
+    }
+
+    // MyrvoldRuskey
     int[] initialOrder = new int[size];
     for (int j = 0; j < size; j++) {
       initialOrder[j] = j;
@@ -71,8 +104,39 @@ public class CombinatoricsUtil {
     return initialOrder;
   }
 
+  // TODO: int isn't enough here (will fail on normal lineups of 13 players or more)
+  // http://webhome.cs.uvic.ca/~ruskey/Publications/RankPerm/MyrvoldRuskey.pdf - rank1
+  public static int getPermutationIndex(int[] permutation) {
+    int[] permutaionCopy = permutation.clone();
+    int[] inversePermutaion = new int[permutation.length];
+    for (int i = 0; i < inversePermutaion.length; i++) {
+      inversePermutaion[permutation[i]] = i;
+    }
+    int result = getPermutationIndex(permutation.length, permutaionCopy, inversePermutaion);
+
+    // Index adjustment to make the 0th permutation match the initial order
+    if (result == factorial(permutation.length) - 1) {
+      return 0;
+    } else {
+      return result + 1;
+    }
+  }
+
+  private static int getPermutationIndex(int size, int[] order, int[] inverseOrder) {
+    if (size == 1) {
+      return 0;
+    }
+    int something = order[size - 1];
+    swap(size - 1, inverseOrder[size - 1], order);
+    swap(something, size - 1, inverseOrder);
+    return (something + size * getPermutationIndex(size - 1, order, inverseOrder));
+  }
+
   // https://computationalcombinatorics.wordpress.com/2012/09/10/ranking-and-unranking-of-combinations-and-permutations/
-  public static int[] getIthCombination(int k, long m) {
+  // unrank-co-lexographic
+  public static int[] getIthCombination(int size, long index) {
+    int k = size;
+    long m = index;
     int[] S = new int[k];
     int i = k - 1;
     while (i >= 0) {
@@ -87,7 +151,18 @@ public class CombinatoricsUtil {
     return S;
   }
 
-  static private void swap(int indexOne, int indexTwo, int[] arrayToSwap) {
+  // https://computationalcombinatorics.wordpress.com/2012/09/10/ranking-and-unranking-of-combinations-and-permutations/
+  // rank-co-lexographic
+  public static long getCombinationIndex(int[] S) {
+    int k = S.length;
+    long sum = 0;
+    for (int i = 0; i < k; i++) {
+      sum += binomial(S[i], i + 1);
+    }
+    return sum;
+  }
+
+  static public void swap(int indexOne, int indexTwo, int[] arrayToSwap) {
     int temp = arrayToSwap[indexOne];
     arrayToSwap[indexOne] = arrayToSwap[indexTwo];
     arrayToSwap[indexTwo] = temp;

@@ -24,6 +24,10 @@ public class TTestTaskResult {
     return this.eliminatedLineupComposites;
   }
 
+  /**
+   * @return the number of monte carlo simulations the ttest performed in total to determine the best
+   *         lineup.
+   */
   public long getSimulationsRequired() {
     return simulationsRequired;
   }
@@ -33,4 +37,5 @@ public class TTestTaskResult {
     return bestLineupComposite.getStats().getMean() + " "
         + Optional.ofNullable(bestLineupComposite.getLineup()).map(v -> v.toString()).orElse("-");
   }
+
 }

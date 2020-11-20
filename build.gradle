@@ -87,7 +87,7 @@ task generateGalleryHtml(type: Test) {
   }
 }
 
-// This used to be more valuable when needed to make requests to load json from the webserver, not just opting the .html file in the browser works just as well.
+// This used to be more valuable when needed to make requests to load json from the webserver, now just opting the .html file in the browser works just as well.
 task serve {
 	doLast {
 		int port = 8085;

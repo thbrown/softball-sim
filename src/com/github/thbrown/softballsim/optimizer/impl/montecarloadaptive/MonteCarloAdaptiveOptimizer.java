@@ -39,8 +39,10 @@ public class MonteCarloAdaptiveOptimizer implements Optimizer<MonteCarloAdaptive
   private static final int TASK_MAX_LINEUP_COUNT = 10;
   private static final int TASK_MIN_LINEUP_COUNT = 1;
 
-  private static final int TASK_BUFFER_SIZE = 2000;
+  // Maximum number of tasks that should be queued up at once.
+  private static final int TASK_BUFFER_SIZE = 200;
 
+  private long lineupIndex = 0;
 
   @Override
   public MonteCarloAdaptiveResult optimize(List<String> playersInLineup, LineupTypeEnum lineupType,
@@ -56,6 +58,7 @@ public class MonteCarloAdaptiveOptimizer implements Optimizer<MonteCarloAdaptive
     // Get the arguments as their expected types
     MonteCarloAdaptiveArgumentParser parsedArguments = new MonteCarloAdaptiveArgumentParser(arguments);
     final double ALPHA = parsedArguments.getAlpha();
+    final int INNINGS = parsedArguments.getInnings();
 
     // Since this optimizer involves iterating over all possible lineups, we'll use the lineup indexer
     BattingLineupIndexer indexer = lineupType.getLineupIndexer(battingData, playersInLineup);
@@ -63,13 +66,10 @@ public class MonteCarloAdaptiveOptimizer implements Optimizer<MonteCarloAdaptive
     // It might make sense to take a best guess at the optimal lineup by sorting each batter by AVG.
     // If the first lineup is a reasonably good one, we'll be comparing new lineups against it and since
     // it's more likely there will be a greater difference between mean runs scored for this lineup
-    // we'll
-    // have to run less simulations to detect that difference. This would be better if we only had one
-    // best lineup
-    // instead of one best lineup for each thread like we have now.
-
+    // we'll have to run less simulations to detect that difference.
     List<DataPlayer> firstLineup = indexer.getLineup(0).asList();
-    Collections.sort(firstLineup, new Comparator<DataPlayer>() {
+    List<DataPlayer> modifiableList = new ArrayList<>(firstLineup);
+    Collections.sort(modifiableList, new Comparator<DataPlayer>() {
       @Override
       public int compare(DataPlayer o1, DataPlayer o2) {
         double diff = (o2.getBattingAverage() - o1.getBattingAverage());
@@ -82,9 +82,8 @@ public class MonteCarloAdaptiveOptimizer implements Optimizer<MonteCarloAdaptive
       }
     });
     List<String> playerIdsSortedByBattingAverage =
-        firstLineup.stream().map(v -> v.getId()).collect(Collectors.toList());
+        modifiableList.stream().map(v -> v.getId()).collect(Collectors.toList());
     indexer = lineupType.getLineupIndexer(battingData, playerIdsSortedByBattingAverage);
-
 
     // Our optimizer is parallelizable so we want to take advantage of multiple cores
     ExecutorService executor = Executors.newFixedThreadPool(parsedArguments.getThreads());
@@ -98,67 +97,60 @@ public class MonteCarloAdaptiveOptimizer implements Optimizer<MonteCarloAdaptive
     List<DataPlayer> someLineup = indexer.getLineup(0).asList();
     HitGenerator hitGenerator = new HitGenerator(someLineup);
 
-    // We need to keep track of what lineups are looking the best so far, in case the simulations
-    // gets interrupted we can restart where we left off
-    Queue<LineupComposite> inProgressLineups = new LinkedList<>();
-    Set<Long> preExistingCandidateLineupIndexes =
-        Optional.ofNullable(existingResult).map(v -> v.getCandidateLineups()).orElse(Collections.emptySet());
-
+    // This section involves setting up variables used by the simulation including restoring a paused
+    // simulation
     long simulationsRun = Optional.ofNullable(existingResult).map(v -> v.getCountCompleted()).orElse(0L);
 
-    BattingLineup startingLineup =
-        Optional.ofNullable(existingResult).map(v -> v.getLineup()).orElse(indexer.getLineup(0));
-    if (existingResult != null) {
-      // The serialized result does not save the players stats
-      startingLineup.populateStats(battingData);
-    }
-    LineupComposite firstLineupComposite = new LineupComposite(startingLineup, hitGenerator, 0L);
-    SynchronizationLineupCompositeWrapper bestLineup = new SynchronizationLineupCompositeWrapper(firstLineupComposite);
-    Set<LineupComposite> candidateLineupsGlobal = new LinkedHashSet<>();
-    for (Long l : preExistingCandidateLineupIndexes) {
-      LineupComposite composite = new LineupComposite(indexer.getLineup(l), hitGenerator, l);
-      candidateLineupsGlobal.add(composite);
-      inProgressLineups.add(composite);
+    BattingLineup startingLineup = Optional.ofNullable(existingResult)
+        .map(MonteCarloAdaptiveResult::getLineup)
+        // The serialized result does not save the players stats
+        .map(lineup -> {
+          lineup.populateStats(battingData);
+          return lineup;
+        })
+        .orElse(indexer.getLineup(0));
+
+    LineupComposite startingLineupComposite = new LineupComposite(startingLineup, hitGenerator, 0L);
+    SynchronizedLineupCompositeWrapper bestLineupComposite =
+        new SynchronizedLineupCompositeWrapper(startingLineupComposite);
+
+    // This is where the best lineups for each task wait to be added to a new task.
+    Queue<LineupComposite> winnersPool = new LinkedList<>();
+
+    // Candidate list contains all lineups before the 'lineupIndex' that have not yet been eliminated,
+    // they may been in the winners pool
+    // waiting to be added to a task, or they may have already been assigned to a task
+    Set<LineupComposite> candidateLineups = new LinkedHashSet<>();
+
+    Set<Long> savedCandidateLineupIndexes = Optional.ofNullable(existingResult)
+        .map(MonteCarloAdaptiveResult::getCandidateLineups).orElse(Collections.emptySet());
+    for (Long linupIndex : savedCandidateLineupIndexes) {
+      LineupComposite composite = new LineupComposite(indexer.getLineup(linupIndex), hitGenerator, linupIndex);
+      candidateLineups.add(composite);
+      winnersPool.add(composite);
     }
 
     // Queue up a few tasks to process (number of tasks is capped by TASK_BUFFER_SIZE)
-    long startIndex = Optional.ofNullable(existingResult).map(v -> v.getCountCompleted()).orElse(0L);
-    long lineupIndex = startIndex;
+    long startIndex = Optional.ofNullable(existingResult).map(v -> v.getCountCompleted()).orElse(1L); // 0th lineup will
+                                                                                                      // already be
+                                                                                                      // added
+    lineupIndex = startIndex;
 
     for (int i = 0; i < TASK_BUFFER_SIZE; i++) {
-      List<LineupComposite> lineupsToTest = new ArrayList<>(10);
-
-      int taskSize = getNumberOfLineupsToAddToTask(indexer.size() - lineupIndex,
-          parsedArguments.getThreads());
-      for (int j = 0; j < taskSize; j++) {
-
-        // First get any in progress lineups from the queue and add them to the task
-        if (!inProgressLineups.isEmpty()) {
-          LineupComposite toEnqueue = inProgressLineups.remove();
-          lineupsToTest.add(toEnqueue);
-          continue;
-        }
-
-        // Second get fresh lineups
-        if (lineupIndex < indexer.size()) {
-          LineupComposite composite = new LineupComposite(indexer.getLineup(lineupIndex), hitGenerator, lineupIndex);
-          lineupsToTest.add(composite);
-          lineupIndex++;
-        }
-
-        if (lineupIndex >= indexer.size()) {
-          // All done, no more lineups to enqueue for simulation
-          break;
-        }
+      int taskSize = getNumberOfLineupsToAddToTask(indexer.size() - lineupIndex, parsedArguments.getThreads());
+      long savedLineupIndexerIndex = this.lineupIndex;
+      List<LineupComposite> lineupsToTest = getLineupsToTest(taskSize, winnersPool, hitGenerator, indexer);
+      long newLineupsAdded = this.lineupIndex - savedLineupIndexerIndex;
+      if (lineupsToTest.size() > 0) {
+        TTestTask task =
+            new TTestTaskWithBestLineup(bestLineupComposite, lineupsToTest, INNINGS, ALPHA, newLineupsAdded);
+        results.add(executor.submit(task));
       }
-
-      TTestTask task = new TTestTask(lineupsToTest, parsedArguments.getInnings(), ALPHA, bestLineup);
-      results.add(executor.submit(task));
     }
 
-    // Process results as they finish executing
+    // Process results, in order of submission, as soon as the earliest submitted task finishes
+    // executing
     long progressCounter = startIndex;
-    LineupComposite bestLineupCompositeSoFar = bestLineup.getCopyOfBestLineupComposite();
     while (!results.isEmpty()) {
       // Wait for the result
       TTestTaskResult result = null;
@@ -171,47 +163,56 @@ public class MonteCarloAdaptiveOptimizer implements Optimizer<MonteCarloAdaptive
         throw new RuntimeException(e);
       }
 
-      // Maintain the list of active lineups
-      candidateLineupsGlobal.removeAll(result.getEliminatedLineupComposites());
-      if (result.getBestLineupComposite() != null) {
-        candidateLineupsGlobal.add(result.getBestLineupComposite());
-        inProgressLineups.add(result.getBestLineupComposite());
+      // Replace the best lineup if necessary
+      if (result.getBestLineupComposite() != null) { // Null means do nothing
+        // If the bestLineup is in the elimination list, update the bestLineup
+        boolean wasReplaced = bestLineupComposite.replaceIfCurrentIsInCollection(result.getBestLineupComposite(),
+            result.getEliminatedLineupComposites());
+        if (!wasReplaced) {
+          // Result lineup hasn't yet be compared to the current bestLineup (this should only happen in
+          // multithreaded use cases). Enqueue it for further evaluation.
+          winnersPool.add(result.getBestLineupComposite());
+        }
       }
+
+      // Maintain the list of active lineups
+      candidateLineups.removeAll(result.getEliminatedLineupComposites());
+      if (result.getBestLineupComposite() != null) {
+        candidateLineups.add(result.getBestLineupComposite());
+      }
+
+      // Keep track of the number of simulations run so far
       simulationsRun += result.getSimulationsRequired();
 
       // Update the progress tracker
-      progressCounter += result.getEliminatedLineupComposites().size();
-      bestLineupCompositeSoFar = bestLineup.getCopyOfBestLineupComposite();
+      LineupComposite bestLineupCopy = bestLineupComposite.getCopyOfBestLineupComposite();
+
+      // Ugly cast :(
+      progressCounter += ((TTestTaskResultWithNewLineups) result).getNewLineupsProcessed();
+      // Logger.log(progressCounter + " of " + indexer.size() + " " +
+      // (result.getEliminatedLineupComposites().size()));
+
       Set<Long> candidateLineupIndexes =
-          candidateLineupsGlobal.stream().map(v -> v.lineupIndex()).collect(Collectors.toSet());
+          candidateLineups.stream().map(LineupComposite::lineupIndex).collect(Collectors.toSet());
+
       long elapsedTime = (System.currentTimeMillis() - startTimestamp)
-          + Optional.ofNullable(existingResult).map(v -> v.getElapsedTimeMs()).orElse(0l);
-      MonteCarloAdaptiveResult partialResult = new MonteCarloAdaptiveResult(bestLineupCompositeSoFar.getLineup(),
-          bestLineupCompositeSoFar.getStats().getMean(), indexer.size(), progressCounter, elapsedTime,
+          + Optional.ofNullable(existingResult).map(MonteCarloAdaptiveResult::getElapsedTimeMs).orElse(0l);
+
+      MonteCarloAdaptiveResult partialResult = new MonteCarloAdaptiveResult(bestLineupCopy.getLineup(),
+          bestLineupCopy.getStats().getMean(), indexer.size(), progressCounter - candidateLineups.size(), elapsedTime,
           candidateLineupIndexes, simulationsRun);
+
       progressTracker.updateProgress(partialResult);
 
-      // Add task - TODO: this is duplicate code from above, clean it up
-      int numberOfLineupsToTest =
-          getNumberOfLineupsToAddToTask(indexer.size() - lineupIndex, parsedArguments.getThreads());
-      List<LineupComposite> lineupsToTest = new ArrayList<>(numberOfLineupsToTest);
-      for (int j = 0; j < numberOfLineupsToTest; j++) {
-        // First get any in progress lineups from the queue and add them to the task
-        if (!inProgressLineups.isEmpty()) {
-          LineupComposite toEnqueue = inProgressLineups.remove();
-          lineupsToTest.add(toEnqueue);
-          continue;
-        }
-        // Second get fresh lineups
-        if (lineupIndex < indexer.size()) {
-          LineupComposite composite = new LineupComposite(indexer.getLineup(lineupIndex), hitGenerator, lineupIndex);
-          lineupsToTest.add(composite);
-          lineupIndex++;
-        }
-      }
+      // Add new tasks
+      int taskSize = getNumberOfLineupsToAddToTask(indexer.size() - lineupIndex, parsedArguments.getThreads());
+      long savedLineupIndexerIndex = this.lineupIndex;
+      List<LineupComposite> lineupsToTest = getLineupsToTest(taskSize, winnersPool, hitGenerator, indexer);
+      long newLineupsAdded = this.lineupIndex - savedLineupIndexerIndex;
 
       if (lineupsToTest.size() > 0) {
-        TTestTask task = new TTestTask(lineupsToTest, parsedArguments.getInnings(), ALPHA, bestLineup);
+        TTestTask task =
+            new TTestTaskWithBestLineup(bestLineupComposite, lineupsToTest, INNINGS, ALPHA, newLineupsAdded);
         results.add(executor.submit(task));
       }
 
@@ -226,34 +227,72 @@ public class MonteCarloAdaptiveOptimizer implements Optimizer<MonteCarloAdaptive
     }
     executor.shutdown();
 
+    LineupComposite bestLineupCopy = bestLineupComposite.getCopyOfBestLineupComposite();
+
+
     /*
      * if (candidateLineupsGlobal.size() != 0) { throw new RuntimeException(
      * "There should no lineups remaining, but there were " + candidateLineupsGlobal.size()); }
      */
-    
+
     // Make sure we've run at least MAX_ITERATIONS games on our final result so the expected score is
     // accurate.
     // This is especially important when using a cached result. Since stats objects can't be serialized
     // and cached, a final result will have a score of NaN
-    if (bestLineupCompositeSoFar.getStats().getN() < TTestTask.MAX_ITERATIONS) {
-      for (int i = 0; i < TTestTask.MAX_ITERATIONS - bestLineupCompositeSoFar.getStats().getN(); i++) {
+    if (bestLineupCopy.getStats().getN() < TTestTask.MAX_ITERATIONS) {
+      for (int i = 0; i < TTestTask.MAX_ITERATIONS - bestLineupCopy.getStats().getN(); i++) {
         double score =
-            MonteCarloGameSimulation.simulateGame(bestLineupCompositeSoFar.getLineup(), parsedArguments.getInnings(),
-                bestLineupCompositeSoFar.getHitGenerator());
-        bestLineupCompositeSoFar.addSample(score);
+            MonteCarloGameSimulation.simulateGame(bestLineupCopy.getLineup(), INNINGS,
+                bestLineupCopy.getHitGenerator());
+        bestLineupCopy.addSample(score);
       }
     }
 
     Set<Long> candidateLineupIndexes =
-        candidateLineupsGlobal.stream().map(v -> v.lineupIndex()).collect(Collectors.toSet());
+        candidateLineups.stream().map(v -> v.lineupIndex()).collect(Collectors.toSet());
     long elapsedTime = (System.currentTimeMillis() - startTimestamp)
         + Optional.ofNullable(existingResult).map(v -> v.getElapsedTimeMs()).orElse(0l);
-    MonteCarloAdaptiveResult finalResult = new MonteCarloAdaptiveResult(bestLineupCompositeSoFar.getLineup(),
-        bestLineupCompositeSoFar.getStats().getMean(), indexer.size(), indexer.size(), elapsedTime,
+    MonteCarloAdaptiveResult finalResult = new MonteCarloAdaptiveResult(bestLineupCopy.getLineup(),
+        bestLineupCopy.getStats().getMean(), indexer.size(), indexer.size(), elapsedTime,
         candidateLineupIndexes, simulationsRun);
 
     progressTracker.updateProgress(finalResult);
     return finalResult;
+  }
+
+  private List<LineupComposite> getLineupsToTest(int taskSize, Queue<LineupComposite> inProgressLineups,
+      HitGenerator hitGenerator, BattingLineupIndexer indexer) {
+    List<LineupComposite> lineupsToTest = new LinkedList<>(); // LinkedList becasue we only iterate and sometimes need
+                                                              // to add elements to the beginning of the list
+    for (int j = 0; j < taskSize; j++) {
+
+      // First, add the best lineup we have so far to the task list. Make a copy so other threads can
+      // modify it.
+      // Having a good lineup in each task reduces the runtime because we don't waste much time comparing
+      // bad lineups to other bad lineups.
+      // lineupsToTest.add(new LineupComposite(bestLineup));
+
+      // First, get any in progress lineups from the queue and add them to the task
+      if (!inProgressLineups.isEmpty()) {
+        LineupComposite toEnqueue = inProgressLineups.remove();
+        lineupsToTest.add(toEnqueue);
+        continue;
+      }
+
+      // Second, get fresh lineups
+      if (lineupIndex < indexer.size()) {
+        LineupComposite composite = new LineupComposite(indexer.getLineup(lineupIndex), hitGenerator, lineupIndex);
+        lineupsToTest.add(composite);
+        lineupIndex++;
+      }
+
+      if (lineupIndex >= indexer.size()) {
+        // All done, no more lineups to enqueue for simulation
+        break;
+      }
+    }
+
+    return lineupsToTest;
   }
 
   private int getNumberOfLineupsToAddToTask(long remainingLineups, int numberOfThreads) {

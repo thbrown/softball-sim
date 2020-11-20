@@ -22,9 +22,9 @@ public class MonteCarloExhaustiveTest {
     final int INNINGS = 7;
     final int GAMES = 100;
     final int LINEUP_TYPE = 1;
-    final int THREAD_COUNT = 4;
+    final int THREAD_COUNT = 1;
 
-    String[] args = {"-O", "MONTE_CARLO_EXHAUSTIVE", "-L",
+    String[] args = {"-O", "MONTE_CARLO_EXHAUSTIVE", "-F", "-L",
         "1OiRCCmrn16iyK,Oscar,Molly,Nelly,1CV6WRyspDjA7Z,1MPJ24EEyS0g6p",
         "-g", String.valueOf(GAMES), "-i", String.valueOf(INNINGS), "-T", String.valueOf(LINEUP_TYPE), "-t",
         String.valueOf(THREAD_COUNT)};

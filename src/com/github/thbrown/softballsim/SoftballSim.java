@@ -23,7 +23,7 @@ public class SoftballSim {
     }
   }
 
-  public static void mainInternal(String[] args) throws MissingArgumentException {
+  public static Result mainInternal(String[] args) throws MissingArgumentException {
     // The valid command line flags change based on which optimizer and data source are supplied.
     CommandLineOptions commandLineOptions = CommandLineOptions.getInstance();
 
@@ -35,7 +35,7 @@ public class SoftballSim {
       HelpFormatter formatter = CommandLineOptions.getInstance().getHelpFormatter();
       formatter.printHelp(CommandLineOptions.APPLICATION_NAME, CommandLineOptions.HELP_HEADER_1, availableOptions,
           CommandLineOptions.HELP_FOOTER);
-      return;
+      return null;
     }
 
     // Some arguments have been supplied, parse only the common arguments for now
@@ -69,10 +69,10 @@ public class SoftballSim {
       HelpFormatter formatter = CommandLineOptions.getInstance().getHelpFormatter();
       formatter.printHelp(CommandLineOptions.APPLICATION_NAME, helpHeader, availableOptions,
           CommandLineOptions.HELP_FOOTER);
-      return;
+      return null;
     }
 
-    dataSource.execute(args, lineupType, players, optimizer);
+    return dataSource.execute(args, lineupType, players, optimizer);
   }
 
 }

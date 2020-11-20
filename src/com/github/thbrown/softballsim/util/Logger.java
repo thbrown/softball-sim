@@ -3,6 +3,8 @@ package com.github.thbrown.softballsim.util;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * General logger implementation.
@@ -24,6 +26,8 @@ public class Logger {
 
   private final static Object lock = new Object();
 
+  private final static Map<String, PrintWriter> secondaryLogFiles = new HashMap<>();
+
   static PrintWriter writer;
   static {
     try {
@@ -32,7 +36,6 @@ public class Logger {
         writer.println("Logging started");
       }
     } catch (IOException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
     // Runtime.getRuntime().addShutdownHook(new LoggerShuterDowner());
@@ -80,6 +83,24 @@ public class Logger {
   public static void log(Object string, Exception e) {
     RuntimeException rte = new RuntimeException(string.toString(), e);
     Logger.log(rte);
+  }
+
+  /**
+   * Writes logs only to the specified file Note: this code has not been synchronized
+   */
+  public static void logToFile(String whatToLog, String filePath) {
+    PrintWriter writer = null;
+    if (secondaryLogFiles.containsKey(filePath)) {
+      writer = secondaryLogFiles.get(filePath);
+    } else {
+      try {
+        writer = new PrintWriter(new FileWriter(filePath, APPEND_MODE), true);
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+      secondaryLogFiles.put(filePath, writer);
+    }
+    writer.println(whatToLog);
   }
 
   /**

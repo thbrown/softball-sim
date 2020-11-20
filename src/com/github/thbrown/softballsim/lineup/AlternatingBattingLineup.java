@@ -1,6 +1,7 @@
 package com.github.thbrown.softballsim.lineup;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import com.github.thbrown.softballsim.data.gson.DataPlayer;
@@ -16,12 +17,12 @@ import com.github.thbrown.softballsim.data.gson.DataStats;
  */
 public class AlternatingBattingLineup implements BattingLineup {
 
-  private List<DataPlayer> groupA;
-  private List<DataPlayer> groupB;
+  private final List<DataPlayer> groupA;
+  private final List<DataPlayer> groupB;
 
   public AlternatingBattingLineup(List<DataPlayer> groupA, List<DataPlayer> groupB) {
-    this.groupA = groupA;
-    this.groupB = groupB;
+    this.groupA = Collections.unmodifiableList(groupA);
+    this.groupB = Collections.unmodifiableList(groupB);
     if (groupA.size() <= 0 || groupB.size() <= 0) {
       throw new IllegalArgumentException(String.format(
           "You must include at least one player of each gender.\n" +
@@ -102,19 +103,21 @@ public class AlternatingBattingLineup implements BattingLineup {
 
   @Override
   public void populateStats(DataStats battingData) {
-    for(int i = 0 ; i < groupA.size(); i++) {
+    for (int i = 0; i < groupA.size(); i++) {
       DataPlayer statslessPlayer = groupA.get(i);
       DataPlayer statsfullPlayer = battingData.getPlayerById(statslessPlayer.getId());
-      if(statsfullPlayer == null) {
-        throw new RuntimeException("Failed to populate stats for player " + statslessPlayer + " as no stats for this player were found in batting data. Try running the optimization again with the -F flag.");
+      if (statsfullPlayer == null) {
+        throw new RuntimeException("Failed to populate stats for player " + statslessPlayer
+            + " as no stats for this player were found in batting data. Try running the optimization again with the -F flag.");
       }
       groupA.set(i, statsfullPlayer);
     }
-    for(int i = 0 ; i < groupB.size(); i++) {
+    for (int i = 0; i < groupB.size(); i++) {
       DataPlayer statslessPlayer = groupB.get(i);
       DataPlayer statsfullPlayer = battingData.getPlayerById(statslessPlayer.getId());
-      if(statsfullPlayer == null) {
-        throw new RuntimeException("Failed to populate stats for player " + statslessPlayer + " as no stats for this player were found in batting data. Try running the optimization again with the -F flag.");
+      if (statsfullPlayer == null) {
+        throw new RuntimeException("Failed to populate stats for player " + statslessPlayer
+            + " as no stats for this player were found in batting data. Try running the optimization again with the -F flag.");
       }
       groupB.set(i, statsfullPlayer);
     }

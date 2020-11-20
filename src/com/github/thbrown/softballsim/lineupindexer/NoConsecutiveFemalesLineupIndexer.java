@@ -2,6 +2,7 @@ package com.github.thbrown.softballsim.lineupindexer;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.math3.util.Pair;
 import com.github.thbrown.softballsim.data.gson.DataPlayer;
 import com.github.thbrown.softballsim.data.gson.DataStats;
 import com.github.thbrown.softballsim.lineup.BattingLineup;
@@ -165,6 +166,16 @@ public class NoConsecutiveFemalesLineupIndexer implements BattingLineupIndexer {
     // }
 
     return new OrdinaryBattingLineup(mergedLineup);
+  }
+
+  @Override
+  public Pair<Long, BattingLineup> getRandomNeighbor(long index) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public long getIndex(BattingLineup lineup) {
+    throw new UnsupportedOperationException();
   }
 
 }

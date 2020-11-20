@@ -1,5 +1,6 @@
 package com.github.thbrown.softballsim.lineup;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import com.github.thbrown.softballsim.data.gson.DataPlayer;
@@ -7,10 +8,10 @@ import com.github.thbrown.softballsim.data.gson.DataStats;
 
 public class OrdinaryBattingLineup implements BattingLineup {
 
-  private List<DataPlayer> players;
+  private final List<DataPlayer> players;
 
   public OrdinaryBattingLineup(List<DataPlayer> players) {
-    this.players = players;
+    this.players = Collections.unmodifiableList(players);
     if (players.size() <= 0) {
       throw new IllegalArgumentException("You must include at least one player in the lineup.");
     }
@@ -58,11 +59,12 @@ public class OrdinaryBattingLineup implements BattingLineup {
 
   @Override
   public void populateStats(DataStats battingData) {
-    for(int i = 0 ; i < players.size(); i++) {
+    for (int i = 0; i < players.size(); i++) {
       DataPlayer statslessPlayer = players.get(i);
       DataPlayer statsfullPlayer = battingData.getPlayerById(statslessPlayer.getId());
-      if(statsfullPlayer == null) {
-        throw new RuntimeException("Failed to populate stats for player " + statslessPlayer + " as no stats for this player were found in batting data. Try running the optimization again with the -F flag.");
+      if (statsfullPlayer == null) {
+        throw new RuntimeException("Failed to populate stats for player " + statslessPlayer
+            + " as no stats for this player were found in batting data. Try running the optimization again with the -F flag.");
       }
       players.set(i, statsfullPlayer);
     }

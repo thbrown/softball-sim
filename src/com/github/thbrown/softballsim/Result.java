@@ -23,7 +23,8 @@ public class Result {
   private final long countCompleted;
   private final long elapsedTimeMs;
 
-  public Result(OptimizerEnum optimizer, BattingLineup lineup, double lineupScore, long countTotal, long countCompleted, long elapsedTimeMs) {
+  public Result(OptimizerEnum optimizer, BattingLineup lineup, double lineupScore, long countTotal, long countCompleted,
+      long elapsedTimeMs) {
     this.optimizer = optimizer;
     this.lineup = lineup;
     this.lineupScore = lineupScore;

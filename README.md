@@ -1,7 +1,7 @@
 # SoftballSim
 Lineup optimization tool for making sure you choose the best batting order for your softball, baseball, or kickball team. Used by softball.app for lineup optimizations but can also be run from the command line on file system data.
 
-Build (requires Java 8*, replace `./gradlew` with `./gradlew.bat` for windows machines):
+Build (requires Java 8*, in the instructions below replace `./gradlew` with `./gradlew.bat` for windows machines):
 
 ```
 # Build (Note: this runs tests and formats code)

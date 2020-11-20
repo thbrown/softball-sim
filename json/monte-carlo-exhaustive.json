@@ -154,7 +154,7 @@ _*We can debate about how walks or sacrifices should be counted. It probably dep
       "type": "Boolean",
       "shortLabel": "l",
       "longLabel": "lowest",
-      "description": "If this field is true, the optimizer will attempt to provide the lowest scoring lineup instead of the highest"
+      "description": "IN_DEVELOPMENT: this field is true, the optimizer will attempt to provide the lowest scoring lineup instead of the highest"
     },
     {
       "type": "String",

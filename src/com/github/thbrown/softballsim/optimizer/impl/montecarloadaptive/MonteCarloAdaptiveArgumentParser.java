@@ -44,5 +44,4 @@ public class MonteCarloAdaptiveArgumentParser {
   public double getAlpha() {
     return alpha;
   }
-
 }

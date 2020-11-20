@@ -10,7 +10,7 @@ import com.github.thbrown.softballsim.data.gson.DataPlayer;
 /**
  * Class that simulates hits for a player based of their stats.
  * 
- * This class must be immutable so the hit method can be called from multiple threads.
+ * This class must remain immutable so the hit method can be called from multiple threads.
  */
 public class HitGenerator {
 
@@ -30,7 +30,7 @@ public class HitGenerator {
       for (int i = 0; i < player.getDoubleCount(); i++) {
         resultBucket.add(2);
       }
-      for (int i = 0; i < player.getSingleCount() + player.getWalkCount(); i++) {
+      for (int i = 0; i < (player.getSingleCount() + player.getWalkCount()); i++) {
         resultBucket.add(1);
       }
       for (int i = 0; i < (player.getOutCount() + player.getSacCount()); i++) {

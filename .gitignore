@@ -19,9 +19,7 @@ gson-*.jar
 /cached
 
 # Application log files
-java.log
-stdDevAndAvg.log
-threadCount.log
+*.log
 
 # Configs
 estimated-time-config.json

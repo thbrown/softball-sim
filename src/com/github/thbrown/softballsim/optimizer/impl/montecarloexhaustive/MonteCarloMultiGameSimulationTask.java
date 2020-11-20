@@ -32,7 +32,8 @@ public class MonteCarloMultiGameSimulationTask implements Callable<TaskResult> {
   }
 
   public TaskResult run() {
-    // Simulate *numberOfGamesToSimulate* games, average the runs scored, return the result of the simulation
+    // Simulate *numberOfGamesToSimulate* games, average the runs scored, return the result of the
+    // simulation
     double totalScore = 0;
     for (int i = 0; i < numberOfGamesToSimulate; i++) {
       double gameScore = MonteCarloGameSimulation.simulateGame(lineup, inningsPerGame, hitGenerator);

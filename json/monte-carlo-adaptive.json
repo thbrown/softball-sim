@@ -6,7 +6,7 @@
   "description": "
 Employs the same approach as the Monte Carlo Exhaustive optimizer but instead of simulating a fixed number of games for each lineup, 
 performs a variable number of simulated games. The exact number of games simulated for each lineup is determined by continuing to do simulations
-on a lineup until a statistical t-tests determines that the expected run totals for two lineups are significantly different (by some configurable alpha value).
+on a lineup until a statistical t-test determines that the expected run totals for two lineups are significantly different (by some configurable alpha value).
 The lineup with the lower mean is then rejected and the larger one remembered as the best so far.
 ",
   "supported-lineup-types": [
@@ -36,7 +36,7 @@ The lineup with the lower mean is then rejected and the larger one remembered as
       "type": "Boolean",
       "shortLabel": "l",
       "longLabel": "lowest",
-      "description": "If this field is true, the optimizer will attempt to provide the lowest scoring lineup instead of the highest"
+      "description": "IN_DEVELOPMENT: If this field is true, the optimizer will attempt to provide the lowest scoring lineup instead of the highest"
     },
     {
       "type": "String",

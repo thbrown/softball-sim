@@ -10,6 +10,7 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import com.github.thbrown.softballsim.CommandLineOptions;
+import com.github.thbrown.softballsim.Result;
 import com.github.thbrown.softballsim.datasource.DataSource;
 import com.github.thbrown.softballsim.datasource.DataSourceEnum;
 import com.github.thbrown.softballsim.lineupindexer.LineupTypeEnum;
@@ -57,7 +58,7 @@ public class DataSourceNetwork implements DataSource {
   }
 
   @Override
-  public void execute(String[] args, LineupTypeEnum lineupType, List<String> players, OptimizerEnum optimizer) {
+  public Result execute(String[] args, LineupTypeEnum lineupType, List<String> players, OptimizerEnum optimizer) {
     // Parse command line arguments, this time include arguments that apply only to DataSouceNetwork
     CommandLineOptions commandLineOptions = CommandLineOptions.getInstance();
     Options commonAndDataSourceOptions = commandLineOptions.getOptionsForFlags(DataSourceEnum.NETWORK, null);
@@ -108,6 +109,7 @@ public class DataSourceNetwork implements DataSource {
       Logger.log(e);
       e.printStackTrace();
     }
+    return null; // TODO: Make this return the result for completeness sake?
   }
 
   /**
