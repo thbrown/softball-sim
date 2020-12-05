@@ -9,12 +9,14 @@ import com.github.thbrown.softballsim.data.gson.DataStats;
 public class OrdinaryBattingLineup implements BattingLineup {
 
   private final List<DataPlayer> players;
+  private final int size;
 
   public OrdinaryBattingLineup(List<DataPlayer> players) {
     this.players = Collections.unmodifiableList(players);
     if (players.size() <= 0) {
       throw new IllegalArgumentException("You must include at least one player in the lineup.");
     }
+    this.size = players.size();
   }
 
   @Override
@@ -68,5 +70,10 @@ public class OrdinaryBattingLineup implements BattingLineup {
       }
       players.set(i, statsfullPlayer);
     }
+  }
+
+  @Override
+  public int size() {
+    return this.size;
   }
 }

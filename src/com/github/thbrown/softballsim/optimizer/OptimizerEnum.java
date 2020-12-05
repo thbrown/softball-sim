@@ -1,6 +1,10 @@
 package com.github.thbrown.softballsim.optimizer;
 
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -21,6 +25,7 @@ import com.github.thbrown.softballsim.optimizer.gson.OptimizerDefinition;
 import com.github.thbrown.softballsim.optimizer.impl.montecarloexhaustive.MonteCarloExhaustiveOptimizer;
 import com.github.thbrown.softballsim.optimizer.impl.montecarloadaptive.MonteCarloAdaptiveOptimizer;
 import com.github.thbrown.softballsim.optimizer.impl.montecarloannealing.MonteCarloAnnealingOptimizer;
+import com.github.thbrown.softballsim.optimizer.impl.expectedvalue.ExpectedValueOptimizer;
 import com.github.thbrown.softballsim.util.GsonAccessor;
 import com.github.thbrown.softballsim.util.Logger;
 import com.github.thbrown.softballsim.util.StringUtils;
@@ -34,7 +39,8 @@ public enum OptimizerEnum {
   // TODO: Can't we just use the id from the json?
   MONTE_CARLO_EXHAUSTIVE(0, new MonteCarloExhaustiveOptimizer()),
   MONTE_CARLO_ADAPTIVE(1, new MonteCarloAdaptiveOptimizer()),
-  MONTE_CARLO_ANNEALING(2, new MonteCarloAnnealingOptimizer());
+  MONTE_CARLO_ANNEALING(2, new MonteCarloAnnealingOptimizer()),
+  EXPECTED_VALUE(3, new ExpectedValueOptimizer());
 
   private final int id;
   private final Optimizer<? extends Result> optimizerImplementation;
@@ -44,12 +50,30 @@ public enum OptimizerEnum {
     this.id = id;
     this.optimizerImplementation = optimizer;
     try {
-      String optimizerDefinitionJson =
-          new String(Files.readAllBytes(Paths.get("./json/" + optimizer.getJsonDefinitionFileName())));
+      String optimizerDefinitionJson = readFromFileOrClassPath("./json/" + optimizer.getJsonDefinitionFileName());
       this.optimizerDefinition =
           GsonAccessor.getInstance().getCustom().fromJson(optimizerDefinitionJson, OptimizerDefinition.class);
     } catch (IOException e) {
       throw new RuntimeException("Error while deserializing " + optimizer.getJsonDefinitionFileName(), e);
+    }
+  }
+
+  /**
+   * When running from the fat jar, there are is no json directory to read from. However, the files
+   * are stored in the jar during the build process. We can get at those via the classpath.
+   * 
+   * @throws IOException
+   */
+  private String readFromFileOrClassPath(String path) throws IOException {
+    File tempFile = new File(path);
+    if (tempFile.exists()) {
+      return new String(Files.readAllBytes(Paths.get(path)));
+    } else {
+      path = path.substring(1); // Remove leading '.'
+      InputStream in = getClass().getResourceAsStream(path);
+      InputStreamReader inR = new InputStreamReader(in);
+      BufferedReader reader = new BufferedReader(inR);
+      return reader.lines().collect(Collectors.joining());
     }
   }
 

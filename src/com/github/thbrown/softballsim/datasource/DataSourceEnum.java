@@ -7,6 +7,7 @@ import org.apache.commons.cli.Option;
 import com.github.thbrown.softballsim.Result;
 import com.github.thbrown.softballsim.datasource.local.DataSourceFileSystem;
 import com.github.thbrown.softballsim.datasource.network.DataSourceNetwork;
+import com.github.thbrown.softballsim.datasource.gcpfunctions.DataSourceGcpFunctions;
 import com.github.thbrown.softballsim.lineupindexer.LineupTypeEnum;
 import com.github.thbrown.softballsim.optimizer.OptimizerEnum;
 import com.github.thbrown.softballsim.util.StringUtils;
@@ -19,7 +20,8 @@ import com.github.thbrown.softballsim.util.StringUtils;
  */
 public enum DataSourceEnum {
   FILE_SYSTEM(new DataSourceFileSystem()),
-  NETWORK(new DataSourceNetwork());
+  NETWORK(new DataSourceNetwork()),
+  GCP_FUNCTIONS(new DataSourceGcpFunctions());
 
   private final DataSource dataSource;
 

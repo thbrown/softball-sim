@@ -20,6 +20,8 @@ public class AlternatingBattingLineup implements BattingLineup {
   private final List<DataPlayer> groupA;
   private final List<DataPlayer> groupB;
 
+  private final int size;
+
   public AlternatingBattingLineup(List<DataPlayer> groupA, List<DataPlayer> groupB) {
     this.groupA = Collections.unmodifiableList(groupA);
     this.groupB = Collections.unmodifiableList(groupB);
@@ -29,6 +31,7 @@ public class AlternatingBattingLineup implements BattingLineup {
               "Males: %s Females: %s .",
           groupA.size(), groupB.size()));
     }
+    this.size = groupA.size() + groupB.size();
   }
 
 
@@ -121,6 +124,12 @@ public class AlternatingBattingLineup implements BattingLineup {
       }
       groupB.set(i, statsfullPlayer);
     }
+  }
+
+
+  @Override
+  public int size() {
+    return this.size;
   }
 
 }

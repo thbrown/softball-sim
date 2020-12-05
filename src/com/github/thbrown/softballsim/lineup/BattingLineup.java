@@ -43,4 +43,6 @@ public interface BattingLineup {
    */
   public void populateStats(DataStats battingData);
 
+  public int size();
+
 }

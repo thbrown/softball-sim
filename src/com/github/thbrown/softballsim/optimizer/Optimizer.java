@@ -37,6 +37,8 @@ public interface Optimizer<R extends Result> {
   /**
    * Just return the class of that result generic (Result.class if you are not using a custom result).
    * 
+   * This is currently required to serialize/de-serialize partial results.
+   * 
    * TODO: See if there is a way to fix this: It's a shame that this has to be specified twice. Once
    * by overriding this method and once in the declaration of the subclass.
    */

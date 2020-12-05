@@ -12,7 +12,14 @@ public class MonteCarloExhaustiveResult extends Result {
 
   public MonteCarloExhaustiveResult(BattingLineup lineup, double lineupScore, long countTotal, long countCompleted,
       long elapsedTimeMs, Map<Long, Long> histogram, double worstScore) {
-    super(OptimizerEnum.MONTE_CARLO_EXHAUSTIVE, lineup, lineupScore, countTotal, countCompleted, elapsedTimeMs);
+    this(OptimizerEnum.MONTE_CARLO_EXHAUSTIVE, lineup, lineupScore, countTotal, countCompleted, elapsedTimeMs,
+        histogram, worstScore);
+  }
+
+  protected MonteCarloExhaustiveResult(OptimizerEnum optimizerEnum, BattingLineup lineup, double lineupScore,
+      long countTotal, long countCompleted,
+      long elapsedTimeMs, Map<Long, Long> histogram, double worstScore) {
+    super(optimizerEnum, lineup, lineupScore, countTotal, countCompleted, elapsedTimeMs);
     this.histogram = histogram;
     this.worstScore = worstScore;
   }

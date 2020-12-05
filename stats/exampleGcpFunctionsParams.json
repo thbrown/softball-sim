@@ -1,0 +1,172 @@
+{
+  "O":"0",
+  "L":"Danny,Markus,Betty,Maria",
+  "i":"7",
+  "g":"10000000",
+  "I":"zsjdklasaskfjaskfdjs",
+  "data":{
+  "teams": [
+    {
+      "id": "5vx4b7xEdnAvWm",
+      "name": "BubbleGum",
+      "games": [
+        {
+          "id": "4hiW5KBrgty7yC",
+          "opponent": "BagGuys",
+          "lineup": [
+            "0vUgZQC9kXxCuD",
+            "5uy4J5KvyOQOAx",
+            "1dVD7iGo9aLMNq",
+            "4EcenPlz4bgz9f"
+          ],
+          "date": 1606605527,
+          "park": null,
+          "scoreUs": 0,
+          "scoreThem": 0,
+          "lineupType": 1,
+          "plateAppearances": [
+            {
+              "id": "5DATP6ohWqlhPe",
+              "player_id": "0vUgZQC9kXxCuD",
+              "result": "Out",
+              "location": {
+                "x": null,
+                "y": null
+              }
+            },
+            {
+              "id": "4QXzD1LMhMtYN5",
+              "player_id": "0vUgZQC9kXxCuD",
+              "result": "1B",
+              "location": {
+                "x": null,
+                "y": null
+              }
+            },
+            {
+              "id": "5GVuOtglBLNXr9",
+              "player_id": "0vUgZQC9kXxCuD",
+              "result": "Out",
+              "location": {
+                "x": null,
+                "y": null
+              }
+            },
+            {
+              "id": "0POHsxKzeBLO9D",
+              "player_id": "5uy4J5KvyOQOAx",
+              "result": "3B",
+              "location": {
+                "x": null,
+                "y": null
+              }
+            },
+            {
+              "id": "0y8hqiXEM0kJzB",
+              "player_id": "5uy4J5KvyOQOAx",
+              "result": "Out",
+              "location": {
+                "x": null,
+                "y": null
+              }
+            },
+            {
+              "id": "005yR3iKAv79oR",
+              "player_id": "5uy4J5KvyOQOAx",
+              "result": "HRo",
+              "location": {
+                "x": null,
+                "y": null
+              }
+            },
+            {
+              "id": "5im8jovySxbd7C",
+              "player_id": "1dVD7iGo9aLMNq",
+              "result": "1B",
+              "location": {
+                "x": null,
+                "y": null
+              }
+            },
+            {
+              "id": "2c2yHI2CpVDUOB",
+              "player_id": "1dVD7iGo9aLMNq",
+              "result": "1B",
+              "location": {
+                "x": null,
+                "y": null
+              }
+            },
+            {
+              "id": "0ZE93jssfuSCsk",
+              "player_id": "1dVD7iGo9aLMNq",
+              "result": "Out",
+              "location": {
+                "x": null,
+                "y": null
+              }
+            },
+            {
+              "id": "1EaCxbMTUsHRJM",
+              "player_id": "4EcenPlz4bgz9f",
+              "result": "Out",
+              "location": {
+                "x": null,
+                "y": null
+              }
+            },
+            {
+              "id": "2SoHvauxgoKiWs",
+              "player_id": "4EcenPlz4bgz9f",
+              "result": "Out",
+              "location": {
+                "x": null,
+                "y": null
+              }
+            },
+            {
+              "id": "2oOsKE6A7NYo3Y",
+              "player_id": "4EcenPlz4bgz9f",
+              "result": "2B",
+              "location": {
+                "x": null,
+                "y": null
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "players": [
+    {
+      "id": "0vUgZQC9kXxCuD",
+      "name": "Danny",
+      "gender": "M",
+      "song_link": null,
+      "song_start": null
+    },
+    {
+      "id": "5uy4J5KvyOQOAx",
+      "name": "Markus",
+      "gender": "M",
+      "song_link": null,
+      "song_start": null
+    },
+    {
+      "id": "1dVD7iGo9aLMNq",
+      "name": "Betty",
+      "gender": "F",
+      "song_link": null,
+      "song_start": null
+    },
+    {
+      "id": "4EcenPlz4bgz9f",
+      "name": "Maria",
+      "gender": "F",
+      "song_link": null,
+      "song_start": null
+    }
+  ],
+  "optimizations": []
+}}

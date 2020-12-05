@@ -37,7 +37,7 @@ public class HitGenerator {
         resultBucket.add(0);
       }
 
-      // We get slightly better access performance from an array over an Arraylist
+      // We get slightly better access performance from an array over an ArrayList
       Integer[] resultBucketArray = new Integer[resultBucket.size()];
       hitValues.put(player.getId(), resultBucket.toArray(resultBucketArray));
     }

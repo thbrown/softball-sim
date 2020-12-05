@@ -58,7 +58,7 @@ public class DataSourceFileSystem implements DataSource {
 
     // Parse command line arguments
     CommandLineOptions commandLineOptions = CommandLineOptions.getInstance();
-    Options allOptions = commandLineOptions.getOptionsForFlags(DataSourceEnum.FILE_SYSTEM, optimizer);
+    Options allOptions = commandLineOptions.getOptionsForFlags(getDataSourceEnum(), optimizer);
     CommandLine allCmd = commandLineOptions.parse(allOptions, args, false);
 
     // Read stats data from file
@@ -94,7 +94,7 @@ public class DataSourceFileSystem implements DataSource {
     // Check if there is a cached result for a run with the exact same args
     Result existingResult = null;
 
-    String fileName = getArgsMd5(allCmd);
+    String fileName = getFileName(allCmd);
     File cacheFile = new File(CACHED_RESULTS_FILE_PATH + File.separatorChar + fileName);
     if (cacheFile.exists() && !allCmd.hasOption(CommandLineOptions.FORCE)) {
       Logger.log(
@@ -108,7 +108,7 @@ public class DataSourceFileSystem implements DataSource {
       }
     }
 
-    DataSourceFunctions functions = new DataSourceFunctionsFileSystem(fileName);
+    DataSourceFunctions functions = getFunctions(fileName);
     ProgressTracker tracker = new ProgressTracker(existingResult, functions);
     Thread trackerThread = new Thread(tracker);
     trackerThread.start();
@@ -127,6 +127,18 @@ public class DataSourceFileSystem implements DataSource {
     } finally {
       trackerThread.interrupt();
     }
+  }
+
+  protected DataSourceEnum getDataSourceEnum() {
+    return DataSourceEnum.FILE_SYSTEM;
+  }
+
+  protected String getFileName(CommandLine allCmd) {
+    return getArgsMd5(allCmd);
+  }
+
+  protected DataSourceFunctions getFunctions(String fileName) {
+    return new DataSourceFunctionsFileSystem(fileName);
   }
 
   /**

@@ -1,6 +1,9 @@
 package com.github.thbrown.softballsim.util;
 
+import java.util.Map;
 import com.github.thbrown.softballsim.Result;
+import com.github.thbrown.softballsim.cloud.Arguments;
+import com.github.thbrown.softballsim.cloud.ArgumentsDeserializer;
 import com.github.thbrown.softballsim.data.gson.DataStats;
 import com.github.thbrown.softballsim.data.gson.DataStatsDeserializer;
 import com.github.thbrown.softballsim.datasource.network.DataSourceNetworkCommand;
@@ -28,10 +31,6 @@ public class GsonAccessor {
     return instance;
   }
 
-  protected GsonAccessor() {
-
-  }
-
   /**
    * @return a GSON instance with all the custom serializers/deserailizers registered for this
    *         application
@@ -52,6 +51,7 @@ public class GsonAccessor {
     gsonBuilder.registerTypeAdapter(OptimizerDefinitionArgument.class, new OptimizerDefinitionArgumentDeserializer());
     gsonBuilder.registerTypeAdapter(BattingLineup.class, new BattingLineupDeserializer());
     gsonBuilder.registerTypeAdapter(Result.class, new ResultDeserializer());
+    gsonBuilder.registerTypeAdapter(Arguments.class, new ArgumentsDeserializer());
 
     // Serializers
     gsonBuilder.registerTypeAdapter(BattingLineup.class, new BattingLineupSerializer());

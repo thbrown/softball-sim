@@ -17,7 +17,7 @@ public class Logger {
   private final static boolean SHOW_TIMESTAMPS = false;
   private final static boolean SHOW_FILE_AND_LINE = false;
   private final static boolean APPEND_MODE = false;
-  private final static boolean WRITE_LOG_TO_FILE = true;
+  private final static boolean WRITE_LOG_TO_FILE = false;
 
   // Color constants
   private final static String ANSI_RESET = "\u001B[0m";
@@ -30,13 +30,15 @@ public class Logger {
 
   static PrintWriter writer;
   static {
-    try {
-      synchronized (lock) {
-        writer = new PrintWriter(new FileWriter("java.log", APPEND_MODE), true);
-        writer.println("Logging started");
+    if (WRITE_LOG_TO_FILE) {
+      try {
+        synchronized (lock) {
+          writer = new PrintWriter(new FileWriter("java.log", APPEND_MODE), true);
+          writer.println("Logging started");
+        }
+      } catch (IOException e) {
+        e.printStackTrace();
       }
-    } catch (IOException e) {
-      e.printStackTrace();
     }
     // Runtime.getRuntime().addShutdownHook(new LoggerShuterDowner());
   }

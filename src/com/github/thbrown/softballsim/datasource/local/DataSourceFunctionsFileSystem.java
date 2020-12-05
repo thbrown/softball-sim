@@ -18,7 +18,7 @@ import com.google.gson.Gson;
 public class DataSourceFunctionsFileSystem implements DataSourceFunctions {
 
   private final Gson gson = GsonAccessor.getInstance().getCustom();
-  private final String cacheFileName;
+  protected final String cacheFileName;
 
   public DataSourceFunctionsFileSystem(String fileName) {
     cacheFileName = fileName;
@@ -36,7 +36,7 @@ public class DataSourceFunctionsFileSystem implements DataSourceFunctions {
     }
 
     // Save the most recent result to the file system so we can start the optimization from this point
-    // if it gets inturrupted
+    // if it gets interrupted
     String result = gson.toJson(currentResult);
     writeFile(result, DataSourceFileSystem.CACHED_RESULTS_FILE_PATH, cacheFileName);
   }

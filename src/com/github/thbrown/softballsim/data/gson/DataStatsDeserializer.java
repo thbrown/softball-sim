@@ -25,7 +25,7 @@ public class DataStatsDeserializer implements JsonDeserializer<DataStats> {
   public DataStats deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
       throws JsonParseException {
 
-    // First, deserialise StatsData using the gson's default deserialization
+    // First, de-serialize StatsData using the gson's default deserialization
     DataStats stats = GsonAccessor.getInstance().getDefault().fromJson(json, DataStats.class);
 
     // Then, create references for the relationships between objects

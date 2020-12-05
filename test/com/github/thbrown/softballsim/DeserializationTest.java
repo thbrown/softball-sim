@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Map;
 import org.junit.Test;
 import com.github.thbrown.softballsim.data.gson.DataGame;
 import com.github.thbrown.softballsim.data.gson.DataPlateAppearance;
@@ -68,6 +69,15 @@ public class DeserializationTest {
     OptimizerDefinition targetObject = GsonAccessor.getInstance().getCustom().fromJson(json, OptimizerDefinition.class);
 
     // TODO: assert some fields
+
+    Logger.log(targetObject);
+  }
+
+  @Test
+  public void deserializeJsonDataAsMap() throws IOException {
+    String json = new String(Files.readAllBytes(Paths.get("./stats/exampleData.json")));
+
+    Map<String, String> targetObject = GsonAccessor.getInstance().getCustom().fromJson(json, Map.class);
 
     Logger.log(targetObject);
   }

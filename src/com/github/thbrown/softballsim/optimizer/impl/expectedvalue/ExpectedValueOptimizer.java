@@ -1,4 +1,4 @@
-package com.github.thbrown.softballsim.optimizer.impl.montecarloexhaustive;
+package com.github.thbrown.softballsim.optimizer.impl.expectedvalue;
 
 import java.text.DecimalFormat;
 import java.util.HashMap;
@@ -20,16 +20,18 @@ import com.github.thbrown.softballsim.lineup.BattingLineup;
 import com.github.thbrown.softballsim.lineupindexer.BattingLineupIndexer;
 import com.github.thbrown.softballsim.lineupindexer.LineupTypeEnum;
 import com.github.thbrown.softballsim.optimizer.Optimizer;
-import com.github.thbrown.softballsim.optimizer.OptimizerEnum;
+import com.github.thbrown.softballsim.optimizer.impl.montecarloexhaustive.HitGenerator;
+import com.github.thbrown.softballsim.optimizer.impl.montecarloexhaustive.MonteCarloExhaustiveResult;
+import com.github.thbrown.softballsim.optimizer.impl.montecarloexhaustive.TaskResult;
 import com.github.thbrown.softballsim.util.Logger;
 
-public class MonteCarloExhaustiveOptimizer implements Optimizer<MonteCarloExhaustiveResult> {
+public class ExpectedValueOptimizer implements Optimizer<MonteCarloExhaustiveResult> {
 
   private static int TASK_BUFFER_SIZE = 1000;
 
   @Override
   public String getJsonDefinitionFileName() {
-    return "monte-carlo-exhaustive.json";
+    return "expected-value.json";
   }
 
   @Override
@@ -44,7 +46,7 @@ public class MonteCarloExhaustiveOptimizer implements Optimizer<MonteCarloExhaus
     validateData(battingData, playersInLineup);
 
     // Get the arguments as their expected types
-    MonteCarloExhaustiveArgumentParser parsedArguments = new MonteCarloExhaustiveArgumentParser(arguments);
+    ExpectedValueArgumentParser parsedArguments = new ExpectedValueArgumentParser(arguments);
 
     // Since this optimizer involves iterating over all possible lineups, we'll use the lineup indexer
     BattingLineupIndexer indexer = lineupType.getLineupIndexer(battingData, playersInLineup);
@@ -53,7 +55,7 @@ public class MonteCarloExhaustiveOptimizer implements Optimizer<MonteCarloExhaus
     DecimalFormat formatter = new DecimalFormat("#,###");
     Logger.log("*********************************************************************");
     Logger.log("Possible lineups: \t\t" + formatter.format(indexer.size()));
-    Logger.log("Games to simulate per lineup: \t" + parsedArguments.getGames());
+    Logger.log("Maximum batters per game: \t" + parsedArguments.getMaxBatters());
     Logger.log("Innings per game: \t\t" + parsedArguments.getInnings());
     Logger.log("Threads used: \t\t\t" + parsedArguments.getThreads());
     Logger.log("*********************************************************************");
@@ -75,9 +77,8 @@ public class MonteCarloExhaustiveOptimizer implements Optimizer<MonteCarloExhaus
     long startIndex = Optional.ofNullable(existingResult).map(v -> v.getCountCompleted()).orElse(0L);
     long max = indexer.size() - startIndex > TASK_BUFFER_SIZE ? TASK_BUFFER_SIZE + startIndex : indexer.size();
     for (long l = startIndex; l < max; l++) {
-      MonteCarloMultiGameSimulationTask task =
-          new MonteCarloMultiGameSimulationTask(indexer.getLineup(l), parsedArguments.getGames(),
-              parsedArguments.getInnings(), hitGenerator);
+      ExpectedValueTask task =
+          new ExpectedValueTask(indexer.getLineup(l), parsedArguments.getMaxBatters(), parsedArguments.getInnings());
       results.add(executor.submit(task));
     }
 
@@ -130,17 +131,16 @@ public class MonteCarloExhaustiveOptimizer implements Optimizer<MonteCarloExhaus
       progressCounter++;
       long elapsedTime = (System.currentTimeMillis() - startTimestamp)
           + Optional.ofNullable(existingResult).map(v -> v.getElapsedTimeMs()).orElse(0l);
-      MonteCarloExhaustiveResult partialResult =
-          new MonteCarloExhaustiveResult(bestResult.getLineup(),
-              bestResult.getScore(), indexer.size(), progressCounter, elapsedTime, histo, worstScore);
+      ExpectedValueResult partialResult = new ExpectedValueResult(bestResult.getLineup(),
+          bestResult.getScore(), indexer.size(), progressCounter, elapsedTime, histo, worstScore);
       progressTracker.updateProgress(partialResult);
 
       // Add another task to the buffer if there are any left
       BattingLineup lineup = indexer.getLineup(lineupQueueCounter);
       if (lineup != null) {
         lineupQueueCounter++;
-        MonteCarloMultiGameSimulationTask s = new MonteCarloMultiGameSimulationTask(lineup, parsedArguments.getGames(),
-            parsedArguments.getInnings(), hitGenerator);
+        ExpectedValueTask s =
+            new ExpectedValueTask(lineup, parsedArguments.getMaxBatters(), parsedArguments.getInnings());
         results.add(executor.submit(s));
 
         // Good for debugging
@@ -151,9 +151,8 @@ public class MonteCarloExhaustiveOptimizer implements Optimizer<MonteCarloExhaus
     executor.shutdown();
     long elapsedTime = (System.currentTimeMillis() - startTimestamp)
         + Optional.ofNullable(existingResult).map(v -> v.getElapsedTimeMs()).orElse(0l);
-    MonteCarloExhaustiveResult finalResult =
-        new MonteCarloExhaustiveResult(bestResult.getLineup(),
-            bestResult.getScore(), indexer.size(), progressCounter, elapsedTime, histo, worstScore);
+    ExpectedValueResult finalResult = new ExpectedValueResult(bestResult.getLineup(),
+        bestResult.getScore(), indexer.size(), progressCounter, elapsedTime, histo, worstScore);
     return finalResult;
   }
 

@@ -6,8 +6,8 @@ import com.github.thbrown.softballsim.datasource.ProgressTracker;
 import com.github.thbrown.softballsim.datasource.local.DataSourceFunctionsFileSystem;
 
 /**
- * Functions class that sends data over the network for each lifecycle event as well as logging
- * things to the console.
+ * Functions class that implements lifecycle hooks to sends data over the network and log things to
+ * the console.
  * 
  * Note: Using inheritance here because it's an easy way to re-use the logging from the parent class
  * but I don't really like it because as we add more DataSources we may want to share code between

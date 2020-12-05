@@ -50,12 +50,15 @@ Flags (more command line flags will be available based on which optimizer and da
  -T,--Lineup-type <arg>         Type of lineup to be simulated. You may specify the name or the id.
                                 Options are [ORDINARY - 1, ALTERNATING_GENDER - 2,
                                 NO_CONSECUTIVE_FEMALES - 3]. Default: ORDINARY
- -V,--Verbose                   In development. If present, print debuging details on error.
+ -V,--Verbose                   In development. If present, print debugging details on error.
 ```
 
 #### Available optimizer Options
 
 * 0 - MONTE\_CARLO\_EXHAUSTIVE
+* 1 - MONTE\_CARLO\_ADAPTIVE
+* 2 - MONTE\_CARLO\_ANNEALING
+* 3 - EXPECTED\_VALUE
 
 #### Available dataSource Options
 
@@ -73,6 +76,38 @@ Available lineup types:
 ## Contributing
 
 See CONTRIBUTING.md
+
+### GCP Functions Deployment
+
+Shorter optimizations (< 5 minutes) can be executed on GCP cloud functions. There are two endpoints for this:
+
+1. https://us-central1-optimum-library-250223.cloudfunctions.net/softball-sim-start
+2. https://us-central1-optimum-library-250223.cloudfunctions.net/softball-sim-query
+
+The first is a synchronous query that will start an optimization, the second is also a synchronous query that can be run in parallel to retrieve the 1st query's progress. These calls are associated by an id parameter that is passed to both. 'zsjdklasaskfjaskfdjs' is id used in the example. If you are calling this endpoint, you should change this to something random, long, and unique because if you don't the runs might conflict, furthermore, you might see other peoples data an other people might see your data.
+
+#### To Deploy
+
+Make sure 'WRITE_LOG_TO_FILE = false' in com.github.thbrown.softballsim.util.Logger before building.
+
+Then, from the project root directory, run:
+
+`gcloud functions deploy softball-sim-start --entry-point=com.github.thbrown.softballsim.cloud.GcpFunctionsEntryPointStart --timeout=540 --memory=256 --runtime=java11 --trigger-http --source=build/libs --allow-unauthenticated`
+
+`gcloud functions deploy softball-sim-query --entry-point=com.github.thbrown.softballsim.cloud.GcpFunctionsEntryPointQuery --timeout=20 --memory=256 --runtime=java11 --trigger-http --source=build/libs --allow-unauthenticated`
+
+#### To Test
+
+Make sure you have params you like in ./stats/exampleGcpFunctionsParams.json. Then:
+
+`curl -X POST "https://us-central1-optimum-library-250223.cloudfunctions.net/softball-sim-start" -H "Content-Type:application/json" --data @./stats/exampleGcpFunctionsParams.json`
+
+To see incremental progress, use:exampleGcpFunctionsParams
+
+`curl -X POST "https://us-central1-optimum-library-250223.cloudfunctions.net/softball-sim-query" -N -H "Content-Type:application/json" --data {"I":zsjdklasaskfjaskfdjs}`
+
+``
+
 
 ## Other Notes
 
