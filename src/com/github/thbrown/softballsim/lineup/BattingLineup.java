@@ -1,29 +1,48 @@
 package com.github.thbrown.softballsim.lineup;
 
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
+import com.github.thbrown.softballsim.data.gson.DataPlayer;
+import com.github.thbrown.softballsim.data.gson.DataStats;
 
-import com.github.thbrown.softballsim.Player;
-
+/**
+ * Implementers must make sure this their implementations are immutable.
+ */
 public interface BattingLineup {
 
   /**
-   * Returns the next player up to bat.
+   * TODO
    */
-  public Player getNextBatter();
+  public List<DataPlayer> asList();
 
   /**
-   * This hook runs after a game has completed. Use this to ensure that the
-   * first player is up to bat at the beginning of the next simulated game.
+   * TODO
    */
-  public void reset();
-  
+  public default List<String> asListOfIds() {
+    return asList().stream().map(p -> p.getId()).collect(Collectors.toList());
+  };
+
   /**
-   * Gets a map representation of the result so it can be easily serialized into json
-   * @return 
+   * Gets the batter at given index in the lineup
    */
-  public Map<String, List<String>> toMap();
-  
-  public BattingLineup getRandomSwap();
+  public DataPlayer getBatter(int index);
+
+  /**
+   * String used to identify the type of lineup during serialization/deserialization
+   * 
+   * @return
+   */
+  public default String getLineupType() {
+    return this.getClass().getSimpleName();
+  }
+
+  /**
+   * Player statistics aren't stored in serialized result data. So players will appear to have no
+   * stats after deserialization. This method replaces the players that have empty stats objects with
+   * their counterparts from DataStats that do have stats info.
+   */
+  public void populateStats(DataStats battingData);
+
+  public int size();
 
 }

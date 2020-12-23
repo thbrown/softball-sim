@@ -1,52 +1,85 @@
 package com.github.thbrown.softballsim;
 
-import static org.junit.Assert.*;
-
+import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-
+import java.util.Map;
 import org.junit.Test;
-
-import com.github.thbrown.softballsim.Logger;
-import com.github.thbrown.softballsim.gson.BaseOptimizationDefinition;
-import com.github.thbrown.softballsim.gson.MonteCarloExaustiveOptimizatonDefinition;
-import com.github.thbrown.softballsim.gson.OptimizationDefinitionDeserializer;
-import com.github.thbrown.softballsim.helpers.TimeEstimationConfig;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.github.thbrown.softballsim.data.gson.DataGame;
+import com.github.thbrown.softballsim.data.gson.DataPlateAppearance;
+import com.github.thbrown.softballsim.data.gson.DataPlayer;
+import com.github.thbrown.softballsim.data.gson.DataStats;
+import com.github.thbrown.softballsim.data.gson.DataTeam;
+import com.github.thbrown.softballsim.optimizer.gson.OptimizerDefinition;
+import com.github.thbrown.softballsim.util.GsonAccessor;
+import com.github.thbrown.softballsim.util.Logger;
 
 public class DeserializationTest {
+  // TODO: once network is implemented
+  /*
+   * @Test public void deserializeMonteCarloExaustiveData() throws IOException { String json = new
+   * String(Files.readAllBytes(Paths.get("./testData/monteCarloExaustiveData.json")));
+   * 
+   * GsonBuilder gsonBldr = new GsonBuilder();
+   * gsonBldr.registerTypeAdapter(BaseOptimizationDefinition.class, new
+   * OptimizationDefinitionDeserializer()); BaseOptimizationDefinition targetObject =
+   * gsonBldr.create().fromJson(json, BaseOptimizationDefinition.class);
+   * 
+   * MonteCarloExhaustiveOptimizatonDefinition data = (MonteCarloExhaustiveOptimizatonDefinition)
+   * targetObject; assertEquals(7, data.getInnings()); assertEquals(10000000, data.getIterations());
+   * assertEquals(0, data.getStartIndex()); assertEquals(1, data.getLineupType()); assertEquals(null,
+   * data.getInitialHistogram()); assertEquals(null, data.getInitialScore());
+   * 
+   * Logger.log(targetObject); }
+   */
+
   @Test
-  public void deserializeMonteCarloExaustiveData() throws IOException {
-      String json = new String(Files.readAllBytes(Paths.get("./testData/monteCarloExaustiveData.json")));
-      
-      GsonBuilder gsonBldr = new GsonBuilder();
-      gsonBldr.registerTypeAdapter(BaseOptimizationDefinition.class, new OptimizationDefinitionDeserializer());
-      BaseOptimizationDefinition targetObject = gsonBldr.create().fromJson(json, BaseOptimizationDefinition.class);
-   
-      MonteCarloExaustiveOptimizatonDefinition data = (MonteCarloExaustiveOptimizatonDefinition) targetObject;
-      assertEquals(7, data.getInnings());
-      assertEquals(10000000, data.getIterations());
-      assertEquals(0, data.getStartIndex());
-      assertEquals(1, data.getLineupType());
-      assertEquals(null, data.getInitialHistogram());
-      assertEquals(null, data.getInitialScore());
-      
-      Logger.log(targetObject);
+  public void deserializeExampleStatsData() throws IOException {
+    String json = new String(Files.readAllBytes(Paths.get("./stats/exampleData.json")));
+
+    DataStats targetObject = GsonAccessor.getInstance().getCustom().fromJson(json, DataStats.class);
+
+    // Spot check some fields - this is tightly coupled to the sample data
+    DataPlayer somePlayer = targetObject.getPlayers().get(0);
+    assertEquals(.597, somePlayer.getBattingAverage(), .001);
+    assertEquals(115, somePlayer.getSingleCount());
+
+    DataTeam someTeam = targetObject.getTeams().get(0);
+    assertEquals(28, someTeam.getGames().size());
+    assertEquals(1032, someTeam.getPlateApperances().size());
+    assertEquals(38, someTeam.getPlayers().size());
+
+    DataGame someGame = targetObject.getTeams().get(0).getGames().get(0);
+    assertEquals(39, someGame.getPlateAppearances().size());
+    assertEquals(11, someGame.getPlayers().size());
+
+    DataPlateAppearance somePa = targetObject.getTeams().get(0).getGames().get(0).getPlateAppearances().get(0);
+    assertEquals("Fireballs", somePa.getGame().getOpponent());
+    assertEquals("E", somePa.getResult());
+    assertEquals("Cheryl", somePa.getPlayer().getName());
+
+    Logger.log(targetObject);
   }
-  
+
   @Test
-  public void serializeTimeEstimationConfig() throws IOException {
-      TimeEstimationConfig config = new TimeEstimationConfig();
-      config.setInnings(7);
-      config.setIterations(10000);
-      config.setThreads(8);
-      config.setLineupType(1);
-      config.setCoefficients(new double[] {1,2,3,4,5});
-      config.setErrorAdjustments(new double[] {0,1,1.1,1.2,1.3,1.4,1.5,1.6,1.7});
-      Gson g = new Gson();
-      Logger.log(g.toJson(config));
+  public void deserializeJsonData() throws IOException {
+    String json = new String(Files.readAllBytes(Paths.get("./json/monte-carlo-exhaustive.json")));
+
+    OptimizerDefinition targetObject = GsonAccessor.getInstance().getCustom().fromJson(json, OptimizerDefinition.class);
+
+    // TODO: assert some fields
+
+    Logger.log(targetObject);
+  }
+
+  @Test
+  public void deserializeJsonDataAsMap() throws IOException {
+    String json = new String(Files.readAllBytes(Paths.get("./stats/exampleData.json")));
+
+    Map<String, String> targetObject = GsonAccessor.getInstance().getCustom().fromJson(json, Map.class);
+
+    Logger.log(targetObject);
   }
 
 }

@@ -1,6 +1,14 @@
 plugins {
   id 'java'
   id 'application'
+  id 'com.diffplug.gradle.spotless' version '3.25.0'
+}
+
+java {
+  // All code in this repository must build against Java 11 for GCP functions compatibility
+  // If you just want to get the tool running locally w/ a different version a Java, go ahead and comment out these lines
+  sourceCompatibility = JavaVersion.VERSION_11
+  targetCompatibility = JavaVersion.VERSION_11
 }
 
 repositories {
@@ -9,35 +17,104 @@ repositories {
 
 dependencies {
   testCompile group: 'junit', name: 'junit', version: '4.12'
+  testCompile group: 'com.j2html', name: 'j2html', version: '1.4.0'
+  testCompile group: 'com.vladsch.flexmark', name: 'flexmark', version: '0.50.50'
+  testCompile group: 'com.vladsch.flexmark', name: 'flexmark-all', version: '0.50.50'
+  testCompile group: 'com.googlecode.owasp-java-html-sanitizer', name: 'owasp-java-html-sanitizer', version: 'r136'
+  
   compile group: 'com.google.code.gson', name: 'gson', version: '2.8.5'
   compile group: 'org.apache.commons', name: 'commons-math3', version: '3.6'
+  compile group: 'commons-cli', name: 'commons-cli', version: '1.4'
+  compile group: 'com.google.cloud.functions', name: 'functions-framework-api', version: '1.0.2'
+  compile group: 'com.google.cloud', name: 'google-cloud-storage', version: '1.113.4'
+}
+
+run {
+  args = ["-O", "MONTE_CARLO_ADAPTIVE", "-P", "1OiRCCmrn16iyK,00000000000001,0000000000000f,0000000000000k,1CV6WRyspDjA7Z","1MPJ24EEyS0g6p", "-g", "100000", "-i", "7"]
 }
 
 jar {
   manifest {
     attributes "Main-Class": "com.github.thbrown.softballsim.SoftballSim"
   }
+  
+  // Copy the files in the json directory to json dirictory inside of the executable jar
+  from ('json') {
+    into 'json'
+  }
  
   from {
     configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
-   }
+  }
 }
 
 sourceSets {
   main {
     java {
-      srcDirs = ['src/com/github/thbrown/softballsim']
+      srcDirs = ['src']
     }
   }
   test {
     java {
-      srcDirs = ['test/com/github/thbrown/softballsim']
+      srcDirs = ['test']
     }
     resources {
-      srcDirs = ['test/resources/com/github/thbrown/softballsim']
+      srcDirs = ['test/resources']
     }
   }
+  gallery {
+  	java {
+      srcDirs = ['gallery']
+  	}
+  	compileClasspath += sourceSets.main.output + configurations.testCompile
+    runtimeClasspath += output + compileClasspath + configurations.testRuntime
+  }
 }
+
+spotless {
+  java {
+  	//removeUnusedImports()
+  	eclipse().configFile 'code-format.xml'
+  }
+}
+
+task message {
+  doLast {
+    println "Build successful: output jar can be found in ./build/libs"
+    println "Run with `java -jar ./build/libs/softball-sim.jar`"
+  }
+}
+
+task generateGalleryHtml(type: Test) {  
+  testClassesDirs = sourceSets.gallery.output.classesDirs
+  classpath = sourceSets.gallery.runtimeClasspath
+  outputs.upToDateWhen { false } // Gradle doesn't know that changes in the ./json affects the output html
+  doFirst {
+    println "Generating ./index.html for Optimization Gallery..."
+  }
+}
+
+// This used to be more valuable when needed to make requests to load json from the webserver, now just opting the .html file in the browser works just as well.
+task serve {
+	doLast {
+		int port = 8085;
+	    SimpleHttpFileServerFactory factory = new SimpleHttpFileServerFactory()
+	    println("Serving " + System.getProperty("user.dir"));
+	    HttpFileServer server = factory.start(new File(System.getProperty("user.dir")), port)
+	    println("Running on port " + port + " See gallery on http://localhost:" + port + "/index.html ");
+	    println("Stop server with ctrl+c (this may not work on windows, in which case you'll have to stop the process in Task Manager :( ) ");
+	    java.lang.Thread.sleep(Long.MAX_VALUE);
+    }
+}
+
+// Print the message after assembly completes
+assemble.finalizedBy message
+
+// Generate the gallery html as part of the build process
+assemble.finalizedBy generateGalleryHtml
+
+// Auto format files on build
+assemble.dependsOn spotlessApply
 
 // Define the main class for the application
 mainClassName = 'com.github.thbrown.softballsim.SoftballSim'

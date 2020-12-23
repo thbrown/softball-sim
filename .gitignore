@@ -10,15 +10,16 @@ build
 .metadata
 .settings
 
+# Build Stuff
 *.jar
-
-gson-2.8.5.jar
+gson-*.jar
 /bin
 
+# Cached optimizations
+/cached
+
 # Application log files
-java.log
-stdDevAndAvg.log
-threadCount.log
+*.log
 
 # Configs
 estimated-time-config.json

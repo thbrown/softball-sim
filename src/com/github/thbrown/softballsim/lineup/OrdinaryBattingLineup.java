@@ -1,92 +1,79 @@
 package com.github.thbrown.softballsim.lineup;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.Collectors;
-
-import com.github.thbrown.softballsim.Player;
+import java.util.Objects;
+import com.github.thbrown.softballsim.data.gson.DataPlayer;
+import com.github.thbrown.softballsim.data.gson.DataStats;
 
 public class OrdinaryBattingLineup implements BattingLineup {
 
-  private List<Player> players;
-  private int hitterIndex = 0;
+  private final List<DataPlayer> players;
+  private final int size;
 
-  public OrdinaryBattingLineup(List<Player> players) {
-    this.players = players;
+  public OrdinaryBattingLineup(List<DataPlayer> players) {
+    this.players = Collections.unmodifiableList(players);
     if (players.size() <= 0) {
       throw new IllegalArgumentException("You must include at least one player in the lineup.");
     }
-  }
-
-  @Override
-  public Player getNextBatter() {
-    Player selection = players.get(hitterIndex);
-    hitterIndex = (hitterIndex + 1) % players.size();
-    return selection;
-  }
-
-  @Override
-  public void reset() {
-    hitterIndex = 0;
+    this.size = players.size();
   }
 
   @Override
   public String toString() {
     StringBuilder result = new StringBuilder();
-    result.append("Players").append("\n");
-    for (Player p : players) {
+    result.append("\t").append(DataPlayer.getListHeader()).append("\n");
+    for (DataPlayer p : players) {
       result.append("\t").append(p).append("\n");
     }
     return result.toString();
   }
-  
+
   @Override
-  public Map<String, List<String>> toMap() {
-    Map<String,List<String>>result = new HashMap<>();
-    result.put("GroupA", players.stream().map(p -> p.getName().trim()).collect(Collectors.toList()));
-    return result;
+  public List<DataPlayer> asList() {
+    return this.players;
   }
 
   @Override
-  public BattingLineup getRandomSwap() {
-	/*
-	LinkedList<Player> players = new LinkedList<>();
-	players.addAll(this.players);
-	if(ThreadLocalRandom.current().nextInt(2) == 0) {
-		players.add(players.remove(0));
-	} else {
-		players.offerFirst(players.remove(players.size()-1));
-	}
-	*/
-	
-    List<Player> players = new ArrayList<>();
-    players.addAll(this.players);
+  public DataPlayer getBatter(int index) {
+    int adjustedIndex = index % players.size();
+    return players.get(adjustedIndex);
+  }
 
-    int randomValueA = ThreadLocalRandom.current().nextInt(players.size());
-    int randomValueB = ThreadLocalRandom.current().nextInt(players.size()-1);
-    int randomValueC = ThreadLocalRandom.current().nextInt(players.size()-2);
+  public static String getType() {
+    return OrdinaryBattingLineup.class.getSimpleName();
+  }
 
-    if(randomValueB >= randomValueA) {
-      randomValueB = randomValueB + 1;
+  @Override
+  public int hashCode() {
+    return Objects.hash(players);
+  }
+
+  @Override
+  public boolean equals(Object other) {
+    if (other instanceof OrdinaryBattingLineup) {
+      if (((OrdinaryBattingLineup) other).players.equals(this.players)) {
+        return true;
+      }
     }
-    
-    if(randomValueC >= randomValueA) {
-        randomValueC = randomValueC + 1;
+    return false;
+  }
+
+  @Override
+  public void populateStats(DataStats battingData) {
+    for (int i = 0; i < players.size(); i++) {
+      DataPlayer statslessPlayer = players.get(i);
+      DataPlayer statsfullPlayer = battingData.getPlayerById(statslessPlayer.getId());
+      if (statsfullPlayer == null) {
+        throw new RuntimeException("Failed to populate stats for player " + statslessPlayer
+            + " as no stats for this player were found in batting data. Try running the optimization again with the -F flag.");
+      }
+      players.set(i, statsfullPlayer);
     }
-    
-    if(randomValueC >= randomValueB) {
-        randomValueC = randomValueC + 1;
-    }
-    
-    Player temp = players.get(randomValueA);
-    players.set(randomValueA, players.get(randomValueB));
-    players.set(randomValueB, players.get(randomValueC));
-    players.set(randomValueC, temp);
-    
-    return new OrdinaryBattingLineup(players);
+  }
+
+  @Override
+  public int size() {
+    return this.size;
   }
 }
