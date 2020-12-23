@@ -1,7 +1,7 @@
 # SoftballSim
 Lineup optimization tool for making sure you choose the best batting order for your softball, baseball, or kickball team. Used by softball.app for lineup optimizations but can also be run from the command line on file system data.
 
-Build (requires Java 8*, in the instructions below replace `./gradlew` with `./gradlew.bat` for windows machines):
+Build (requires Java 11*, in the instructions below replace `./gradlew` with `./gradlew.bat` for windows machines):
 
 ```
 # Build (Note: this runs tests and formats code)
@@ -73,10 +73,6 @@ Available lineup types:
 *  2 - ALTERNATING_GENDER
 *  3 - NO\_CONSECUTIVE\_FEMALES
 
-## Contributing
-
-See CONTRIBUTING.md
-
 ### GCP Functions Deployment
 
 Shorter optimizations (< 5 minutes) can be executed on GCP cloud functions. There are two endpoints for this:
@@ -84,7 +80,9 @@ Shorter optimizations (< 5 minutes) can be executed on GCP cloud functions. Ther
 1. https://us-central1-optimum-library-250223.cloudfunctions.net/softball-sim-start
 2. https://us-central1-optimum-library-250223.cloudfunctions.net/softball-sim-query
 
-The first is a synchronous query that will start an optimization, the second is also a synchronous query that can be run in parallel to retrieve the 1st query's progress. These calls are associated by an id parameter that is passed to both. 'zsjdklasaskfjaskfdjs' is id used in the example. If you are calling this endpoint, you should change this to something random, long, and unique because if you don't the runs might conflict, furthermore, you might see other peoples data an other people might see your data.
+The first is a synchronous query that will start an optimization, the second is also a synchronous query that can be run in parallel to retrieve the 1st query's progress.
+
+These calls are associated by an id parameter that is passed to both. 'zsjdklasaskfjaskfdjs' is id used in the example. If you are calling these endpoints, you should change this id to something random, long, and unique because if you don't, the runs might conflict. Furthermore, you might see other peoples data and other people might see your data.
 
 #### To Deploy
 
@@ -102,15 +100,16 @@ Make sure you have params you like in ./stats/exampleGcpFunctionsParams.json. Th
 
 `curl -X POST "https://us-central1-optimum-library-250223.cloudfunctions.net/softball-sim-start" -H "Content-Type:application/json" --data @./stats/exampleGcpFunctionsParams.json`
 
-To see incremental progress, use:exampleGcpFunctionsParams
+To see incremental progress, use:
 
 `curl -X POST "https://us-central1-optimum-library-250223.cloudfunctions.net/softball-sim-query" -N -H "Content-Type:application/json" --data {"I":zsjdklasaskfjaskfdjs}`
 
-``
+## Contributing
 
+See CONTRIBUTING.md
 
 ## Other Notes
 
-* *All code checked into this repository must build against Java 8 for cloud computing compatibility reasons, but if you have a newer version of Java and just want to get this tool working, you can bypass the Java 8 requirement by commenting out the `sourceCompatibility` and `targetCompatibility` lines in the `java` section of the `build.gradle` file before running the build command.
+* *All code checked into this repository must build against Java 8 for cloud computing compatibility reasons, but if you have a newer version of Java and just want to get this tool working, you can bypass the Java 11 requirement by commenting out the `sourceCompatibility` and `targetCompatibility` lines in the `java` section of the `build.gradle` file before running the build command.
 
 * This CLI uses ANSI escape sequences to color error messages for readability. These are not enabled by default in common Windows shells. So, on Windows you may see some text artifacts before and after error messages.

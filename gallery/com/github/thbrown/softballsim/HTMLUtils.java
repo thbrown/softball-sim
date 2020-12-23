@@ -40,7 +40,7 @@ public class HTMLUtils {
     this.parser = Parser.builder(options).build();
     this.renderer = HtmlRenderer.builder(options).build();
 
-    // HTML sanitization configuration - policy based on githubs here:
+    // HTML sanitization configuration - policy based on Github's here:
     // https://github.com/jch/html-pipeline/blob/master/lib/html/pipeline/sanitization_filter.rb#L44-L106
     // TODO: # Top-level <li> elements are removed because they can break out of containing markup.
     // TODO: # Table child elements that are not contained by a <table> are removed.

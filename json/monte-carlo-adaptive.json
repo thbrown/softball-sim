@@ -1,7 +1,7 @@
 {
   "id": "1",
   "name": "Monte Carlo Adaptive",
-  "img": "https://upload.wikimedia.org/wikipedia/commons/4/49/Gaussian_distribution_thick_lines.svg",
+  "img": "https://cdn.pixabay.com/photo/2019/09/24/16/32/chameleon-4501712_1280.jpg",
   "className": "MonteCarloAdaptive",
   "description": "
 Employs the same approach as the Monte Carlo Exhaustive optimizer but instead of simulating a fixed number of games for each lineup, 

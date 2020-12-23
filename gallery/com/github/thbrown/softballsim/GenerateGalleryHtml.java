@@ -46,11 +46,12 @@ public class GenerateGalleryHtml {
             link().withRel("stylesheet").withHref("css/main.css"),
             link().withRel("stylesheet").withHref("https://fonts.googleapis.com/css?family=Roboto"),
             link().withRel("stylesheet").withHref("https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css"),
+            link().withRel("icon").withHref("https://softball.app/server/assets/icons/favicon.ico"),
 
             link().withRel("stylesheet")
                 .withHref("https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/3.0.1/github-markdown.min.css"),
             script().withType("text/javascript").attr("defer")
-                .withSrc("https://cdnjs.cloudflare.com/ajax/libs/mermaid/8.4.4/mermaid.min.js"),
+                .withSrc("https://cdnjs.cloudflare.com/ajax/libs/mermaid/8.8.4/mermaid.min.js"),
             script().withType("text/javascript").attr("defer").attr("onload", "renderKatex()")
                 .withSrc("https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js")),
         body(

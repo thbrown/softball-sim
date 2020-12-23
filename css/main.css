@@ -1,106 +1,110 @@
 body {
-    margin: 0px;
-    background-color: #4caf50;
+  margin: 0px;
+  background-color: #e8e8e8 /*#4caf50*/;
+}
+
+h1 {
+  margin: 0px;
 }
 
 #main.content {
-    font-family: roboto,arial,helvetica,sans-serif;
-    width: 100%;
-    height: 100vh;
+  font-family: roboto, arial, helvetica, sans-serif;
+  width: 100%;
+  height: 100vh;
 }
 
 div.gallery-tile {
-    margin: 5px;
-    border-radius: 5px;
-    box-shadow: 0 0 4px rgba(0,0,0,0.14), 0 4px 8px rgba(0,0,0,0.28);
-    float: left;
-    width: 300px;
-    background-color: whitesmoke;
+  margin: 5px;
+  border-radius: 5px;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.14), 0 4px 8px rgba(0, 0, 0, 0.28);
+  float: left;
+  width: 300px;
+  background-color: whitesmoke;
 }
 
 div.gallery-tile:hover {
-    box-shadow: 0 0 4px rgba(0,0,0,0.4), 0 4px 8px rgba(0,0,0,0.7);
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.4), 0 4px 8px rgba(0, 0, 0, 0.7);
 }
 
 div.gallery-tile img {
-    width: 100%;
-    height: auto;
-    border-radius: 5px 5px 0px 0px;
+  width: 100%;
+  height: auto;
+  border-radius: 5px 5px 0px 0px;
 }
 
 .gallery-header-wrapper {
-    color: #fff;
-    min-width: 100%;
-    background-color: #087f23;
-    box-shadow: 0 0 4px rgba(0,0,0,0.14), 0 4px 8px rgba(0,0,0,0.28);
+  color: #fff;
+  min-width: 100%;
+  background-color: #087f23;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.14), 0 4px 8px rgba(0, 0, 0, 0.28);
 }
 
 .gallery-tile-name {
-    font-size: 17px;
-    font-weight: 600;
-    padding: 5px;
+  font-size: 17px;
+  font-weight: 600;
+  padding: 5px;
 }
 
 .gallery-tile-body {
-    overflow: hidden;
-    padding: 5px;
-    margin-top: -20px;
+  overflow: hidden;
+  padding: 5px;
+  margin-top: -20px;
 }
 
 .add-button {
-    position: absolute;
-    right: 5px;
-    bottom: 5px;
-    background-color: #795548;
-    color: white;
-    padding: 12px 18px;
-    border-radius: 4px;
+  position: absolute;
+  right: 5px;
+  bottom: 5px;
+  background-color: #795548;
+  color: white;
+  padding: 12px 18px;
+  border-radius: 4px;
 }
 
 .add-button:hover,
 .add-button:focus {
-    background-color: #a98274;
+  background-color: #a98274;
 }
 
 .gallery-tile-add-button {
-    box-shadow: 0px 0px 7px 10px #fefefe;
+  box-shadow: 0px 0px 7px 10px #fefefe;
 }
 
 .gallery-fade {
-    position: absolute;
-    bottom: 0px;
-    background-color: #220901;
-    border-radius: 4px;
-    height: 75px;
-    width: 100%;
-    background: linear-gradient(transparent, white);
+  position: absolute;
+  bottom: 0px;
+  background-color: #220901;
+  border-radius: 4px;
+  height: 75px;
+  width: 100%;
+  background: linear-gradient(transparent, white);
 }
 
 .text-container {
-    position: relative;
-    height: 200px;
-    overflow: hidden;
+  position: relative;
+  height: 200px;
+  overflow: hidden;
 }
 
 div.desc {
-    padding: 15px;
-    text-align: center;
+  padding: 15px;
+  text-align: center;
 }
 
 .img-container {
-	height: 109px;
-    overflow: hidden;
+  height: 109px;
+  overflow: hidden;
 }
 
 .inner {
-	position: relative;
-    max-width: 960px;
-    padding: 10px 20px;
-    margin: 0 auto;
+  position: relative;
+  max-width: 960px;
+  padding: 10px 20px;
+  margin: 0 auto;
 }
 
 .hidden {
-	display: none;
+  display: none;
 }
 
 .modal {
@@ -113,8 +117,8 @@ div.desc {
   width: 100%;
   height: 100%;
   overflow: auto;
-  background-color: rgb(0,0,0);
-  background-color: rgba(0,0,0,0.85);
+  background-color: rgb(0, 0, 0);
+  background-color: rgba(0, 0, 0, 0.85);
 }
 
 .modal-content {
@@ -176,13 +180,25 @@ div.desc {
   animation: spin 2s linear infinite;
 }
 
+.mermaid {
+  line-height: 1;
+}
+
 /* Safari */
 @-webkit-keyframes spin {
-  0% { -webkit-transform: rotate(0deg); }
-  100% { -webkit-transform: rotate(360deg); }
+  0% {
+    -webkit-transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+  }
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }

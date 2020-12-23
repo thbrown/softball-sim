@@ -13,7 +13,7 @@ The optimizer then averages the runs scored acrosss all possible lineups and ret
 
 Simulation flow. This flowchart refers to the parameter *g* which is a configurable value indicating the number of games to simulate. The stages with thick black outlines have sections w/ additional details below.
 ```mermaid
-graph TD;  
+flowchart TD;  
   A[Select a lineup from<br> the lineup pool.]:::addtDoc-->B;
   B[Simulate a game,<br>remember the number<br> of runs scored.]:::addtDoc-->D
   D{Have we simulated<br>more than *g* games?}--yes-->E
@@ -65,7 +65,7 @@ Example simulation (7 innings, 10000 games)
 This flowchart refers to the parameter *i* which is a configurable value indicating the number of innings to simulate (typically 9 for baseball, 7 for softball, but can be anything). Same as before, the stage with the thick black outline has a section w/ additional details below.
 Simulate a game
 ```mermaid
-graph TD;
+flowchart TD;
   B[Set active batter to<br>the first player <br>in the lineup.]-->C
   C{Simulate a <br> plate appearance <br> for the active batter.}:::addtDoc--Result: 0-->D
   C--Result: 1,2,3,4-->E
@@ -77,7 +77,7 @@ graph TD;
   G-->C
   I{Have we <br>simulated more <br>than *i* innings?}--yes-->J
   I--no--> K
-  J[Done! Return the score<br> for this simualted game.]
+  J[Done! Return the score<br> for this simulated game.]
   K[Increment the <br>number of innings<br> simulated by one. <br> Clear the bases. <br> Clear the outs.]-->G
   classDef addtDoc stroke:#333,stroke-width:4px;
 ```
