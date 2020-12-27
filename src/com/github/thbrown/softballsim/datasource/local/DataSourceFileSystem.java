@@ -73,7 +73,8 @@ public class DataSourceFileSystem implements DataSource {
           json = new String(Files.readAllBytes(Paths.get(filesOnly.get(0).getCanonicalPath())));
         } else {
           throw new RuntimeException(
-              "There were " + filesOnly.size() + " files in the directory specified, but this application expects one");
+              "There were " + filesOnly.size() + " files in the directory specified (" + file.getAbsolutePath()
+                  + "), but this application expects only one");
         }
       } else {
         json = new String(Files.readAllBytes(Paths.get(statsFileLocation)));

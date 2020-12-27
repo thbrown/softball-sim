@@ -26,8 +26,7 @@ public class OptimizerSuiteTest {
     Set<Integer> data = new HashSet<>();
 
     // Get an array of all the optimizer json files
-    File[] fileList = new File("./json").listFiles();
-    List<OptimizerDefinitionComposite> definitions = new ArrayList<>(fileList.length);
+    File[] fileList = new File("./docs/definitions").listFiles();
     for (int i = 0; i < fileList.length; i++) {
       String contents = new String(Files.readAllBytes(Paths.get(fileList[i].getCanonicalPath())));
       OptimizerDefinition definition =

@@ -3,7 +3,8 @@
   "name": "Expected Value",
   "img": "https://cdn.pixabay.com/photo/2020/03/07/19/16/swiss-francs-4910665_1280.jpg",
   "className": "MonteCarloExhaustive",
-  "description": "Calculates the expected runs scored mathematically up to a specified max number of batters. The number of batters is limited because there there are an infinite number of possibilities i.e. many teams could theoretical bat forever.",
+  "shortDescription": "Calculates the expected runs scored mathematically up to a specified max number of batters. The number of batters is limited because there there are an infinite number of possibilities i.e. many teams could theoretical bat forever.",
+  "longDescriptionFile": "expected-value.md",
   "supported-lineup-types": [
     "NORMAL",
     "ALTERNATING_GENDER",

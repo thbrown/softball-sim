@@ -30,11 +30,6 @@ public class ExpectedValueOptimizer implements Optimizer<MonteCarloExhaustiveRes
   private static int TASK_BUFFER_SIZE = 1000;
 
   @Override
-  public String getJsonDefinitionFileName() {
-    return "expected-value.json";
-  }
-
-  @Override
   public MonteCarloExhaustiveResult optimize(List<String> playersInLineup, LineupTypeEnum lineupType,
       DataStats battingData,
       Map<String, String> arguments, ProgressTracker progressTracker, MonteCarloExhaustiveResult existingResult) {

@@ -25,6 +25,7 @@ java -jar ./build/libs/softball-sim.jar --help
 ```
 
 Test
+
 ```
 ./gradlew clean test --info
 ```
@@ -62,9 +63,9 @@ Flags (more command line flags will be available based on which optimizer and da
 
 #### Available dataSource Options
 
-* FILE_SYSTEM - Gets data from files in the `./stats` directory. See the `stats` directory in this repository for example files. Application will attempt to read data of all files in the `./stats` directory.
+* FILE_SYSTEM - Gets data from files in the `./stats` directory. See the `stats` directory in this repository for example files. Application will attempt to read data of all files in the `./stats` directory. You can also specify a spicific file using the `-F` flag.
 
-* NETWORK - Gets data from a network connection. This option is intended to be used mostly by softball-scorer app (https://github.com/thbrown/softball-scorer).
+* NETWORK - Gets data from a local network connection. This option is intended to be used mostly by softball-scorer app (https://github.com/thbrown/softball-scorer).
 
 #### Available lineupType Options
 
@@ -110,6 +111,6 @@ See CONTRIBUTING.md
 
 ## Other Notes
 
-* *All code checked into this repository must build against Java 8 for cloud computing compatibility reasons, but if you have a newer version of Java and just want to get this tool working, you can bypass the Java 11 requirement by commenting out the `sourceCompatibility` and `targetCompatibility` lines in the `java` section of the `build.gradle` file before running the build command.
+* *All code checked into this repository must build against Java 11 for cloud computing compatibility reasons, but if you have a newer version of Java and just want to get this tool working, you can bypass the Java 11 requirement by commenting out the `sourceCompatibility` and `targetCompatibility` lines in the `java` section of the `build.gradle` file before running the build command.
 
 * This CLI uses ANSI escape sequences to color error messages for readability. These are not enabled by default in common Windows shells. So, on Windows you may see some text artifacts before and after error messages.

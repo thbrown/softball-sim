@@ -50,11 +50,11 @@ public enum OptimizerEnum {
     this.id = id;
     this.optimizerImplementation = optimizer;
     try {
-      String optimizerDefinitionJson = readFromFileOrClassPath("./json/" + optimizer.getJsonDefinitionFileName());
+      String optimizerDefinitionJson = readFromFileOrClassPath("./docs/definitions/" + id + ".json");
       this.optimizerDefinition =
           GsonAccessor.getInstance().getCustom().fromJson(optimizerDefinitionJson, OptimizerDefinition.class);
     } catch (IOException e) {
-      throw new RuntimeException("Error while deserializing " + optimizer.getJsonDefinitionFileName(), e);
+      throw new RuntimeException("Error while deserializing " + id + ".json", e);
     }
   }
 

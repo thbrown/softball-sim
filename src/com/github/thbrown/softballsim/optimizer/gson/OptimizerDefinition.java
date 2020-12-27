@@ -10,7 +10,8 @@ import org.apache.commons.cli.Option;
 public class OptimizerDefinition {
   private String id;
   private String name;
-  private String description;
+  private String shortDescritpion;
+  private String longDescriptionFile;
   private String img;
   private List<String> supportedLineupTypes;
   private String machine;
@@ -25,8 +26,12 @@ public class OptimizerDefinition {
     return name;
   }
 
-  public String getDescription() {
-    return description;
+  public String getShortDescription() {
+    return shortDescritpion;
+  }
+
+  public String getLongDescriptionFile() {
+    return longDescriptionFile;
   }
 
   public String getImageUrl() {
