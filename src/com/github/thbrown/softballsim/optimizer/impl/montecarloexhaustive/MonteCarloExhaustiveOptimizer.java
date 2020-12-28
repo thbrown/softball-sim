@@ -28,11 +28,6 @@ public class MonteCarloExhaustiveOptimizer implements Optimizer<MonteCarloExhaus
   private static int TASK_BUFFER_SIZE = 1000;
 
   @Override
-  public String getJsonDefinitionFileName() {
-    return "monte-carlo-exhaustive.json";
-  }
-
-  @Override
   public MonteCarloExhaustiveResult optimize(List<String> playersInLineup, LineupTypeEnum lineupType,
       DataStats battingData,
       Map<String, String> arguments, ProgressTracker progressTracker, MonteCarloExhaustiveResult existingResult) {

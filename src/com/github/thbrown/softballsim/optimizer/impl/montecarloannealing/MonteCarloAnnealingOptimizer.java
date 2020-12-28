@@ -36,11 +36,6 @@ public class MonteCarloAnnealingOptimizer implements Optimizer<Result> {
   private static final double ALPHA = .001;
 
   @Override
-  public String getJsonDefinitionFileName() {
-    return "monte-carlo-annealing.json";
-  }
-
-  @Override
   public Result optimize(List<String> playersInLineup, LineupTypeEnum lineupType, DataStats battingData,
       Map<String, String> arguments, ProgressTracker progressTracker, Result existingResult) {
 

@@ -10,12 +10,6 @@ import com.github.thbrown.softballsim.lineupindexer.LineupTypeEnum;
 public interface Optimizer<R extends Result> {
 
   /**
-   * This should return the name of the json definition file that has been added to the /json
-   * directory.
-   */
-  public String getJsonDefinitionFileName();
-
-  /**
    * Code that gets executed to actually determine the optimized lineup. This is where all the magic
    * happens.
    * 

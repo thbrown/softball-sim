@@ -1,0 +1,1 @@
+Calculates the expected runs scored mathematically up to a specified max number of batters. The number of batters is limited because there there are an infinite number of possibilities i.e. many teams could theoretical bat forever.

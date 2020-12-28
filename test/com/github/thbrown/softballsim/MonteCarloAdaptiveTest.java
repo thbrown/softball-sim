@@ -20,25 +20,27 @@ public class MonteCarloAdaptiveTest {
   @Test
   public void testMonteCarloAdaptive() throws Exception {
     final int INNINGS = 7;
-    final double ALPHA = .0001;
+    final double ALPHA = .001;
     final int LINEUP_TYPE = 2;
     final int THREAD_COUNT = 8;
     final String LINEUP = "1OiRCCmrn16iyK,Nelly,1CV6WRyspDjA7Z,1MPJ24EEyS0g6p,Devon,Jordyn";
 
     String[] args = {"-O", "MONTE_CARLO_ADAPTIVE", "-L", LINEUP, "-a", String.valueOf(ALPHA), "-i",
-        String.valueOf(INNINGS), "-T", String.valueOf(LINEUP_TYPE), "-t", String.valueOf(THREAD_COUNT), "-F"};
+        String.valueOf(INNINGS), "-T", String.valueOf(LINEUP_TYPE), "-t", String.valueOf(THREAD_COUNT), "-F", "-P",
+        "./stats/exampleData.json"};
 
     // Run the same simulation with the exhaustive optimizer, useful for doing a comparison
     String[] args2 = {"-O", "MONTE_CARLO_EXHAUSTIVE", "-L", LINEUP, "-g", String.valueOf(500000), "-i",
-        String.valueOf(INNINGS), "-T", String.valueOf(LINEUP_TYPE), "-t", String.valueOf(THREAD_COUNT)};
+        String.valueOf(INNINGS), "-T", String.valueOf(LINEUP_TYPE), "-t", String.valueOf(THREAD_COUNT), "-P",
+        "./stats/exampleData.json"};
 
-    SoftballSim.main(args2);
+    SoftballSim.main(args);
   }
 
   @Test
   public void testMonteCarloAdaptiveNetwork() throws Exception {
     final int INNINGS = 7;
-    final double ALPHA = .0001;
+    final double ALPHA = .001;
     final int LINEUP_TYPE = 2;
     final int THREAD_COUNT = 8;
     final String PLAYERS = "1OiRCCmrn16iyK,Nelly,1CV6WRyspDjA7Z,1MPJ24EEyS0g6p,Devon,Jordyn";

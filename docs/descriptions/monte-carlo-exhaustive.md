@@ -1,13 +1,4 @@
-{
-  "id": "0",
-  "name": "Monte Carlo Exhaustive",
-  "img": "https://i.imgur.com/35aPFzD.jpg",
-  "className": "MonteCarloExhaustive",
-  "description": "
-Runs Monte Carlo simulations of games for all possible lineups. 
-The optimizer then averages the runs scored acrosss all possible lineups and returns the lineup with the highest average runs scored.
-
-## Details
+Runs Monte Carlo simulations of games for all possible lineups. The optimizer then averages the runs scored acrosss all possible lineups and returns the lineup with the highest average runs scored.
 
 ### Overview
 
@@ -70,8 +61,8 @@ flowchart TD;
   C{Simulate a <br> plate appearance <br> for the active batter.}:::addtDoc--Result: 0-->D
   C--Result: 1,2,3,4-->E
   D[Increment the<br> number of outs <br>by one]-->F
-  E[\"Advance the runners. <br> Increase score if the<br>plate appearance <br>drove home (a) run(s).\"]-->G
-  F[> 3 outs?]--no--> G
+  E["Advance the runners. <br> Increase score if the<br>plate appearance <br>drove home (a) run(s)."]-->G
+  F[>= 3 outs?]--no--> G
   F--yes-->I
   G[Set active batter to<br>the next batter <br>in the lineup.]
   G-->C
@@ -126,44 +117,3 @@ Things that are not accounted for in the simulation:
 - Any pitching data
 
 _*We can debate about how walks or sacrifices should be counted. It probably depends on what flavor of the sport you are playing. IMHO sacrifices should be counted as outs in slowpitch softball and kickball, but not baseball or fastpitch. In any event, these mapping are configurable (or will be configurable soon). So you are welcome to impose your own philosophy._
-  ",
-  "supported-lineup-types": [
-    "NORMAL",
-    "ALTERNATING_GENDER",
-    "NO_CONSECUTIVE_FEMALES"
-  ],
-  "machine": "g4-high-compute",
-  "arguments": [
-    {
-      "type": "String",
-      "shortLabel": "g",
-      "longLabel": "games",
-      "description": "Number of games to simulate for each lineup. An optimization run with more games will take longer but be more accurate.",
-      "defaultValue": "10000",
-      "pattern": "^[1-9]\\d*$"
-    },
-    {
-      "type": "String",
-      "shortLabel": "i",
-      "longLabel": "innings",
-      "description": "Number of innings to be played in each simulated game. More innings will increase the estimated completion time.",
-      "defaultValue": "7",
-      "pattern": "^[1-9]\\d*$"
-    },
-    {
-      "type": "Boolean",
-      "shortLabel": "l",
-      "longLabel": "lowest",
-      "description": "IN_DEVELOPMENT: this field is true, the optimizer will attempt to provide the lowest scoring lineup instead of the highest"
-    },
-    {
-      "type": "String",
-      "shortLabel": "t",
-      "longLabel": "threads",
-      "description": "Number of threads that will be used to run the simulation. For best performance, this should = the number of logical cores (which is the default). You can lower this if you don't want the optimization hoggin' all your CPU cores.",
-      "defaultValue": "$getLogicalCPUCores",
-      "pattern": "^([1-9]\\d*|\\$getLogicalCPUCores)$",
-      "hideInUi": "true"
-    }
-  ]
-}

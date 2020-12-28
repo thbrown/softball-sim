@@ -31,11 +31,6 @@ import com.github.thbrown.softballsim.util.Logger;
 
 public class MonteCarloAdaptiveOptimizer implements Optimizer<MonteCarloAdaptiveResult> {
 
-  @Override
-  public String getJsonDefinitionFileName() {
-    return "monte-carlo-adaptive.json";
-  }
-
   private static final int TASK_MAX_LINEUP_COUNT = 10;
   private static final int TASK_MIN_LINEUP_COUNT = 1;
 

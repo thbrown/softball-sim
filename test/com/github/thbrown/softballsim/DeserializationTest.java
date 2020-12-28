@@ -64,7 +64,7 @@ public class DeserializationTest {
 
   @Test
   public void deserializeJsonData() throws IOException {
-    String json = new String(Files.readAllBytes(Paths.get("./json/monte-carlo-exhaustive.json")));
+    String json = new String(Files.readAllBytes(Paths.get("./docs/definitions/0.json")));
 
     OptimizerDefinition targetObject = GsonAccessor.getInstance().getCustom().fromJson(json, OptimizerDefinition.class);
 

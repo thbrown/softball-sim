@@ -7,6 +7,10 @@ h1 {
   margin: 0px;
 }
 
+.hidden {
+  display: none !important;
+}
+
 #main.content {
   font-family: roboto, arial, helvetica, sans-serif;
   width: 100%;

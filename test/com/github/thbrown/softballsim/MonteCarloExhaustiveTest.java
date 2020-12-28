@@ -35,7 +35,7 @@ public class MonteCarloExhaustiveTest {
   @Test
   public void testDataSourceNetwork() throws Exception {
     final int INNINGS = 7;
-    final int GAMES = 1000;
+    final int GAMES = 100;
     final int LINEUP_TYPE = 1;
     final int THREAD_COUNT = 4;
 

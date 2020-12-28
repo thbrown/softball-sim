@@ -1,0 +1,3 @@
+A faster (time constrained), less accurate optimizer that doesn't test the entire search space of possible lineups. 
+Instead, it employs [simulated annealing](https://en.wikipedia.org/wiki/Simulated_annealing) to seaerch only a subset of possible lineups. 
+Like the Monte Carlo Adaptive optimizer, this optimizer uses statistical t-tests to determine when a particular lineup is better or worse than another.
