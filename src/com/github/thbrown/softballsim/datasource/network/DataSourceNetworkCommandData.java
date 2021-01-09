@@ -35,7 +35,7 @@ public class DataSourceNetworkCommandData extends DataSourceNetworkCommand {
   }
 
   @Override
-  public void process(String[] args, LineupTypeEnum lineupType, List<String> players, OptimizerEnum optimizer,
+  public Result process(String[] args, LineupTypeEnum lineupType, List<String> players, OptimizerEnum optimizer,
       NetworkHelper network) {
     // This implementation allows arguments to come in over the network as well. Here we'll merge the
     // flags from the CLI with the arguments from the network and re-parse.
@@ -95,9 +95,11 @@ public class DataSourceNetworkCommandData extends DataSourceNetworkCommand {
       } else {
         Result result = optimizer.optimize(players, lineupType, stats, arguments, tracker, null);
         functions.onComplete(result);
+        return result;
       }
     } finally {
       trackerThread.interrupt();
     }
+    return null;
   }
 }

@@ -89,8 +89,7 @@ public class DataSourceNetwork implements DataSource {
         // command
         DataSourceNetworkCommand command = null;
         while ((command = network.readCommand()) != null) {
-          command.process(args, lineupType, players, optimizer, network);
-          break;
+          return command.process(args, lineupType, players, optimizer, network);
         }
       } catch (Exception e) {
         // Something went wrong, send the details to the remote instance
@@ -109,7 +108,7 @@ public class DataSourceNetwork implements DataSource {
       Logger.log(e);
       e.printStackTrace();
     }
-    return null; // TODO: Make this return the result for completeness sake?
+    return null;
   }
 
   /**

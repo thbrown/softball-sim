@@ -42,7 +42,7 @@ public class CommandLineOptions {
   public final static String FORCE = "F";
 
   public final static String SOURCE_DEFAULT = "FILE_SYSTEM";
-  public final static String TYPE_LINEUP_DEFAULT = "ORDINARY";
+  public final static String TYPE_LINEUP_DEFAULT = "STANDARD";
 
   // Help
   public final static String HELP_HEADER_1 =

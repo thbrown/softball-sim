@@ -3,17 +3,15 @@ package com.github.thbrown.softballsim.optimizer.gson;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 
-public class OptimizerDefinitionArgumentBoolean extends OptimizerDefinitionArgument {
+public class OptimizerDefinitionOptionString extends OptimizerDefinitionOption {
+  private String defaultValue;
+  private String pattern;
 
-  private static String TRUE = "true";
-  private static String FALSE = "false";
-
-  @Override
   public Option getCommandLineOption() {
     return Option.builder(super.getShortLabel())
         .longOpt(super.getLongLabel())
         .desc(super.getDescription())
-        .hasArg(false)
+        .hasArg(true)
         .required(false)
         .build();
   }
@@ -25,7 +23,14 @@ public class OptimizerDefinitionArgumentBoolean extends OptimizerDefinitionArgum
 
   @Override
   public String getValue(CommandLine cmd) {
-    return cmd.hasOption(super.getShortLabel()) ? TRUE : FALSE;
+    String value = cmd.getOptionValue(super.getShortLabel(), defaultValue);
+    if (value == null) {
+      return value;
+    }
+    if (pattern == null || value.matches(pattern)) {
+      return value;
+    }
+    throw new RuntimeException("The argument " + value + " did not validate again the regex pattern " + pattern);
   }
 
 }

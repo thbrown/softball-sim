@@ -1,6 +1,7 @@
 package com.github.thbrown.softballsim.datasource.network;
 
 import java.util.List;
+import com.github.thbrown.softballsim.Result;
 import com.github.thbrown.softballsim.lineupindexer.LineupTypeEnum;
 import com.github.thbrown.softballsim.optimizer.OptimizerEnum;
 
@@ -26,7 +27,7 @@ public abstract class DataSourceNetworkCommand {
    * @param optimizer
    * @param network
    */
-  public void process(String[] args, LineupTypeEnum lineupType, List<String> players, OptimizerEnum optimizer,
+  public Result process(String[] args, LineupTypeEnum lineupType, List<String> players, OptimizerEnum optimizer,
       NetworkHelper network) {
     throw new UnsupportedOperationException("This command should never be recieved from the server.");
   };

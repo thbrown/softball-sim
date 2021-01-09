@@ -1,11 +1,13 @@
 package com.github.thbrown.softballsim.optimizer.gson;
 
+import java.util.Set;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 
-public class OptimizerDefinitionArgumentString extends OptimizerDefinitionArgument {
+public class OptimizerDefinitionOptionEnumeration extends OptimizerDefinitionOption {
+
   private String defaultValue;
-  private String pattern;
+  private Set<String> values;
 
   public Option getCommandLineOption() {
     return Option.builder(super.getShortLabel())
@@ -24,10 +26,16 @@ public class OptimizerDefinitionArgumentString extends OptimizerDefinitionArgume
   @Override
   public String getValue(CommandLine cmd) {
     String value = cmd.getOptionValue(super.getShortLabel(), defaultValue);
-    if (pattern == null || value.matches(pattern)) {
+    if (value == null) {
       return value;
     }
-    throw new RuntimeException("The argument " + value + " did not validate again the regex pattern " + pattern);
+
+    if (values.contains(value)) {
+      throw new RuntimeException("The value provided for argurment " + super.getLongLabel() + " is " + value
+          + " which not in the list of allowed values " + values);
+    }
+
+    return value;
   }
 
 }

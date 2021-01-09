@@ -2,31 +2,31 @@
   "id": "3",
   "name": "Expected Value",
   "img": "https://cdn.pixabay.com/photo/2020/03/07/19/16/swiss-francs-4910665_1280.jpg",
-  "className": "MonteCarloExhaustive",
   "shortDescription": "Calculates the expected runs scored mathematically up to a specified max number of batters. The number of batters is limited because there there are an infinite number of possibilities i.e. many teams could theoretical bat forever.",
   "longDescriptionFile": "expected-value.md",
-  "supported-lineup-types": [
-    "NORMAL",
+  "supportedLineupTypes": [
+    "STANDARD",
     "ALTERNATING_GENDER",
     "NO_CONSECUTIVE_FEMALES"
   ],
-  "machine": "g4-high-compute",
-  "arguments": [
+  "options": [
     {
-      "type": "String",
+      "type": "Number",
       "shortLabel": "b",
       "longLabel": "batters",
       "description": "Maximum number of batters that should be considered in a single game.",
       "defaultValue": "100",
-      "pattern": "^[1-9]\\d*$"
+      "min": "1",
+      "step": "1"
     },
     {
-      "type": "String",
+      "type": "Number",
       "shortLabel": "i",
       "longLabel": "innings",
       "description": "Number of innings to be played in each simulated game. More innings will increase the estimated completion time.",
       "defaultValue": "7",
-      "pattern": "^[1-9]\\d*$"
+      "min": "0",
+      "step": "1"
     },
     {
       "type": "Boolean",
@@ -35,13 +35,13 @@
       "description": "IN_DEVELOPMENT: this field is true, the optimizer will attempt to provide the lowest scoring lineup instead of the highest"
     },
     {
-      "type": "String",
+      "type": "Number",
       "shortLabel": "t",
       "longLabel": "threads",
       "description": "Number of threads that will be used to run the simulation. For best performance, this should = the number of logical cores (which is the default). You can lower this if you don't want the optimization hoggin' all your CPU cores.",
-      "defaultValue": "$getLogicalCPUCores",
-      "pattern": "^([1-9]\\d*|\\$getLogicalCPUCores)$",
-      "hideInUi": "true"
+      "uiVisibility": "HIDDEN",
+      "min": "0",
+      "step": "1"
     }
   ]
 }

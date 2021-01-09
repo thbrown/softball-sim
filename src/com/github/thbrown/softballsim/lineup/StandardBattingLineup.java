@@ -6,12 +6,12 @@ import java.util.Objects;
 import com.github.thbrown.softballsim.data.gson.DataPlayer;
 import com.github.thbrown.softballsim.data.gson.DataStats;
 
-public class OrdinaryBattingLineup implements BattingLineup {
+public class StandardBattingLineup implements BattingLineup {
 
   private final List<DataPlayer> players;
   private final int size;
 
-  public OrdinaryBattingLineup(List<DataPlayer> players) {
+  public StandardBattingLineup(List<DataPlayer> players) {
     this.players = Collections.unmodifiableList(players);
     if (players.size() <= 0) {
       throw new IllegalArgumentException("You must include at least one player in the lineup.");
@@ -41,7 +41,7 @@ public class OrdinaryBattingLineup implements BattingLineup {
   }
 
   public static String getType() {
-    return OrdinaryBattingLineup.class.getSimpleName();
+    return StandardBattingLineup.class.getSimpleName();
   }
 
   @Override
@@ -51,8 +51,8 @@ public class OrdinaryBattingLineup implements BattingLineup {
 
   @Override
   public boolean equals(Object other) {
-    if (other instanceof OrdinaryBattingLineup) {
-      if (((OrdinaryBattingLineup) other).players.equals(this.players)) {
+    if (other instanceof StandardBattingLineup) {
+      if (((StandardBattingLineup) other).players.equals(this.players)) {
         return true;
       }
     }

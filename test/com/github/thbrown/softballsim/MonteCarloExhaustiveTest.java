@@ -4,6 +4,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import org.junit.Assert;
 import org.junit.Test;
 import com.github.thbrown.softballsim.server.ServerCommandHooks;
 import com.github.thbrown.softballsim.server.ServerComplete;
@@ -21,7 +22,7 @@ public class MonteCarloExhaustiveTest {
   public void testDataSourceFileSystem() throws Exception {
     final int INNINGS = 7;
     final int GAMES = 100;
-    final int LINEUP_TYPE = 1;
+    final int LINEUP_TYPE = 0;
     final int THREAD_COUNT = 1;
 
     String[] args = {"-O", "MONTE_CARLO_EXHAUSTIVE", "-F", "-L",
@@ -29,14 +30,15 @@ public class MonteCarloExhaustiveTest {
         "-g", String.valueOf(GAMES), "-i", String.valueOf(INNINGS), "-T", String.valueOf(LINEUP_TYPE), "-t",
         String.valueOf(THREAD_COUNT)};
 
-    SoftballSim.main(args);
+    Result result = SoftballSim.mainInternal(args);
+    Assert.assertNotNull("Expected the simulation to produce a result, but it produced null", result);
   }
 
   @Test
   public void testDataSourceNetwork() throws Exception {
     final int INNINGS = 7;
     final int GAMES = 100;
-    final int LINEUP_TYPE = 1;
+    final int LINEUP_TYPE = 0;
     final int THREAD_COUNT = 4;
 
     // Setup test server
@@ -71,7 +73,8 @@ public class MonteCarloExhaustiveTest {
     String[] args = {"-D", "NETWORK", "-O", "MONTE_CARLO_EXHAUSTIVE", "-L",
         "1OiRCCmrn16iyK,Oscar,Molly,Nelly,1CV6WRyspDjA7Z,1MPJ24EEyS0g6p"};
 
-    SoftballSim.main(args);
+    Result result = SoftballSim.mainInternal(args);
+    Assert.assertNotNull("Expected the simulation to produce a result, but it produced null", result);
   }
 
 }

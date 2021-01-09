@@ -8,7 +8,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 
-public class OptimizerDefinitionArgumentDeserializer implements JsonDeserializer<OptimizerDefinitionArgument> {
+public class OptimizerDefinitionOptioneDeserializer implements JsonDeserializer<OptimizerDefinitionOption> {
 
   private static final String[] validShortLabels = {
       "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m",
@@ -19,15 +19,15 @@ public class OptimizerDefinitionArgumentDeserializer implements JsonDeserializer
   public final String SHORT_LABEL = "shortLabel";
 
   @Override
-  public OptimizerDefinitionArgument deserialize(final JsonElement json, final Type typeOfT,
+  public OptimizerDefinitionOption deserialize(final JsonElement json, final Type typeOfT,
       final JsonDeserializationContext context)
       throws JsonParseException {
 
     // Figure out what type of input we were given data for
     JsonObject jsonObject = json.getAsJsonObject();
     JsonElement optimizationType = jsonObject.get(INPUT_TYPE);
-    OptimizerDefinitionArgumentEnum type =
-        OptimizerDefinitionArgumentEnum.getEnumByJsonType(optimizationType.getAsString());
+    OptimizerDefinitionOptionsEnum type =
+        OptimizerDefinitionOptionsEnum.getEnumByJsonType(optimizationType.getAsString());
 
     // Validate shortLabel
     String shortLabel = jsonObject.get(SHORT_LABEL).getAsString();
@@ -36,7 +36,7 @@ public class OptimizerDefinitionArgumentDeserializer implements JsonDeserializer
     }
 
     // Deserialize that data based on the type
-    OptimizerDefinitionArgument result = context.deserialize(json, type.getDeserializationTarget());
+    OptimizerDefinitionOption result = context.deserialize(json, type.getDeserializationTarget());
     return result;
   }
 

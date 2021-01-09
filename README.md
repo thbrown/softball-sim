@@ -49,8 +49,8 @@ Flags (more command line flags will be available based on which optimizer and da
  -P,--Players-in-lineup <arg>   Comma separated list of player ids that should be included in the
                                 optimized lineup. Defaults to all players.
  -T,--Lineup-type <arg>         Type of lineup to be simulated. You may specify the name or the id.
-                                Options are [ORDINARY - 1, ALTERNATING_GENDER - 2,
-                                NO_CONSECUTIVE_FEMALES - 3]. Default: ORDINARY
+                                Options are [STANDARD - 0, ALTERNATING_GENDER - 1,
+                                NO_CONSECUTIVE_FEMALES - 2]. Default: STANDARD
  -V,--Verbose                   In development. If present, print debugging details on error.
 ```
 
@@ -70,9 +70,9 @@ Flags (more command line flags will be available based on which optimizer and da
 #### Available lineupType Options
 
 Available lineup types:
-*  1 - ORDINARY
-*  2 - ALTERNATING_GENDER
-*  3 - NO\_CONSECUTIVE\_FEMALES
+*  0 - STANDARD
+*  1 - ALTERNATING_GENDER
+*  2 - NO\_CONSECUTIVE\_FEMALES
 
 ### GCP Functions Deployment
 

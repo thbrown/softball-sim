@@ -2,31 +2,31 @@
   "id": "1",
   "name": "Monte Carlo Adaptive",
   "img": "https://cdn.pixabay.com/photo/2019/09/24/16/32/chameleon-4501712_1280.jpg",
-  "className": "MonteCarloAdaptive",
   "shortDescription": "Employs the same approach as the Monte Carlo Exhaustive optimizer but instead of simulating a fixed number of games for each lineup, performs a variable number of simulated games. The exact number of games simulated for each lineup is determined by continuing to do simulations on a lineup until a statistical t-test determines that the expected run totals for two lineups are significantly different (by some configurable alpha value). The lineup with the lower mean is then rejected and the larger one remembered as the best so far.",
   "longDescriptionFile": "monte-carlo-adaptive.md",
-  "supported-lineup-types": [
-    "NORMAL",
+  "supportedLineupTypes": [
+    "STANDARD",
     "ALTERNATING_GENDER",
     "NO_CONSECUTIVE_FEMALES"
   ],
-  "machine": "g4-high-compute",
-  "arguments": [
+  "options": [
     {
-      "type": "String",
+      "type": "Number",
       "shortLabel": "a",
       "longLabel": "alpha",
       "description": "Confidence value at which point to reject the null hypotheses (lineups have equal means). Lower alpha will give more accurate results but take longer to run.",
       "defaultValue": ".0001",
-      "pattern": ".*"
+      "max": ".99999999999999",
+      "min": ".00000000000001"
     },
     {
-      "type": "String",
+      "type": "Number",
       "shortLabel": "i",
       "longLabel": "innings",
       "description": "Number of innings to be played in each simulated game. More innings will increase the estimated completion time.",
       "defaultValue": "7",
-      "pattern": "^[1-9]\\d*$"
+      "min": "0",
+      "step": "1"
     },
     {
       "type": "Boolean",
@@ -35,13 +35,13 @@
       "description": "IN_DEVELOPMENT: If this field is true, the optimizer will attempt to provide the lowest scoring lineup instead of the highest"
     },
     {
-      "type": "String",
+      "type": "Number",
       "shortLabel": "t",
       "longLabel": "threads",
       "description": "Number of threads that will be used to run the simulation. For best performance, this should = the number of logical cores (which is the default). You can lower this if you don't want the optimization hoggin' all your CPU cores.",
-      "defaultValue": "$getLogicalCPUCores",
-      "pattern": "^([1-9]\\d*|\\$getLogicalCPUCores)$",
-      "hideInUi": "true"
+      "uiVisibility": "HIDDEN",
+      "min": "0",
+      "step": "1"
     }
   ]
 }

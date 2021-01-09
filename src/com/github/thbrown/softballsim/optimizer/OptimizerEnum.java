@@ -82,11 +82,11 @@ public enum OptimizerEnum {
   }
 
   public List<Option> getCommandLineOptions() {
-    return optimizerDefinition.getArgumentsAsCommandLineOptions();
+    return optimizerDefinition.getOptionsAsCommandLineOptions();
   }
 
   public Map<String, String> getArgumentsAndValuesAsMap(CommandLine cmd) {
-    return optimizerDefinition.getArgumentsAndValuesAsMap(cmd);
+    return optimizerDefinition.getOptionsAndValuesAsMap(cmd);
   }
 
   /**

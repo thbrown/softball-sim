@@ -4,6 +4,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import org.junit.Assert;
 import org.junit.Test;
 import com.github.thbrown.softballsim.data.gson.DataStats;
 import com.github.thbrown.softballsim.datasource.network.DataSourceNetworkCommandData;
@@ -20,9 +21,9 @@ public class MonteCarloAnnealingTest {
   @Test
   public void testMonteCarloAnnealing() throws Exception {
     final int INNINGS = 7;
-    final double ALPHA = .0001;
+    final double ALPHA = .01;
     final int DURATION = 10;
-    final int LINEUP_TYPE = 1;
+    final int LINEUP_TYPE = 0;
     final int THREAD_COUNT = 8;
     final String LINEUP = "1OiRCCmrn16iyK,Nelly,1CV6WRyspDjA7Z,1MPJ24EEyS0g6p,Devon,Jordyn";
 
@@ -37,17 +38,16 @@ public class MonteCarloAnnealingTest {
     String[] args3 = {"-O", "MONTE_CARLO_ADAPTIVE", "-L", LINEUP, "-a", String.valueOf(ALPHA), "-i",
         String.valueOf(INNINGS), "-T", String.valueOf(LINEUP_TYPE), "-t", String.valueOf(THREAD_COUNT), "-F"};
 
-    SoftballSim.main(args);
-    // SoftballSim.main(args2);
-    // SoftballSim.main(args3);
+    Result result = SoftballSim.mainInternal(args);
+    Assert.assertNotNull("Expected the simulation to produce a result, but it produced null", result);
   }
 
   @Test
   public void testMonteCarloAnnealingNetwork() throws Exception {
     final int INNINGS = 7;
-    final double ALPHA = .0001;
+    final double ALPHA = .01;
     final int DURATION = 1000;
-    final int LINEUP_TYPE = 1;
+    final int LINEUP_TYPE = 0;
     final String PLAYERS = "1OiRCCmrn16iyK,Nelly,1CV6WRyspDjA7Z,1MPJ24EEyS0g6p,Devon,Jordyn";
 
     // Setup test server
@@ -84,7 +84,8 @@ public class MonteCarloAnnealingTest {
 
     String[] args = {"-D", "NETWORK"};
 
-    SoftballSim.main(args);
+    Result result = SoftballSim.mainInternal(args);
+    Assert.assertNotNull("Expected the simulation to produce a result, but it produced null", result);
   }
 
 }

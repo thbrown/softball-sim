@@ -4,6 +4,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import org.junit.Assert;
 import org.junit.Test;
 import com.github.thbrown.softballsim.data.gson.DataStats;
 import com.github.thbrown.softballsim.datasource.network.DataSourceNetworkCommandData;
@@ -20,8 +21,8 @@ public class MonteCarloAdaptiveTest {
   @Test
   public void testMonteCarloAdaptive() throws Exception {
     final int INNINGS = 7;
-    final double ALPHA = .001;
-    final int LINEUP_TYPE = 2;
+    final double ALPHA = .01;
+    final int LINEUP_TYPE = 1;
     final int THREAD_COUNT = 8;
     final String LINEUP = "1OiRCCmrn16iyK,Nelly,1CV6WRyspDjA7Z,1MPJ24EEyS0g6p,Devon,Jordyn";
 
@@ -34,14 +35,15 @@ public class MonteCarloAdaptiveTest {
         String.valueOf(INNINGS), "-T", String.valueOf(LINEUP_TYPE), "-t", String.valueOf(THREAD_COUNT), "-P",
         "./stats/exampleData.json"};
 
-    SoftballSim.main(args);
+    Result result = SoftballSim.mainInternal(args);
+    Assert.assertNotNull("Expected the simulation to produce a result, but it produced null", result);
   }
 
   @Test
   public void testMonteCarloAdaptiveNetwork() throws Exception {
     final int INNINGS = 7;
-    final double ALPHA = .001;
-    final int LINEUP_TYPE = 2;
+    final double ALPHA = .01;
+    final int LINEUP_TYPE = 1;
     final int THREAD_COUNT = 8;
     final String PLAYERS = "1OiRCCmrn16iyK,Nelly,1CV6WRyspDjA7Z,1MPJ24EEyS0g6p,Devon,Jordyn";
 
@@ -79,7 +81,8 @@ public class MonteCarloAdaptiveTest {
 
     String[] args = {"-D", "NETWORK"};
 
-    SoftballSim.main(args);
+    Result result = SoftballSim.mainInternal(args);
+    Assert.assertNotNull("Expected the simulation to produce a result, but it produced null", result);
   }
 
 }

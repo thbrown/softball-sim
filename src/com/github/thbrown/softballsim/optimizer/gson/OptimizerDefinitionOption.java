@@ -3,7 +3,7 @@ package com.github.thbrown.softballsim.optimizer.gson;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 
-public abstract class OptimizerDefinitionArgument {
+public abstract class OptimizerDefinitionOption {
 
   private String shortLabel;
   private String longLabel;

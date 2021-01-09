@@ -13,7 +13,7 @@ import com.github.thbrown.softballsim.optimizer.OptimizerEnum;
  * {@link com.github.thbrown.softballsim.datasource.ProgressTracker}
  * 
  * Optimizer implementations may need to store additional information, if so, implementers can
- * extend this extend this class. Subclasses should be careful to maintain immutability.
+ * extend this class. Subclasses should be careful to maintain immutability.
  */
 public class Result {
   private final OptimizerEnum optimizer;

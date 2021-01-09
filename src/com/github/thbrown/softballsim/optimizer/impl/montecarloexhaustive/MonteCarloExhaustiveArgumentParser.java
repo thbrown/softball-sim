@@ -9,8 +9,6 @@ public class MonteCarloExhaustiveArgumentParser {
   public final static String LOWEST_SCORE = "l";
   public final static String THREADS = "t";
 
-  public final static String THREADS_DEFAULT_TOKEN = "$getLogicalCPUCores";
-
   private final long games;
   private final int innings;
   private final boolean lowestScore;
@@ -22,7 +20,7 @@ public class MonteCarloExhaustiveArgumentParser {
     lowestScore = Boolean.parseBoolean(args.get(LOWEST_SCORE));
 
     String threadsString = args.get(THREADS);
-    if (threadsString.equals(THREADS_DEFAULT_TOKEN)) {
+    if (threadsString == null) {
       threads = Runtime.getRuntime().availableProcessors();
     } else {
       threads = Integer.parseInt(args.get(THREADS));

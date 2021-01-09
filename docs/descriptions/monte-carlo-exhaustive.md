@@ -23,7 +23,7 @@ flowchart TD;
 
 This optimizer simulates games for all possible lineups. The number of possible lineups for each lineup type is given by these equations where 'm' is the number of male batters and 'f' is the number of female batters:
 
-#### Normal/Ordinary/No Restrictions
+#### Standard
 ```math
 numberOfLineups = (m+f)!
 ```

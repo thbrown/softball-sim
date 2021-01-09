@@ -1,6 +1,8 @@
 package com.github.thbrown.softballsim.util;
 
-import java.util.Map;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import com.github.thbrown.softballsim.Result;
 import com.github.thbrown.softballsim.cloud.Arguments;
 import com.github.thbrown.softballsim.cloud.ArgumentsDeserializer;
@@ -9,10 +11,9 @@ import com.github.thbrown.softballsim.data.gson.DataStatsDeserializer;
 import com.github.thbrown.softballsim.datasource.network.DataSourceNetworkCommand;
 import com.github.thbrown.softballsim.datasource.network.DataSourceNetworkCommandDeserializer;
 import com.github.thbrown.softballsim.lineup.BattingLineup;
-import com.github.thbrown.softballsim.lineup.BattingLineupDeserializer;
-import com.github.thbrown.softballsim.lineup.BattingLineupSerializer;
-import com.github.thbrown.softballsim.optimizer.gson.OptimizerDefinitionArgument;
-import com.github.thbrown.softballsim.optimizer.gson.OptimizerDefinitionArgumentDeserializer;
+import com.github.thbrown.softballsim.lineup.BattingLineupSerializerDeserializer;
+import com.github.thbrown.softballsim.optimizer.gson.OptimizerDefinitionOption;
+import com.github.thbrown.softballsim.optimizer.gson.OptimizerDefinitionOptioneDeserializer;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -44,19 +45,33 @@ public class GsonAccessor {
     return this.customGson;
   }
 
-  protected void register(GsonBuilder gsonBuilder) {
+  protected void register(GsonBuilder gsonBuilder, Class<?>... exclusions) {
+    Set<Class<?>> lookup = new HashSet<>();
+    lookup.addAll(Arrays.asList(exclusions));
+
     // Deserializers
-    gsonBuilder.registerTypeAdapter(DataStats.class, new DataStatsDeserializer());
-    gsonBuilder.registerTypeAdapter(DataSourceNetworkCommand.class, new DataSourceNetworkCommandDeserializer());
-    gsonBuilder.registerTypeAdapter(OptimizerDefinitionArgument.class, new OptimizerDefinitionArgumentDeserializer());
-    gsonBuilder.registerTypeAdapter(BattingLineup.class, new BattingLineupDeserializer());
-    gsonBuilder.registerTypeAdapter(Result.class, new ResultDeserializer());
-    gsonBuilder.registerTypeAdapter(Arguments.class, new ArgumentsDeserializer());
+    if (!lookup.contains(DataStats.class)) {
+      gsonBuilder.registerTypeAdapter(DataStats.class, new DataStatsDeserializer());
+    }
+    if (!lookup.contains(DataSourceNetworkCommand.class)) {
+      gsonBuilder.registerTypeAdapter(DataSourceNetworkCommand.class, new DataSourceNetworkCommandDeserializer());
+    }
+    if (!lookup.contains(OptimizerDefinitionOption.class)) {
+      gsonBuilder.registerTypeAdapter(OptimizerDefinitionOption.class, new OptimizerDefinitionOptioneDeserializer());
+    }
+    if (!lookup.contains(Result.class)) {
+      gsonBuilder.registerTypeAdapter(Result.class, new ResultDeserializer());
+    }
+    if (!lookup.contains(Arguments.class)) {
+      gsonBuilder.registerTypeAdapter(Arguments.class, new ArgumentsDeserializer());
+    }
 
-    // Serializers
-    gsonBuilder.registerTypeAdapter(BattingLineup.class, new BattingLineupSerializer());
+    // Serializers & Deserializers
+    if (!lookup.contains(BattingLineup.class)) {
+      gsonBuilder.registerTypeAdapter(BattingLineup.class, new BattingLineupSerializerDeserializer());
+    }
 
-    // Alow NaN
+    // Allow NaN
     gsonBuilder.serializeSpecialFloatingPointValues();
   }
 
@@ -70,6 +85,17 @@ public class GsonAccessor {
       this.defaultGson = gsonBuilder.create();
     }
     return this.defaultGson;
+  }
+
+  /**
+   * @return a GSON instance with all the custom serializers/deserailizers registered for this
+   *         application except for the ones specified by the exclusions parameter. Excluded types
+   *         will use their default serializers.deserializers
+   */
+  public Gson getCustomWithExclusions(Class<?>... exclusions) {
+    GsonBuilder gsonBuilder = new GsonBuilder();
+    register(gsonBuilder, exclusions);
+    return gsonBuilder.create();
   }
 
 

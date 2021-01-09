@@ -95,7 +95,7 @@ public class DataSourceFileSystem implements DataSource {
     // Check if there is a cached result for a run with the exact same args
     Result existingResult = null;
 
-    String fileName = getFileName(allCmd);
+    String fileName = getFileName(allCmd, json);
     File cacheFile = new File(CACHED_RESULTS_FILE_PATH + File.separatorChar + fileName);
     if (cacheFile.exists() && !allCmd.hasOption(CommandLineOptions.FORCE)) {
       Logger.log(
@@ -104,8 +104,9 @@ public class DataSourceFileSystem implements DataSource {
       try {
         data = new String(Files.readAllBytes(Paths.get(cacheFile.getCanonicalPath())));
         existingResult = GsonAccessor.getInstance().getCustom().fromJson(data, Result.class);
-      } catch (IOException e) {
-        throw new RuntimeException(e);
+      } catch (Exception e) {
+        Logger.warn("Failed to read/parse cached result file: " + cacheFile.getName() + " because " + e.getMessage()
+            + ". Ignoring cached result and running a new simulation.");
       }
     }
 
@@ -134,8 +135,8 @@ public class DataSourceFileSystem implements DataSource {
     return DataSourceEnum.FILE_SYSTEM;
   }
 
-  protected String getFileName(CommandLine allCmd) {
-    return getArgsMd5(allCmd);
+  protected String getFileName(CommandLine allCmd, String data) {
+    return getStringsMd5(allCmd, data);
   }
 
   protected DataSourceFunctions getFunctions(String fileName) {
@@ -164,11 +165,11 @@ public class DataSourceFileSystem implements DataSource {
 
   }
 
-  public static String getArgsMd5(CommandLine args) {
+  public static String getStringsMd5(CommandLine args, String data) {
     List<String> argsStringArray =
         Arrays.stream(args.getOptions()).map(v -> v.getOpt() + v.getValuesList()).collect(Collectors.toList());
     Collections.sort(argsStringArray);
-    return StringUtils.calculateMd5AsHex(argsStringArray.toString());
+    return StringUtils.calculateMd5AsHex(argsStringArray.toString() + "|" + data);
   }
 
 }

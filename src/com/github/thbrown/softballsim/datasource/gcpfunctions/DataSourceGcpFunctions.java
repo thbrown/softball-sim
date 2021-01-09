@@ -17,7 +17,8 @@ public class DataSourceGcpFunctions extends DataSourceFileSystem {
   }
 
   @Override
-  protected String getFileName(CommandLine allCmd) {
+  protected String getFileName(CommandLine allCmd, String data) {
+    // Ignore the params, we want to use the id specified when the application was invoked
     return allCmd.getOptionValue(ID);
   }
 

@@ -4,11 +4,15 @@ import java.lang.reflect.Type;
 import com.github.thbrown.softballsim.Result;
 import com.github.thbrown.softballsim.datasource.network.DataSourceNetworkCommand;
 import com.github.thbrown.softballsim.optimizer.OptimizerEnum;
+import com.google.gson.Gson;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
+import com.google.gson.TypeAdapter;
+import com.google.gson.TypeAdapterFactory;
+import com.google.gson.reflect.TypeToken;
 
 /**
  * Determines what subclass of Result a cached file in json format saved in the cached directory
@@ -30,7 +34,15 @@ public class ResultDeserializer implements JsonDeserializer<Result> {
 
     // Deserialize that data based on the type
     JsonObject data = jsonObject.getAsJsonObject();
-    return context.deserialize(data, type.getResultClass());
+    Type targetClass = type.getResultClass();
+
+    // Avoid stack overflow caused by recursion: use the default deserializer if the optimizer is using
+    // the base result class
+    if (targetClass == Result.class) {
+      return GsonAccessor.getInstance().getCustomWithExclusions(Result.class).fromJson(jsonObject, Result.class);
+    } else {
+      return context.deserialize(data, targetClass);
+    }
   }
 
 }

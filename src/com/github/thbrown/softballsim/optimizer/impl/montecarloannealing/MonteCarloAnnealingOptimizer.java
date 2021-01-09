@@ -30,7 +30,7 @@ public class MonteCarloAnnealingOptimizer implements Optimizer<Result> {
 
   private static final int FINAL_RESULT_ITERATIONS = 1000000;
 
-  // [0-1] A value closer to 0 results in a steaper decline in temperature near the beginning
+  // [0-1] A value closer to 0 results in a steeper decline in temperature near the beginning
   private static final double SKEW = 1;
 
   private static final double ALPHA = .001;
