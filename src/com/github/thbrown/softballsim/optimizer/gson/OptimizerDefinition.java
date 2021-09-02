@@ -10,13 +10,13 @@ import org.apache.commons.cli.Option;
 public class OptimizerDefinition {
   private String id;
   private String name;
-  private String shortDescritpion;
+  private String shortDescription;
   private String longDescriptionFile;
   private String img;
   private List<String> supportedLineupTypes;
-  private String machine;
-  private List<OptimizerDefinitionArgument> arguments;
-  private boolean hideInUi;
+  private List<OptimizerDefinitionOption> options;
+  private String uiVisibility;
+  private String cliVisibility;
 
   public String getId() {
     return id;
@@ -27,7 +27,7 @@ public class OptimizerDefinition {
   }
 
   public String getShortDescription() {
-    return shortDescritpion;
+    return shortDescription;
   }
 
   public String getLongDescriptionFile() {
@@ -42,16 +42,16 @@ public class OptimizerDefinition {
     return supportedLineupTypes;
   }
 
-  public String getMachine() {
-    return machine;
+  public List<OptimizerDefinitionOption> getOptions() {
+    return options;
   }
 
-  public List<OptimizerDefinitionArgument> getArguments() {
-    return arguments;
+  public String getUiVisibility() {
+    return uiVisibility;
   }
 
-  public boolean isHideInUi() {
-    return hideInUi;
+  public String getCliVisibility() {
+    return cliVisibility;
   }
 
   /**
@@ -59,11 +59,11 @@ public class OptimizerDefinition {
    *         -> value. The value is extracted from the CommandLine instance passed in as the argument
    *         to this method.
    */
-  public Map<String, String> getArgumentsAndValuesAsMap(CommandLine cmd) {
+  public Map<String, String> getOptionsAndValuesAsMap(CommandLine cmd) {
     Map<String, String> data = new HashMap<>();
-    for (OptimizerDefinitionArgument argument : arguments) {
-      String key = argument.getShortLabel();
-      String value = argument.getValue(cmd);
+    for (OptimizerDefinitionOption option : options) {
+      String key = option.getShortLabel();
+      String value = option.getValue(cmd);
       data.put(key, value);
     }
     return data;
@@ -72,11 +72,11 @@ public class OptimizerDefinition {
   /**
    * @return command line options that should be available for this optimizer
    */
-  public List<Option> getArgumentsAsCommandLineOptions() {
-    List<Option> options = new ArrayList<>();
-    for (OptimizerDefinitionArgument argument : arguments) {
-      options.add(argument.getCommandLineOption());
+  public List<Option> getOptionsAsCommandLineOptions() {
+    List<Option> outputOptions = new ArrayList<>();
+    for (OptimizerDefinitionOption option : this.options) {
+      outputOptions.add(option.getCommandLineOption());
     }
-    return options;
+    return outputOptions;
   }
 }

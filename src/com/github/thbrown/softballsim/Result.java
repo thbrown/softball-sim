@@ -13,8 +13,11 @@ import com.github.thbrown.softballsim.optimizer.OptimizerEnum;
  * {@link com.github.thbrown.softballsim.datasource.ProgressTracker}
  * 
  * Optimizer implementations may need to store additional information, if so, implementers can
- * extend this extend this class. Subclasses should be careful to maintain immutability.
+ * extend this class. Subclasses should be careful to maintain immutability.
+ * 
+ * Unused field needed in the serialized result.
  */
+@SuppressWarnings("unused")
 public class Result {
   private final OptimizerEnum optimizer;
   private final BattingLineup lineup;
@@ -22,27 +25,38 @@ public class Result {
   private final long countTotal;
   private final long countCompleted;
   private final long elapsedTimeMs;
+  private final ResultStatusEnum status;
+  private final String statusMessage;
 
   public Result(OptimizerEnum optimizer, BattingLineup lineup, double lineupScore, long countTotal, long countCompleted,
-      long elapsedTimeMs) {
+      long elapsedTimeMs, ResultStatusEnum status) {
+    this(optimizer, lineup, lineupScore, countTotal, countCompleted, elapsedTimeMs, status, null);
+  }
+
+  public Result(OptimizerEnum optimizer, BattingLineup lineup, double lineupScore, long countTotal, long countCompleted,
+      long elapsedTimeMs, ResultStatusEnum status, String statusMessage) {
     this.optimizer = optimizer;
     this.lineup = lineup;
     this.lineupScore = lineupScore;
     this.countTotal = countTotal;
     this.countCompleted = countCompleted;
     this.elapsedTimeMs = elapsedTimeMs;
+    this.status = status;
+    this.statusMessage = statusMessage;
   }
 
   /**
-   * Copy constructor
+   * Copy an existing Result but provide an updated status and statusMessage
    */
-  public Result(Result toCopy) {
+  public Result(Result toCopy, ResultStatusEnum newStatus, String newStatusMessage) {
     this.optimizer = toCopy.optimizer;
     this.lineup = toCopy.lineup;
     this.lineupScore = toCopy.lineupScore;
     this.countTotal = toCopy.countTotal;
     this.countCompleted = toCopy.countCompleted;
     this.elapsedTimeMs = toCopy.elapsedTimeMs;
+    this.status = newStatus;
+    this.statusMessage = newStatusMessage;
   }
 
   @Override

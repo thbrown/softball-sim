@@ -2,44 +2,45 @@
   "id": "2",
   "name": "Monte Carlo Annealing",
   "img": "https://upload.wikimedia.org/wikipedia/commons/f/f8/Fotothek_df_n-08_0000320.jpg",
-  "className": "MonteCarloAnnealing",
   "shortDescription": "A faster (time constrained) but less accurate optimizer that doesn't test the entire search space of possible lineups. Instead, it employs [simulated annealing](https://en.wikipedia.org/wiki/Simulated_annealing) to seaerch only a subset of possible lineups. Like the Monte Carlo Adaptive optimizer, this optimizer uses statistical t-tests to determine when a particular lineup is better or worse than another.",
   "longDescriptionFile": "monte-carlo-annealing.md",
-  "supported-lineup-types": [
-    "NORMAL",
+  "supportedLineupTypes": [
+    "STANDARD",
     "ALTERNATING_GENDER",
     "NO_CONSECUTIVE_FEMALES"
   ],
-  "machine": "function",
-  "arguments": [
+  "options": [
     {
-      "type": "String",
-      "shortLabel": "a",
-      "longLabel": "alpha",
+      "type": "Number",
+      "shortLabel": "A",
+      "longLabel": "Alpha",
       "description": "Confidence value at which point to reject the null hypotheses (lineups have equal means). Lower alpha will give more accurate results but take longer to run.",
       "defaultValue": ".0001",
-      "pattern": ".*"
+      "max": ".99999999999999",
+      "min": ".00000000000001"
     },
     {
-      "type": "String",
-      "shortLabel": "d",
-      "longLabel": "duration",
+      "type": "Number",
+      "shortLabel": "D",
+      "longLabel": "Duration",
       "description": "How long should this optimization run for (in seconds)? Longer times will produce better results.",
       "defaultValue": "10",
-      "pattern": "^[1-9]\\d*$"
+      "max": "86300",
+      "min": "5"
     },
     {
-      "type": "String",
-      "shortLabel": "i",
-      "longLabel": "innings",
-      "description": "Number of innings to be played in each simulated game.",
+      "type": "Number",
+      "shortLabel": "I",
+      "longLabel": "Innings",
+      "description": "Number of innings to be played in each simulated game. More innings will increase the estimated completion time.",
       "defaultValue": "7",
-      "pattern": "^[1-9]\\d*$"
+      "min": "0",
+      "step": "1"
     },
     {
       "type": "Boolean",
-      "shortLabel": "l",
-      "longLabel": "lowest",
+      "shortLabel": "L",
+      "longLabel": "Lowest",
       "description": "IN_DEVELOPMENT: If this field is true, the optimizer will attempt to provide the lowest scoring lineup instead of the highest"
     }
   ]

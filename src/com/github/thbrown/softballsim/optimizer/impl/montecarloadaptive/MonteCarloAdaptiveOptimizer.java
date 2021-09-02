@@ -18,6 +18,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
 import com.github.thbrown.softballsim.Msg;
 import com.github.thbrown.softballsim.Result;
+import com.github.thbrown.softballsim.ResultStatusEnum;
 import com.github.thbrown.softballsim.data.gson.DataPlayer;
 import com.github.thbrown.softballsim.data.gson.DataStats;
 import com.github.thbrown.softballsim.datasource.ProgressTracker;
@@ -195,7 +196,7 @@ public class MonteCarloAdaptiveOptimizer implements Optimizer<MonteCarloAdaptive
 
       MonteCarloAdaptiveResult partialResult = new MonteCarloAdaptiveResult(bestLineupCopy.getLineup(),
           bestLineupCopy.getStats().getMean(), indexer.size(), progressCounter - candidateLineups.size(), elapsedTime,
-          candidateLineupIndexes, simulationsRun);
+          candidateLineupIndexes, simulationsRun, ResultStatusEnum.PARTIAL);
 
       progressTracker.updateProgress(partialResult);
 
@@ -249,7 +250,7 @@ public class MonteCarloAdaptiveOptimizer implements Optimizer<MonteCarloAdaptive
         + Optional.ofNullable(existingResult).map(v -> v.getElapsedTimeMs()).orElse(0l);
     MonteCarloAdaptiveResult finalResult = new MonteCarloAdaptiveResult(bestLineupCopy.getLineup(),
         bestLineupCopy.getStats().getMean(), indexer.size(), indexer.size(), elapsedTime,
-        candidateLineupIndexes, simulationsRun);
+        candidateLineupIndexes, simulationsRun, ResultStatusEnum.COMPLETE);
 
     progressTracker.updateProgress(finalResult);
     return finalResult;

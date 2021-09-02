@@ -4,10 +4,10 @@ import java.util.Map;
 
 public class ExpectedValueArgumentParser {
 
-  public final static String MAX_BATTERS = "b";
-  public final static String INNINGS = "i";
-  public final static String LOWEST_SCORE = "l";
-  public final static String THREADS = "t";
+  public final static String MAX_BATTERS = "B";
+  public final static String INNINGS = "I";
+  public final static String LOWEST_SCORE = "L";
+  public final static String THREADS = "T";
 
   private final int batters;
   private final int innings;

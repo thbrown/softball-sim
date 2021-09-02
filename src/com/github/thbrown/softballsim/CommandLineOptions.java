@@ -32,26 +32,31 @@ public class CommandLineOptions {
   public final static String APPLICATION_NAME = "java -jar softball-sim.jar";
 
   // Common Flags
-  public final static String DATA_SOURCE = "D";
-  public final static String ESTIMATE_ONLY = "E";
-  public final static String LINEUP_TYPE = "T";
-  public final static String OPTIMIZER = "O";
-  public final static String HELP = "H";
-  public final static String VERBOSE = "V"; // Should this be 'B' and use 'V' for version?
-  public final static String LINEUP = "L";
-  public final static String FORCE = "F";
+  public final static String DATA_SOURCE = "d";
+  public final static String LINEUP_TYPE = "t";
+  public final static String OPTIMIZER = "o";
+  public final static String HELP = "h";
+  public final static String VERBOSE = "v"; // Should this be 'B' and use 'V' for version?
+  public final static String LINEUP = "l";
+  public final static String FORCE = "f";
+  public final static String UPDATE_INTERVAL = "u";
+  public final static String ESTIMATE_ONLY = "e";
 
-  public final static String SOURCE_DEFAULT = "FILE_SYSTEM";
-  public final static String TYPE_LINEUP_DEFAULT = "ORDINARY";
+  public final static String DATA_SOURCE_DEFAULT = "FILE_SYSTEM";
+  public final static String TYPE_LINEUP_DEFAULT = "STANDARD";
+  public final static String UPDATE_INTERVAL_DEFAULT = "5000";
 
   // Help
   public final static String HELP_HEADER_1 =
-      "An application for optimizing batting lineups using historical hitting data. Powered by by open source optimization engines at https://github.com/thbrown/softball-sim. For more options, specify an optimizer.";
+      "An application for optimizing batting lineups using historical hitting data. Powered by by open source optimization engines at https://github.com/thbrown/softball-sim. For more options, specify an optimizer. Check the help command or see https://optimizers.softball.app for the gallery of optimizers.\t"
+          + System.lineSeparator() + System.lineSeparator() + "options:";
   public final static String HELP_HEADER_2 = "Showing additional flags for ";
-  public final static String HELP_FOOTER = String.join(" ", "Example:", APPLICATION_NAME, "-" + DATA_SOURCE,
-      "FILE_SYSTEM", "-" + OPTIMIZER, "MONTE_CARLO_EXHAUSTIVE", "-", LINEUP, "Maya,PJ,Rex,Bodie,Lizzy,Julia",
-      "-" + MonteCarloExhaustiveArgumentParser.GAMES,
-      String.valueOf(10000), "-" + MonteCarloExhaustiveArgumentParser.INNINGS, String.valueOf(7));
+  public final static String HELP_FOOTER =
+      System.lineSeparator() + System.lineSeparator()
+          + String.join(" ", "example:", APPLICATION_NAME, "-" + DATA_SOURCE,
+              "FILE_SYSTEM", "-" + OPTIMIZER, "MONTE_CARLO_EXHAUSTIVE", "-" + LINEUP, "Maya,PJ,Rex,Bodie,Lizzy,Julia",
+              "-" + MonteCarloExhaustiveArgumentParser.GAMES,
+              String.valueOf(10000), "-" + MonteCarloExhaustiveArgumentParser.INNINGS, String.valueOf(7));
 
   private final static CommandLineOptions INSTANCE = new CommandLineOptions();
   private final static CommandLineParser parser = new DefaultParser();
@@ -65,7 +70,7 @@ public class CommandLineOptions {
   private CommandLineOptions() {
     HelpFormatter formatter = new HelpFormatter();
     formatter.setOptionComparator(getComparatorHelp());
-    formatter.setWidth(100);
+    formatter.setWidth(110);
     this.helpFormatter = formatter;
   }
 
@@ -73,35 +78,29 @@ public class CommandLineOptions {
     List<Option> commonOptions = new ArrayList<>();
     // Common options
     commonOptions.add(Option.builder(DATA_SOURCE)
-        .longOpt("Data-source")
-        .desc("Where to read the source data from. Options are " + DataSourceEnum.getValuesAsString() + ". Default: "
-            + SOURCE_DEFAULT)
+        .longOpt("data-source")
+        .desc("Where to read the source data from (e.g. the stats file). Options are "
+            + DataSourceEnum.getValuesAsString() + ". Default: "
+            + DATA_SOURCE_DEFAULT)
         .hasArg(true)
         .required(false)
         .build());
-    commonOptions.add(Option.builder(ESTIMATE_ONLY)
-        .longOpt("Estimate-only")
-        .desc("In Development. "
-            + "If this flag is provided, application will return an estimated completion time only, not the result.")
-        .hasArg(false)
-        .required(false)
-        .build());
     commonOptions.add(Option.builder(FORCE)
-        .longOpt("Force")
+        .longOpt("force")
         .desc(
-            "If this flag is provided, application will not attempt to use any previously calculated results from the /cache directory to resume the optimization from its state when it was inturrupted or last run.")
+            "If this flag is provided, application will not attempt to use any previously calculated results from cache to resume the optimization from its state when it was inturrupted or last run.")
         .hasArg(false)
         .required(false)
         .build());
     commonOptions.add(Option.builder(LINEUP_TYPE)
-        .longOpt("Lineup-type")
+        .longOpt("lineup-type")
         .desc("Type of lineup to be simulated. You may specify the name or the id. Options are "
             + LineupTypeEnum.getValuesAsString() + ". Default: " + TYPE_LINEUP_DEFAULT)
         .hasArg(true)
         .required(false)
         .build());
     commonOptions.add(Option.builder(OPTIMIZER)
-        .longOpt("Optimizer")
+        .longOpt("optimizer")
         .desc(
             "Required. The optimizer to be used to optimize the lineup. You may specify the name or the id. Options are "
                 + OptimizerEnum.getValuesAsString() + ".")
@@ -109,22 +108,36 @@ public class CommandLineOptions {
         .required(false) // This is a required field, but we'll enforce it manually (i.e. no using Apache cli)
         .build());
     commonOptions.add(Option.builder(LINEUP)
-        .longOpt("Players-in-lineup")
+        .longOpt("players-in-lineup")
         .desc(
             "Comma separated list of player ids that should be included in the optimized lineup. Defaults to all players.")
         .hasArg(true)
         .required(false)
         .build());
     commonOptions.add(Option.builder(HELP)
-        .longOpt("Help")
+        .longOpt("help")
         .desc(
             "Prints the available flags. Help output will change depending on the optimizer and dataSource specified.")
         .hasArg(false)
         .required(false)
         .build());
     commonOptions.add(Option.builder(VERBOSE)
-        .longOpt("Verbose")
+        .longOpt("verbose")
         .desc("In development. If present, print debuging details on error.")
+        .hasArg(false)
+        .required(false)
+        .build());
+    commonOptions.add(Option.builder(UPDATE_INTERVAL)
+        .longOpt("update-interval")
+        .desc("Time period, in milliseconds, that the application should report results. Default: "
+            + UPDATE_INTERVAL_DEFAULT)
+        .hasArg(true)
+        .required(false)
+        .build());
+    commonOptions.add(Option.builder(ESTIMATE_ONLY)
+        .longOpt("estimate-only")
+        .desc(
+            "If this flag is enabled, the application will only run for UPDATE_INTERVAL milliseconds. The produced result is useful for estimating optimization completion time.")
         .hasArg(false)
         .required(false)
         .build());

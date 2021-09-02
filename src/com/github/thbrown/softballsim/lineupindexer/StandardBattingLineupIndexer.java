@@ -8,14 +8,14 @@ import com.github.thbrown.softballsim.CommandLineOptions;
 import com.github.thbrown.softballsim.data.gson.DataPlayer;
 import com.github.thbrown.softballsim.data.gson.DataStats;
 import com.github.thbrown.softballsim.lineup.BattingLineup;
-import com.github.thbrown.softballsim.lineup.OrdinaryBattingLineup;
+import com.github.thbrown.softballsim.lineup.StandardBattingLineup;
 import com.github.thbrown.softballsim.util.CombinatoricsUtil;
 
-public class OrdinaryBattingLineupIndexer implements BattingLineupIndexer {
+public class StandardBattingLineupIndexer implements BattingLineupIndexer {
   private List<DataPlayer> players = new ArrayList<>();
   private long size;
 
-  public OrdinaryBattingLineupIndexer(DataStats stats, List<String> players) {
+  public StandardBattingLineupIndexer(DataStats stats, List<String> players) {
     // Get the DataPlayers by id
     for (String playerId : players) {
       this.players.add(stats.getPlayerById(playerId));
@@ -42,7 +42,7 @@ public class OrdinaryBattingLineupIndexer implements BattingLineupIndexer {
     }
     int[] order = CombinatoricsUtil.getIthPermutation(players.size(), index);
     List<DataPlayer> lineup = CombinatoricsUtil.mapListToArray(players, order);
-    return new OrdinaryBattingLineup(lineup);
+    return new StandardBattingLineup(lineup);
   }
 
   @Override
@@ -67,7 +67,7 @@ public class OrdinaryBattingLineupIndexer implements BattingLineupIndexer {
     // Build the Pair
     long newIndex = CombinatoricsUtil.getPermutationIndex(order);
     List<DataPlayer> playersInLineup = CombinatoricsUtil.mapListToArray(players, order);
-    OrdinaryBattingLineup lineup = new OrdinaryBattingLineup(playersInLineup);
+    StandardBattingLineup lineup = new StandardBattingLineup(playersInLineup);
     return Pair.create(newIndex, lineup);
   }
 

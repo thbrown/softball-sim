@@ -6,7 +6,7 @@ import org.apache.commons.math3.util.Pair;
 import com.github.thbrown.softballsim.data.gson.DataPlayer;
 import com.github.thbrown.softballsim.data.gson.DataStats;
 import com.github.thbrown.softballsim.lineup.BattingLineup;
-import com.github.thbrown.softballsim.lineup.OrdinaryBattingLineup;
+import com.github.thbrown.softballsim.lineup.StandardBattingLineup;
 import com.github.thbrown.softballsim.util.CombinatoricsUtil;
 
 public class NoConsecutiveFemalesLineupIndexer implements BattingLineupIndexer {
@@ -165,7 +165,7 @@ public class NoConsecutiveFemalesLineupIndexer implements BattingLineupIndexer {
     // System.out.println("");
     // }
 
-    return new OrdinaryBattingLineup(mergedLineup);
+    return new StandardBattingLineup(mergedLineup);
   }
 
   @Override

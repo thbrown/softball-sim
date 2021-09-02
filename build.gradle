@@ -2,6 +2,7 @@ plugins {
   id 'java'
   id 'application'
   id 'com.diffplug.gradle.spotless' version '3.25.0'
+  id "com.github.gradle-lean" version "0.1.2"
 }
 
 java {
@@ -38,9 +39,9 @@ jar {
     attributes "Main-Class": "com.github.thbrown.softballsim.SoftballSim"
   }
   
-  // Copy the files in the json directory to json dirictory inside of the executable jar
-  from ('json') {
-    into 'json'
+  // Copy the definition files into the executable jar
+  from ('docs/definitions') {
+    into 'docs/definitions'
   }
  
   from {

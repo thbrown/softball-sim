@@ -4,9 +4,9 @@ import java.util.Map;
 
 public class MonteCarloAnnealingArgumentParser {
 
-  public final static String DURATION = "d";
-  public final static String INNINGS = "i";
-  public final static String LOWEST_SCORE = "l";
+  public final static String DURATION = "D";
+  public final static String INNINGS = "I";
+  public final static String LOWEST_SCORE = "L";
 
   private final int duration;
   private final int innings;

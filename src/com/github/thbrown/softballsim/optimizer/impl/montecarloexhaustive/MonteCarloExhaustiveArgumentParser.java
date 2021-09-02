@@ -4,12 +4,10 @@ import java.util.Map;
 
 public class MonteCarloExhaustiveArgumentParser {
 
-  public final static String GAMES = "g";
-  public final static String INNINGS = "i";
-  public final static String LOWEST_SCORE = "l";
-  public final static String THREADS = "t";
-
-  public final static String THREADS_DEFAULT_TOKEN = "$getLogicalCPUCores";
+  public final static String GAMES = "G";
+  public final static String INNINGS = "I";
+  public final static String LOWEST_SCORE = "L";
+  public final static String THREADS = "T";
 
   private final long games;
   private final int innings;
@@ -22,7 +20,7 @@ public class MonteCarloExhaustiveArgumentParser {
     lowestScore = Boolean.parseBoolean(args.get(LOWEST_SCORE));
 
     String threadsString = args.get(THREADS);
-    if (threadsString.equals(THREADS_DEFAULT_TOKEN)) {
+    if (threadsString == null) {
       threads = Runtime.getRuntime().availableProcessors();
     } else {
       threads = Integer.parseInt(args.get(THREADS));

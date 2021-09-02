@@ -12,9 +12,9 @@ import com.github.thbrown.softballsim.util.StringUtils;
 public enum LineupTypeEnum implements LineupIndexerFactory {
 
   // Register batting lineup indexers here
-  ORDINARY(1, (stats, players) -> new OrdinaryBattingLineupIndexer(stats, players)),
-  ALTERNATING_GENDER(2, (stats, players) -> new AlternatingGenderLineupIndexer(stats, players)),
-  NO_CONSECUTIVE_FEMALES(3, (stats, players) -> new NoConsecutiveFemalesLineupIndexer(stats, players));
+  STANDARD(0, (stats, players) -> new StandardBattingLineupIndexer(stats, players)),
+  ALTERNATING_GENDER(1, (stats, players) -> new AlternatingGenderLineupIndexer(stats, players)),
+  NO_CONSECUTIVE_FEMALES(2, (stats, players) -> new NoConsecutiveFemalesLineupIndexer(stats, players));
 
   private static final Map<String, LineupTypeEnum> ENUM_NAME_MAP;
   private static final Map<String, LineupTypeEnum> ENUM_ID_MAP;

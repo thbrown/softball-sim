@@ -10,19 +10,18 @@ import com.google.gson.JsonParseException;
 /**
  * Deserializer that forces the entire serialized json object into a Map<String,String>
  */
-public class ArgumentsDeserializer implements JsonDeserializer<Arguments> {
+public class MapWrapperDeserializer implements JsonDeserializer<MapWrapper> {
 
   @Override
-  public Arguments deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+  public MapWrapper deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
       throws JsonParseException {
 
-    Arguments result = new Arguments();
+    MapWrapper result = new MapWrapper();
     JsonObject jsonObject = json.getAsJsonObject();
     for (String key : jsonObject.keySet()) {
       String value = jsonObject.get(key).toString();
       result.put(key, value.replaceAll("^\"|\"$", "")); // Don't put strings in double quotes
     }
-
     return result;
   }
 }

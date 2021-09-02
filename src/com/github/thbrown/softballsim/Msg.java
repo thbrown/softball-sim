@@ -5,8 +5,8 @@ import java.text.MessageFormat;
 public enum Msg {
 
   MISSING_OPTIMIZER(
-      "Optimizer (-O) is a required flag. Please specify one of the following options either as a name or as an ordinal. {0}"),
-  BAD_STATS_FILE_PATH("Unable to read the stats file from {0}."),
+      "Optimizer (-o) is a required flag. Please specify one of the following options either as a name or as an ordinal. {0}"),
+  BAD_PATH("Unable to read the file from {0}."),
   PLAYER_HAS_NO_PA(
       "Can not optimize lineup because player {0} ({1}) has no plate appearances");
 

@@ -7,6 +7,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.apache.commons.math3.util.Pair;
 import com.github.thbrown.softballsim.Result;
+import com.github.thbrown.softballsim.ResultStatusEnum;
 import com.github.thbrown.softballsim.data.gson.DataStats;
 import com.github.thbrown.softballsim.datasource.ProgressTracker;
 import com.github.thbrown.softballsim.lineup.BattingLineup;
@@ -30,7 +31,7 @@ public class MonteCarloAnnealingOptimizer implements Optimizer<Result> {
 
   private static final int FINAL_RESULT_ITERATIONS = 1000000;
 
-  // [0-1] A value closer to 0 results in a steaper decline in temperature near the beginning
+  // [0-1] A value closer to 0 results in a steeper decline in temperature near the beginning
   private static final double SKEW = 1;
 
   private static final double ALPHA = .001;
@@ -125,7 +126,7 @@ public class MonteCarloAnnealingOptimizer implements Optimizer<Result> {
 
       progressTracker.updateProgress(new Result(OptimizerEnum.MONTE_CARLO_ANNEALING, activeComposite.getLineup(),
           activeComposite.getStats().getMean(), (long) iterations, (long) i,
-          System.currentTimeMillis() - startTimestamp));
+          System.currentTimeMillis() - startTimestamp, ResultStatusEnum.PARTIAL));
     }
 
     // Make sure the final result has at least FINAL_RESULT_ITERATIONS iterations
@@ -142,7 +143,7 @@ public class MonteCarloAnnealingOptimizer implements Optimizer<Result> {
 
     return new Result(OptimizerEnum.MONTE_CARLO_ANNEALING, activeComposite.getLineup(),
         activeComposite.getStats().getMean(), (long) iterations, (long) iterations,
-        System.currentTimeMillis() - startTimestamp);
+        System.currentTimeMillis() - startTimestamp, ResultStatusEnum.COMPLETE);
   }
 
   private double getTemperature(double maxTemperature, long startIndex, long endIndex, long activeIndex) {

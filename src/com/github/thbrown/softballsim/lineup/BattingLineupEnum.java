@@ -1,7 +1,7 @@
 package com.github.thbrown.softballsim.lineup;
 
 public enum BattingLineupEnum {
-  ORDINARY(OrdinaryBattingLineup.getType(), OrdinaryBattingLineup.class),
+  ORDINARY(StandardBattingLineup.getType(), StandardBattingLineup.class),
   ALTERNATING(AlternatingBattingLineup.getType(), AlternatingBattingLineup.class);
 
   private final String apiValue;

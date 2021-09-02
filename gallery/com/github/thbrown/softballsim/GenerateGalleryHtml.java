@@ -33,6 +33,9 @@ public class GenerateGalleryHtml {
     File[] fileList = new File("./docs/definitions").listFiles();
     List<OptimizerDefinitionComposite> definitions = new ArrayList<>(fileList.length);
     for (int i = 0; i < fileList.length; i++) {
+      if (fileList[i].getName().equals("README.md")) {
+        continue;
+      }
       String contents = new String(Files.readAllBytes(Paths.get(fileList[i].getCanonicalPath())));
       OptimizerDefinition definition = GsonAccessor.getInstance().getCustom().fromJson(contents,
           OptimizerDefinition.class);

@@ -35,23 +35,25 @@ Test
 Flags (more command line flags will be available based on which optimizer and data source are supplied):
 
 ```
- -D,--Data-source <arg>         Where to read the source data from. Options are [FILE_SYSTEM,
-                                NETWORK]. Default: FILE_SYSTEM
- -E,--Estimate-only             In Development. If this flag is provided, application will return an
-                                estimated completion time only, not the result.
- -F,--File-path <arg>           FILE_SYSTEM: Path to the stats files. This can be a directory or
-                                file. Default: ./stats/exampleData.json
- -H,--Help                      Prints the available flags. Help output will change depending on the
+ -d,--data-source <arg>         Where to read the source data from. Options are [FILE_SYSTEM,
+                                GCP_BUCKETS]. Default: FILE_SYSTEM
+ -f,--force                     If this flag is provided, application will not attempt to use any
+                                previously calculated results from the /cache directory to resume
+                                the optimization from its state when it was inturrupted or last run.
+ -h,--help                      Prints the available flags. Help output will change depending on the
                                 optimizer and dataSource specified.
- -O,--Optimizer <arg>           Required. The optimizer to be used to optimize the lineup. You may
-                                specify the name or the id. Options are [MONTE_CARLO_EXHAUSTIVE -
-                                0].
- -P,--Players-in-lineup <arg>   Comma separated list of player ids that should be included in the
+ -l,--players-in-lineup <arg>   Comma separated list of player ids that should be included in the
                                 optimized lineup. Defaults to all players.
- -T,--Lineup-type <arg>         Type of lineup to be simulated. You may specify the name or the id.
-                                Options are [ORDINARY - 1, ALTERNATING_GENDER - 2,
-                                NO_CONSECUTIVE_FEMALES - 3]. Default: ORDINARY
- -V,--Verbose                   In development. If present, print debugging details on error.
+ -o,--optimizer <arg>           Required. The optimizer to be used to optimize the lineup. You may
+                                specify the name or the id. Options are [MONTE_CARLO_EXHAUSTIVE - 0,
+                                MONTE_CARLO_ADAPTIVE - 1, MONTE_CARLO_ANNEALING - 2, EXPECTED_VALUE
+                                - 3].
+ -p,--path <arg>                FILE_SYSTEM: Path to the stats files. This can be a directory or
+                                file. Default: ./stats
+ -t,--lineup-type <arg>         Type of lineup to be simulated. You may specify the name or the id.
+                                Options are [STANDARD - 0, ALTERNATING_GENDER - 1,
+                                NO_CONSECUTIVE_FEMALES - 2]. Default: STANDARD
+ -v,--verbose                   In development. If present, print debuging details on error.
 ```
 
 #### Available optimizer Options
@@ -63,20 +65,20 @@ Flags (more command line flags will be available based on which optimizer and da
 
 #### Available dataSource Options
 
-* FILE_SYSTEM - Gets data from files in the `./stats` directory. See the `stats` directory in this repository for example files. Application will attempt to read data of all files in the `./stats` directory. You can also specify a spicific file using the `-F` flag.
+* FILE_SYSTEM - Gets data from files in the `./stats` directory. See the `stats` directory in this repository for example files. Application will attempt to read data of all files in the `./stats` directory. You can also specify a specific file using the `-f` flag.
 
 * NETWORK - Gets data from a local network connection. This option is intended to be used mostly by softball-scorer app (https://github.com/thbrown/softball-scorer).
 
 #### Available lineupType Options
 
 Available lineup types:
-*  1 - ORDINARY
-*  2 - ALTERNATING_GENDER
-*  3 - NO\_CONSECUTIVE\_FEMALES
+*  0 - STANDARD
+*  1 - ALTERNATING_GENDER
+*  2 - NO\_CONSECUTIVE\_FEMALES
 
 ### GCP Functions Deployment
 
-Shorter optimizations (< 5 minutes) can be executed on GCP cloud functions. There are two endpoints for this:
+Shorter optimizations (< 8 minutes) can be executed on GCP cloud functions. There are two endpoints for this:
 
 1. https://us-central1-optimum-library-250223.cloudfunctions.net/softball-sim-start
 2. https://us-central1-optimum-library-250223.cloudfunctions.net/softball-sim-query

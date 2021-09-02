@@ -13,6 +13,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import com.github.thbrown.softballsim.Msg;
 import com.github.thbrown.softballsim.Result;
+import com.github.thbrown.softballsim.ResultStatusEnum;
 import com.github.thbrown.softballsim.data.gson.DataPlayer;
 import com.github.thbrown.softballsim.data.gson.DataStats;
 import com.github.thbrown.softballsim.datasource.ProgressTracker;
@@ -127,7 +128,8 @@ public class ExpectedValueOptimizer implements Optimizer<MonteCarloExhaustiveRes
       long elapsedTime = (System.currentTimeMillis() - startTimestamp)
           + Optional.ofNullable(existingResult).map(v -> v.getElapsedTimeMs()).orElse(0l);
       ExpectedValueResult partialResult = new ExpectedValueResult(bestResult.getLineup(),
-          bestResult.getScore(), indexer.size(), progressCounter, elapsedTime, histo, worstScore);
+          bestResult.getScore(), indexer.size(), progressCounter, elapsedTime, histo, worstScore,
+          ResultStatusEnum.PARTIAL);
       progressTracker.updateProgress(partialResult);
 
       // Add another task to the buffer if there are any left
@@ -147,7 +149,8 @@ public class ExpectedValueOptimizer implements Optimizer<MonteCarloExhaustiveRes
     long elapsedTime = (System.currentTimeMillis() - startTimestamp)
         + Optional.ofNullable(existingResult).map(v -> v.getElapsedTimeMs()).orElse(0l);
     ExpectedValueResult finalResult = new ExpectedValueResult(bestResult.getLineup(),
-        bestResult.getScore(), indexer.size(), progressCounter, elapsedTime, histo, worstScore);
+        bestResult.getScore(), indexer.size(), progressCounter, elapsedTime, histo, worstScore,
+        ResultStatusEnum.COMPLETE);
     return finalResult;
   }
 
