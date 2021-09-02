@@ -4,12 +4,10 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import com.github.thbrown.softballsim.Result;
-import com.github.thbrown.softballsim.cloud.Arguments;
-import com.github.thbrown.softballsim.cloud.ArgumentsDeserializer;
+import com.github.thbrown.softballsim.cloud.MapWrapper;
+import com.github.thbrown.softballsim.cloud.MapWrapperDeserializer;
 import com.github.thbrown.softballsim.data.gson.DataStats;
 import com.github.thbrown.softballsim.data.gson.DataStatsDeserializer;
-import com.github.thbrown.softballsim.datasource.network.DataSourceNetworkCommand;
-import com.github.thbrown.softballsim.datasource.network.DataSourceNetworkCommandDeserializer;
 import com.github.thbrown.softballsim.lineup.BattingLineup;
 import com.github.thbrown.softballsim.lineup.BattingLineupSerializerDeserializer;
 import com.github.thbrown.softballsim.optimizer.gson.OptimizerDefinitionOption;
@@ -53,17 +51,14 @@ public class GsonAccessor {
     if (!lookup.contains(DataStats.class)) {
       gsonBuilder.registerTypeAdapter(DataStats.class, new DataStatsDeserializer());
     }
-    if (!lookup.contains(DataSourceNetworkCommand.class)) {
-      gsonBuilder.registerTypeAdapter(DataSourceNetworkCommand.class, new DataSourceNetworkCommandDeserializer());
-    }
     if (!lookup.contains(OptimizerDefinitionOption.class)) {
       gsonBuilder.registerTypeAdapter(OptimizerDefinitionOption.class, new OptimizerDefinitionOptioneDeserializer());
     }
     if (!lookup.contains(Result.class)) {
       gsonBuilder.registerTypeAdapter(Result.class, new ResultDeserializer());
     }
-    if (!lookup.contains(Arguments.class)) {
-      gsonBuilder.registerTypeAdapter(Arguments.class, new ArgumentsDeserializer());
+    if (!lookup.contains(MapWrapper.class)) {
+      gsonBuilder.registerTypeAdapter(MapWrapper.class, new MapWrapperDeserializer());
     }
 
     // Serializers & Deserializers

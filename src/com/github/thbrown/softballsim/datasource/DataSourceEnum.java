@@ -3,25 +3,17 @@ package com.github.thbrown.softballsim.datasource;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import com.github.thbrown.softballsim.Result;
+import com.github.thbrown.softballsim.data.gson.DataStats;
+import com.github.thbrown.softballsim.datasource.gcpfunctions.DataSourceGcpBuckets;
 import com.github.thbrown.softballsim.datasource.local.DataSourceFileSystem;
-import com.github.thbrown.softballsim.datasource.network.DataSourceNetwork;
-import com.github.thbrown.softballsim.datasource.gcpfunctions.DataSourceGcpFunctions;
-import com.github.thbrown.softballsim.lineupindexer.LineupTypeEnum;
-import com.github.thbrown.softballsim.optimizer.OptimizerEnum;
 import com.github.thbrown.softballsim.util.StringUtils;
 
-/**
- * Defines where the application gets its stats data to feed to an optimizer and what it does with
- * optimization results
- * 
- * TODO: Rename IOMode?
- */
-public enum DataSourceEnum {
+public enum DataSourceEnum implements DataSource {
   FILE_SYSTEM(new DataSourceFileSystem()),
-  NETWORK(new DataSourceNetwork()),
-  GCP_FUNCTIONS(new DataSourceGcpFunctions());
+  GCP_BUCKETS(new DataSourceGcpBuckets());
 
   private final DataSource dataSource;
 
@@ -55,7 +47,32 @@ public enum DataSourceEnum {
     return dataSource.getCommandLineOptions();
   }
 
-  public Result execute(String[] args, LineupTypeEnum lineupType, List<String> players, OptimizerEnum optimizer) {
-    return dataSource.execute(args, lineupType, players, optimizer);
+  public Result getCachedResult(CommandLine cmd, DataStats stats) {
+    return dataSource.getCachedResult(cmd, stats);
+  }
+
+  @Override
+  public DataStats getData(CommandLine cmd) {
+    return dataSource.getData(cmd);
+  }
+
+  @Override
+  public String[] getAdditionalOptions(CommandLine cmd) {
+    return dataSource.getAdditionalOptions(cmd);
+  }
+
+  @Override
+  public String getControlFlag(CommandLine cmd, DataStats stats) {
+    return dataSource.getControlFlag(cmd, stats);
+  }
+
+  @Override
+  public void onUpdate(CommandLine cmd, DataStats stats, ProgressTracker tracker) {
+    dataSource.onUpdate(cmd, stats, tracker);
+  }
+
+  @Override
+  public void onComplete(CommandLine cmd, DataStats stats, Result finalResult) {
+    dataSource.onComplete(cmd, stats, finalResult);
   }
 }

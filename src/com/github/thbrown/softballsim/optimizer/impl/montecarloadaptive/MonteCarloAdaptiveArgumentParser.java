@@ -4,10 +4,10 @@ import java.util.Map;
 
 public class MonteCarloAdaptiveArgumentParser {
 
-  public final static String INNINGS = "i";
-  public final static String LOWEST_SCORE = "l";
-  public final static String THREADS = "t";
-  public final static String ALPHA = "a";
+  public final static String INNINGS = "I";
+  public final static String LOWEST_SCORE = "L";
+  public final static String THREADS = "T";
+  public final static String ALPHA = "A";
 
   private final int innings;
   private final boolean lowestScore;

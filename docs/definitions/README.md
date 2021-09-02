@@ -13,7 +13,7 @@ This document describes the format of the definition files. Unit tests will vali
 
 ### Options Fields
 - **type** - String. The data type of the field. Here are the supported types: `String`, `Number`, `Boolean`, `Enumeration`. Each of these values may add additional fields to the options object. See the "Additional Fields" sections below for more details.
-- **shortLabel** - String. A single character to describe this option. Used as the short flag for this argument in the CLI. Must be lowercase. Since there are 26 letters in the English alphabet, this leaves you with a maximum of 26 possible options.
+- **shortLabel** - String. A single character to describe this option. Used as the short flag for this argument in the CLI. Must be uppercase. Since there are 26 letters in the English alphabet, this leaves you with a maximum of 26 possible options.
 - **longLabel** - String. A single word (no spaces allowed) to describe this option. Used as the long flag for this argument in the CLI. Case-sensitive. 
 - **description** - String. A short paragraph describing the purpose of this option, the tradeoffs of using various values, and any other pertinent information about how it should be used.
 - **uiVissibility** - String. Not required. Defines whether or not this field will appear in the softball.app ui. Choices are `STANDARD` or `HIDDEN`. Defaults to `STANDARD`.

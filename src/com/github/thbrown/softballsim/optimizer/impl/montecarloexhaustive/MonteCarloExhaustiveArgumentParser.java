@@ -4,10 +4,10 @@ import java.util.Map;
 
 public class MonteCarloExhaustiveArgumentParser {
 
-  public final static String GAMES = "g";
-  public final static String INNINGS = "i";
-  public final static String LOWEST_SCORE = "l";
-  public final static String THREADS = "t";
+  public final static String GAMES = "G";
+  public final static String INNINGS = "I";
+  public final static String LOWEST_SCORE = "L";
+  public final static String THREADS = "T";
 
   private final long games;
   private final int innings;

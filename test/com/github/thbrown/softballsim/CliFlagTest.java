@@ -34,7 +34,7 @@ public class CliFlagTest {
   public void testHelpFlagWithOptimizerPrintsHelp() throws Exception {
     try {
       ByteArrayOutputStream outContent = TestUtil.redirectStdOut();
-      SoftballSim.main(new String[] {"--Help", "-O", "0"});
+      SoftballSim.main(new String[] {"--help", "-o", "0"});
 
       // Help text is formatted by the Apache CLI for maximum line length so the exact strings
       // don't always match. We are comparing strings here sans whitespace to work around that issue
@@ -54,7 +54,7 @@ public class CliFlagTest {
     try {
       ByteArrayOutputStream outContent = TestUtil.redirectStdOut();
       SoftballSim
-          .main(new String[] {"-O", "0", "-S", "NETWORK", "-L", "127.0.0.1", "-I", "0000000000", "--Help", "-C"});
+          .main(new String[] {"-o", "0", "-s", "GCP_BUCKETS", "-l", "127.0.0.1", "-i", "0000000000", "--help", "-c"});
 
       // Help text is formatted by the Apache CLI for maximum line length so the exact strings
       // don't always match. We are comparing strings here sans whitespace to work around that issue
@@ -72,14 +72,14 @@ public class CliFlagTest {
   @Test
   public void testOptimizerFlagIsRequired() throws Exception {
     ByteArrayOutputStream outContent = TestUtil.redirectStdOut();
-    SoftballSim.main(new String[] {"-S", "FILE_SYSTEM"});
+    SoftballSim.main(new String[] {"-s", "FILE_SYSTEM"});
     TestUtil.asssertContainsAll(outContent.toString(), Msg.MISSING_OPTIMIZER.splitOnPlaceholders());
   }
 
   @Test
   public void testInvalidFlagThrowsError() throws Exception {
     ByteArrayOutputStream outContent = TestUtil.redirectStdOut();
-    SoftballSim.main(new String[] {"-O", "0", "--pizza"});
+    SoftballSim.main(new String[] {"-o", "0", "--pizza"});
     assertThat(outContent.toString(), CoreMatchers.containsString("Unrecognized option:"));
   }
 

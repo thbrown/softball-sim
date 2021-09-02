@@ -12,8 +12,8 @@
   "options": [
     {
       "type": "Number",
-      "shortLabel": "g",
-      "longLabel": "games",
+      "shortLabel": "G",
+      "longLabel": "Games",
       "description": "Number of games to simulate for each lineup. An optimization run with more games will take longer but be more accurate.",
       "defaultValue": "10000",
       "min": "0",
@@ -21,8 +21,8 @@
     },
     {
       "type": "Number",
-      "shortLabel": "i",
-      "longLabel": "innings",
+      "shortLabel": "I",
+      "longLabel": "Innings",
       "description": "Number of innings to be played in each simulated game. More innings will increase the estimated completion time.",
       "defaultValue": "7",
       "min": "0",
@@ -30,14 +30,14 @@
     },
     {
       "type": "Boolean",
-      "shortLabel": "l",
-      "longLabel": "lowest",
+      "shortLabel": "L",
+      "longLabel": "Lowest",
       "description": "IN_DEVELOPMENT: this field is true, the optimizer will attempt to provide the lowest scoring lineup instead of the highest"
     },
     {
       "type": "Number",
-      "shortLabel": "t",
-      "longLabel": "threads",
+      "shortLabel": "T",
+      "longLabel": "Threads",
       "description": "Number of threads that will be used to run the simulation. For best performance, this should = the number of logical cores (which is the default). You can lower this if you don't want the optimization hoggin' all your CPU cores.",
       "uiVisibility": "HIDDEN",
       "min": "0",

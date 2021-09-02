@@ -1,6 +1,10 @@
 package com.github.thbrown.softballsim.datasource;
 
+import org.apache.commons.cli.CommandLine;
+import com.github.thbrown.softballsim.CommandLineOptions;
 import com.github.thbrown.softballsim.Result;
+import com.github.thbrown.softballsim.ResultStatusEnum;
+import com.github.thbrown.softballsim.data.gson.DataStats;
 import com.github.thbrown.softballsim.util.CircularArray;
 
 /**
@@ -14,40 +18,55 @@ import com.github.thbrown.softballsim.util.CircularArray;
  * update thread function into separate classes.
  */
 public final class ProgressTracker implements Runnable {
-
-  private final static int UPDATE_PERIOD_MS = 5000;
-
   // This should be at least as big as the number of threads, more will give better time estimation at
   // the expense of a bigger memory footprint
   private final static int RESULTS_BUFFER_SIZE = 128;
 
   // These variable are written by one thread an read by another
-  private CircularArray<Result> results = new CircularArray<>(RESULTS_BUFFER_SIZE);
+  private CircularArray<Result> results = new CircularArray<>(RESULTS_BUFFER_SIZE); // For estimating run time over
+                                                                                    // longer periods
   private Long estimatedSecondsRemaining = null;
   private Long estimatedSecondsTotal = null;
 
-  private final DataSourceFunctions functions;
+  private final CommandLine cmd;
+  private final DataStats stats;
 
-  public ProgressTracker(Result initialResult, DataSourceFunctions functions) {
-    this.functions = functions;
+  private final DataSourceEnum functions;
+
+  private final DataSourceEnum dataSource;
+
+  private final long updateInterval;
+
+  public ProgressTracker(Result initialResult, DataSourceEnum dataSource, CommandLine cmd, DataStats stats) {
+    this.cmd = cmd;
+    this.stats = stats;
+    this.functions = dataSource;
+    this.dataSource = dataSource;
+
+    // Get update interfal from cmd line flags
+    String updateIntervalString =
+        cmd.getOptionValue(CommandLineOptions.UPDATE_INTERVAL, CommandLineOptions.UPDATE_INTERVAL_DEFAULT);
+    this.updateInterval = Long.parseLong(updateIntervalString);
+
     if (initialResult == null) {
-      initialResult = new Result(null, null, 0, 0, 0, 0);
+      initialResult = new Result(null, null, 0, 0, 0, 0, ResultStatusEnum.NOT_STARTED);
     }
-    updateFields(initialResult);
+    updateResults(initialResult, true);
   }
 
   public void updateProgress(Result updatedResult) {
-    updateFields(updatedResult);
+    updateResults(updatedResult, false);
   }
 
-  private void updateFields(Result updatedResult) {
+  private void updateResults(Result updatedResult, boolean initialUpdate) {
     Result oldResult;
     synchronized (this) {
       oldResult = results.earliest();
     }
 
     if (oldResult != null && updatedResult != null && !updatedResult.equals(oldResult)) {
-      // If we have two different results, we can update the estimated completion times
+      // If we have two different results, we can update the estimated completion times (Edit: can't you
+      // determine this from a single Result?)
       long calculationsDoneBetweenUpdates = updatedResult.getCountCompleted() - oldResult.getCountCompleted();
       long timeBetweenUpdates = updatedResult.getElapsedTimeMs() - oldResult.getElapsedTimeMs();
       long remainingCalculations = updatedResult.getCountTotal() - updatedResult.getCountCompleted();
@@ -69,8 +88,17 @@ public final class ProgressTracker implements Runnable {
       }
     }
 
-    // If we have a timeEstimate and the thread has been interrupted, cancel the rest of the updates??
-    // TODO: What if multiple threads are calling this
+    // Exit the application if the halt flag is set
+    String control = dataSource.getControlFlag(cmd, stats);
+    if (control != null && control.equals("HALT")) {
+      System.exit(0); // Should we have a non-zero code?
+    }
+
+    // Exit the application if this is an estimate only run and this isn't the first update
+    boolean estimateOnly = cmd.hasOption(CommandLineOptions.ESTIMATE_ONLY);
+    if (estimateOnly && !initialUpdate) {
+      System.exit(0); // Log here?
+    }
   }
 
   @Override
@@ -79,11 +107,11 @@ public final class ProgressTracker implements Runnable {
     // needed
     while (!Thread.interrupted()) {
       try {
-        Thread.sleep(UPDATE_PERIOD_MS);
+        Thread.sleep(updateInterval);
       } catch (InterruptedException e) {
         break;
       }
-      functions.onUpdate(this);
+      functions.onUpdate(cmd, stats, this);
     }
   }
 

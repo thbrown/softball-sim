@@ -4,10 +4,10 @@ import java.util.HashMap;
 import java.util.Set;
 
 /**
- * This class is just so we can customize the deserialization behavior for json data provided by a
- * gcp function without changing the behavior for maps in general
+ * This class is just so we can customize the deserialization behavior for json data we want in a
+ * map without changing the behavior for maps in general
  */
-public class Arguments {
+public class MapWrapper {
 
   HashMap<String, String> arguments = new HashMap<>();
 

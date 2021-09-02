@@ -44,7 +44,7 @@ public class OptimizerDefinitionsTest {
         throw new RuntimeException("There was an error while parsing json definition file " + fileList[i], e);
       }
 
-      // Verify that the ids are unique and numerical integers
+      // Verify that the ids are unique and integers
       try {
         if (!ids.add(Integer.parseInt(definition.getId()))) {
           Assert.fail("Duplicate id detected in " + fileList[i] + ": " + definition.getId());

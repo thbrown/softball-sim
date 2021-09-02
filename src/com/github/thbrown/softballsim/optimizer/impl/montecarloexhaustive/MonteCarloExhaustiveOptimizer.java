@@ -13,6 +13,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import com.github.thbrown.softballsim.Msg;
 import com.github.thbrown.softballsim.Result;
+import com.github.thbrown.softballsim.ResultStatusEnum;
 import com.github.thbrown.softballsim.data.gson.DataPlayer;
 import com.github.thbrown.softballsim.data.gson.DataStats;
 import com.github.thbrown.softballsim.datasource.ProgressTracker;
@@ -20,7 +21,6 @@ import com.github.thbrown.softballsim.lineup.BattingLineup;
 import com.github.thbrown.softballsim.lineupindexer.BattingLineupIndexer;
 import com.github.thbrown.softballsim.lineupindexer.LineupTypeEnum;
 import com.github.thbrown.softballsim.optimizer.Optimizer;
-import com.github.thbrown.softballsim.optimizer.OptimizerEnum;
 import com.github.thbrown.softballsim.util.Logger;
 
 public class MonteCarloExhaustiveOptimizer implements Optimizer<MonteCarloExhaustiveResult> {
@@ -127,7 +127,8 @@ public class MonteCarloExhaustiveOptimizer implements Optimizer<MonteCarloExhaus
           + Optional.ofNullable(existingResult).map(v -> v.getElapsedTimeMs()).orElse(0l);
       MonteCarloExhaustiveResult partialResult =
           new MonteCarloExhaustiveResult(bestResult.getLineup(),
-              bestResult.getScore(), indexer.size(), progressCounter, elapsedTime, histo, worstScore);
+              bestResult.getScore(), indexer.size(), progressCounter, elapsedTime, histo, worstScore,
+              ResultStatusEnum.PARTIAL);
       progressTracker.updateProgress(partialResult);
 
       // Add another task to the buffer if there are any left
@@ -148,7 +149,8 @@ public class MonteCarloExhaustiveOptimizer implements Optimizer<MonteCarloExhaus
         + Optional.ofNullable(existingResult).map(v -> v.getElapsedTimeMs()).orElse(0l);
     MonteCarloExhaustiveResult finalResult =
         new MonteCarloExhaustiveResult(bestResult.getLineup(),
-            bestResult.getScore(), indexer.size(), progressCounter, elapsedTime, histo, worstScore);
+            bestResult.getScore(), indexer.size(), progressCounter, elapsedTime, histo, worstScore,
+            ResultStatusEnum.COMPLETE);
     return finalResult;
   }
 

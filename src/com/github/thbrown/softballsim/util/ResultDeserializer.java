@@ -2,7 +2,6 @@ package com.github.thbrown.softballsim.util;
 
 import java.lang.reflect.Type;
 import com.github.thbrown.softballsim.Result;
-import com.github.thbrown.softballsim.datasource.network.DataSourceNetworkCommand;
 import com.github.thbrown.softballsim.optimizer.OptimizerEnum;
 import com.google.gson.Gson;
 import com.google.gson.JsonDeserializationContext;

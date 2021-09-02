@@ -16,7 +16,7 @@ gson-*.jar
 /bin
 
 # Cached optimizations
-/cached
+/cache
 
 # Application log files
 *.log
