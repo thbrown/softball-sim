@@ -57,7 +57,7 @@ public class AlternatingBattingLineup implements BattingLineup {
 
   @Override
   public DataPlayer getBatter(int index) {
-    int adjustedIndex = index = index / 2;
+    int adjustedIndex = index / 2;
     if (index % 2 == 0) {
       return groupA.get(adjustedIndex % groupA.size());
     } else {
