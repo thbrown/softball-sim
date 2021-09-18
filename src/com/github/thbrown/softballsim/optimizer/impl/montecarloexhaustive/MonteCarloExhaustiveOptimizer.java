@@ -121,6 +121,9 @@ public class MonteCarloExhaustiveOptimizer implements Optimizer<MonteCarloExhaus
         bestResult = result;
       }
 
+      // DEBUG: Print index and score
+      // Logger.log(progressCounter + "\t" + result.getScore() + "\t");
+
       // Update the progress tracker
       progressCounter++;
       long elapsedTime = (System.currentTimeMillis() - startTimestamp)

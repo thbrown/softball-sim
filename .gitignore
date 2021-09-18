@@ -26,3 +26,6 @@ estimated-time-config.json
 
 # Test artifacts
 testCleanupScriptFile
+
+# Log file
+java.log
