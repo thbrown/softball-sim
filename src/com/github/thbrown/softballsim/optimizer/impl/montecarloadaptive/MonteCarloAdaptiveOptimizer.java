@@ -36,7 +36,7 @@ public class MonteCarloAdaptiveOptimizer implements Optimizer<MonteCarloAdaptive
   private static final int TASK_MIN_LINEUP_COUNT = 1;
 
   // Maximum number of tasks that should be queued up at once.
-  private static final int TASK_BUFFER_SIZE = 200;
+  private static final int TASK_BUFFER_SIZE = 20000;
 
   private long lineupIndex = 0;
 
@@ -236,6 +236,7 @@ public class MonteCarloAdaptiveOptimizer implements Optimizer<MonteCarloAdaptive
     // This is especially important when using a cached result. Since stats objects can't be serialized
     // and cached, a final result will have a score of NaN
     if (bestLineupCopy.getStats().getN() < TTestTask.MAX_ITERATIONS) {
+      Logger.log("Top up iterations: " + (TTestTask.MAX_ITERATIONS - bestLineupCopy.getStats().getN()));
       for (int i = 0; i < TTestTask.MAX_ITERATIONS - bestLineupCopy.getStats().getN(); i++) {
         double score =
             MonteCarloGameSimulation.simulateGame(bestLineupCopy.getLineup(), INNINGS,
