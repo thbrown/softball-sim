@@ -2,10 +2,12 @@ package com.github.thbrown.softballsim.optimizer.impl.montecarloadaptive;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import org.apache.commons.math3.stat.descriptive.StatisticalSummary;
+import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.apache.commons.math3.stat.inference.TTest;
 import org.apache.commons.math3.util.Pair;
 import com.github.thbrown.softballsim.optimizer.impl.montecarloadaptive.statstransform.SummaryStatisticsTransform;
@@ -20,7 +22,7 @@ public class TTestTask implements Callable<TTestTaskResult> {
 
   // TODO: make these configurable
   public static int MAX_ITERATIONS = 1000000;
-  private static int INITIAL_GAMES_TO_SIMULATE = 1000;
+  private static int INITIAL_GAMES_TO_SIMULATE = 10;
   private static int SAMPLE_CHUNK_SIZE = 1000;
   private final static TTest tester = new TTest();
 
@@ -109,7 +111,6 @@ public class TTestTask implements Callable<TTestTaskResult> {
 
       // Has the new lineup we are testing de-throned the champion?
       if (statsB.getMean() > statsA.getMean()) {
-        //Logger.log("New Champ: " + statsB.getMean() + " " + statsB.getN());
         eliminatedLineups.add(bestSoFar);
         bestSoFar = toEvaluate;
       } else {

@@ -1,7 +1,7 @@
 # SoftballSim
 Lineup optimization tool for making sure you choose the best batting order for your softball, baseball, or kickball team. Used by softball.app for lineup optimizations but can also be run from the command line on file system data.
 
-### Build (requires Java 11*, in the instructions below replace `./gradlew` with `./gradlew.bat` for windows machines):
+Build (requires Java 11*, in the instructions below replace `./gradlew` with `./gradlew.bat` for windows machines):
 
 ```
 # Build (Note: this runs tests and formats code)
@@ -9,16 +9,13 @@ Lineup optimization tool for making sure you choose the best batting order for y
 
 # Or build without running tests
 ./gradlew build -x test
-
 ```
 
-### Run 
-
-By default the stats used for the optimization can be found in `./stats/exampleData.json`. You can replace or edit this file to use different stats.
+Run 
 
 ```
 # Example
-java -jar ./build/libs/softball-sim.jar -o MONTE_CARLO_EXHAUSTIVE --Games 10000 --Innings 7 -l "Devon,Aaron,Fred,Arnold,Simon,Artimis,Grant,Julia"
+java -jar ./build/libs/softball-sim.jar -o MONTE_CARLO_EXHAUSTIVE --games 10000 --innings 7
 
 # See help for available options
 java -jar ./build/libs/softball-sim.jar --help
@@ -27,14 +24,10 @@ java -jar ./build/libs/softball-sim.jar --help
 ./gradlew run
 ```
 
-### Test/Debug
+Test
 
 ```
-# Run all tests, ignore cache, show output
 ./gradlew clean test --info
-
-# Run a particular test/tests based on a filter, show output, and wait for remote debugger to be attached
-./gradlew test -i --tests Aggrigate* --debug-jvm
 ```
 
 ### Flags
@@ -74,7 +67,7 @@ Flags (more command line flags will be available based on which optimizer and da
 
 * FILE_SYSTEM - Gets data from files in the `./stats` directory. See the `stats` directory in this repository for example files. Application will attempt to read data of all files in the `./stats` directory. You can also specify a specific file using the `-f` flag.
 
-* GCP_BUCKETS - Gets data from GCP cloud storage buckets. This option is intended to be used only by the softball-scorer app (https://github.com/thbrown/softball-scorer).
+* NETWORK - Gets data from a local network connection. This option is intended to be used mostly by softball-scorer app (https://github.com/thbrown/softball-scorer).
 
 #### Available lineupType Options
 
@@ -94,7 +87,7 @@ The first is a synchronous query that will start an optimization, the second is 
 
 These calls are associated by an id parameter that is passed to both. 'zsjdklasaskfjaskfdjs' is id used in the example. If you are calling these endpoints, you should change this id to something random, long, and unique because if you don't, the runs might conflict. Furthermore, you might see other peoples data and other people might see your data.
 
-#### GCP Functions: To Deploy
+#### To Deploy
 
 Make sure 'WRITE_LOG_TO_FILE = false' in com.github.thbrown.softballsim.util.Logger before building.
 
@@ -104,7 +97,7 @@ Then, from the project root directory, run:
 
 `gcloud functions deploy softball-sim-query --entry-point=com.github.thbrown.softballsim.cloud.GcpFunctionsEntryPointQuery --timeout=20 --memory=256 --runtime=java11 --trigger-http --source=build/libs --allow-unauthenticated`
 
-#### GCP Functions: To Test
+#### To Test
 
 Make sure you have params you like in ./stats/exampleGcpFunctionsParams.json. Then:
 
