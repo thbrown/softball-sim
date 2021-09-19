@@ -9,13 +9,16 @@ import com.google.cloud.functions.HttpFunction;
 import com.google.cloud.functions.HttpRequest;
 import com.google.cloud.functions.HttpResponse;
 import com.google.gson.Gson;
+import com.google.api.services.compute.Compute;
+import com.google.api.services.compute.model.*;
+import com.google.common.collect.ImmutableList;
 
 /**
- * A second GCP function that gets an intermediate result for an optimization run.
+ * A second GCP function that gets an intermediate result for an optimization
+ * run.
  * 
- * Intermediate result are stored in a cloud bucket while the *Start function is running.
- * 
- * TODO: This should maybe be in a different project? Or at least generate it's own, smaller jar.
+ * Intermediate result are stored in a cloud bucket while the *Start function is
+ * running.
  */
 public class GcpFunctionsEntryPointQuery implements HttpFunction {
 

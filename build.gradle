@@ -28,6 +28,7 @@ dependencies {
   compile group: 'commons-cli', name: 'commons-cli', version: '1.4'
   compile group: 'com.google.cloud.functions', name: 'functions-framework-api', version: '1.0.2'
   compile group: 'com.google.cloud', name: 'google-cloud-storage', version: '1.113.4'
+  compile group: 'com.google.apis', name: 'google-api-services-compute', version: 'v1-rev20210907-1.32.1'
 }
 
 run {

@@ -5,15 +5,17 @@ import com.github.thbrown.softballsim.lineup.BattingLineup;
 import com.github.thbrown.softballsim.optimizer.OptimizerEnum;
 
 /**
- * This class contains the output of an optimization. It's used for reporting to the end user as
- * well as for the resumption of a partially complete optimization. It may be a final result or it
- * may contain a partial result for an incomplete optimization.
+ * This class contains the output of an optimization. It's used for reporting to
+ * the end user as well as for the resumption of a partially complete
+ * optimization. It may be a final result or it may contain a partial result for
+ * an incomplete optimization.
  * 
  * This class is immutable as instances are shared between threads by
  * {@link com.github.thbrown.softballsim.datasource.ProgressTracker}
  * 
- * Optimizer implementations may need to store additional information, if so, implementers can
- * extend this class. Subclasses should be careful to maintain immutability.
+ * Optimizer implementations may need to store additional information, if so,
+ * implementers can extend this class. Subclasses should be careful to maintain
+ * immutability.
  * 
  * Unused field needed in the serialized result.
  */
@@ -61,11 +63,9 @@ public class Result {
 
   @Override
   public String toString() {
-    return "Optimal lineup: \n"
-        + Optional.ofNullable(lineup).map(v -> v.toString()).orElse("null") + "\n"
-        + "Lineup expected score: " + this.lineupScore + "\n"
-        + getHumanReadableDetails() + "\n"
-        + "Elapsed time (ms): " + this.elapsedTimeMs;
+    return "Optimal lineup: \n" + Optional.ofNullable(lineup).map(v -> v.toString()).orElse("null") + "\n"
+        + "Lineup expected score: " + this.lineupScore + "\n" + getHumanReadableDetails() + "\n" + "Elapsed time (ms): "
+        + this.elapsedTimeMs;
   }
 
   public double getLineupScore() {
@@ -90,5 +90,9 @@ public class Result {
 
   public String getHumanReadableDetails() {
     return "";
+  }
+
+  public ResultStatusEnum getStatus() {
+    return status;
   }
 }

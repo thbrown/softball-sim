@@ -109,7 +109,7 @@ public class TTestTask implements Callable<TTestTaskResult> {
 
       // Has the new lineup we are testing de-throned the champion?
       if (statsB.getMean() > statsA.getMean()) {
-        //Logger.log("New Champ: " + statsB.getMean() + " " + statsB.getN());
+        // Logger.log("New Champ: " + statsB.getMean() + " " + statsB.getN());
         eliminatedLineups.add(bestSoFar);
         bestSoFar = toEvaluate;
       } else {

@@ -54,7 +54,7 @@ public class SingleGameSimulationTest {
     List<DataPlayer> playerList = new ArrayList<>();
 
     playerList.add(stats.getPlayerById("00000000000002"));
-    playerList.add(stats.getPlayerById("0000000000000y")); 
+    playerList.add(stats.getPlayerById("0000000000000y"));
     playerList.add(stats.getPlayerById("00000000000001"));
     playerList.add(stats.getPlayerById("00000000000003"));
     playerList.add(stats.getPlayerById("0000000000000f"));
