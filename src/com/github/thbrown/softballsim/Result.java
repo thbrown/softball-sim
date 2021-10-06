@@ -3,21 +3,20 @@ package com.github.thbrown.softballsim;
 import java.util.Optional;
 import com.github.thbrown.softballsim.lineup.BattingLineup;
 import com.github.thbrown.softballsim.optimizer.OptimizerEnum;
+import com.github.thbrown.softballsim.util.StringUtils;
 
 /**
- * This class contains the output of an optimization. It's used for reporting to
- * the end user as well as for the resumption of a partially complete
- * optimization. It may be a final result or it may contain a partial result for
- * an incomplete optimization.
+ * This class contains the output of an optimization. It's used for reporting to the end user as
+ * well as for the resumption of a partially complete optimization. It may be a final result or it
+ * may contain a partial result for an incomplete optimization.
  * 
- * This class is immutable as instances are shared between threads by
+ * Instance of this class are shared between threads by
  * {@link com.github.thbrown.softballsim.datasource.ProgressTracker}
  * 
- * Optimizer implementations may need to store additional information, if so,
- * implementers can extend this class. Subclasses should be careful to maintain
- * immutability.
+ * Optimizer implementations may need to store additional information, if so, implementers can
+ * extend this class. Subclasses should be careful to maintain immutability.
  * 
- * Unused field needed in the serialized result.
+ * Unused fields are needed in the serialized result.
  */
 @SuppressWarnings("unused")
 public class Result {
@@ -29,6 +28,7 @@ public class Result {
   private final long elapsedTimeMs;
   private final ResultStatusEnum status;
   private final String statusMessage;
+  private final Long estimatedTimeRemainingMs;
 
   public Result(OptimizerEnum optimizer, BattingLineup lineup, double lineupScore, long countTotal, long countCompleted,
       long elapsedTimeMs, ResultStatusEnum status) {
@@ -45,6 +45,7 @@ public class Result {
     this.elapsedTimeMs = elapsedTimeMs;
     this.status = status;
     this.statusMessage = statusMessage;
+    this.estimatedTimeRemainingMs = null;
   }
 
   /**
@@ -59,13 +60,32 @@ public class Result {
     this.elapsedTimeMs = toCopy.elapsedTimeMs;
     this.status = newStatus;
     this.statusMessage = newStatusMessage;
+    this.estimatedTimeRemainingMs = toCopy.estimatedTimeRemainingMs;
+  }
+
+  /**
+   * Copy an existing Result but provide timeRemainingMs
+   */
+  public Result(Result toCopy, Long estimatedTimeRemainingMs) {
+    this.optimizer = toCopy.optimizer;
+    this.lineup = toCopy.lineup;
+    this.lineupScore = toCopy.lineupScore;
+    this.countTotal = toCopy.countTotal;
+    this.countCompleted = toCopy.countCompleted;
+    this.elapsedTimeMs = toCopy.elapsedTimeMs;
+    this.status = toCopy.status;
+    this.statusMessage = toCopy.statusMessage;
+    this.estimatedTimeRemainingMs = estimatedTimeRemainingMs;
   }
 
   @Override
   public String toString() {
+    String percentage = StringUtils.formatDecimal((double) getCountCompleted() / (double) getCountTotal() * 100, 2);
     return "Optimal lineup: \n" + Optional.ofNullable(lineup).map(v -> v.toString()).orElse("null") + "\n"
-        + "Lineup expected score: " + this.lineupScore + "\n" + getHumanReadableDetails() + "\n" + "Elapsed time (ms): "
-        + this.elapsedTimeMs;
+        + "Lineup expected score: " + this.lineupScore + "\n" + getHumanReadableDetails() + "\n" + "Status: "
+        + getStatus() + "\n" + "Progress: " + getCountCompleted() + "/" + getCountTotal() + " (" + percentage + "%)"
+        + "\n" + "Elapsed time (ms): " + this.elapsedTimeMs + "\n" + "Estimated time remaining (ms): "
+        + this.getEstimatedTimeRemainingMs();
   }
 
   public double getLineupScore() {
@@ -94,5 +114,9 @@ public class Result {
 
   public ResultStatusEnum getStatus() {
     return status;
+  }
+
+  public Long getEstimatedTimeRemainingMs() {
+    return estimatedTimeRemainingMs;
   }
 }

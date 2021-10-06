@@ -20,8 +20,7 @@ public class MonteCarloAdaptiveResult extends Result {
 
   public MonteCarloAdaptiveResult(BattingLineup lineup, double lineupScore, long countTotal, long countCompleted,
       long elapsedTimeMs, Set<Long> candidateLineups, long simulationsRequired, ResultStatusEnum status) {
-    super(OptimizerEnum.MONTE_CARLO_ADAPTIVE, lineup, lineupScore, countTotal, countCompleted, elapsedTimeMs,
-        status);
+    super(OptimizerEnum.MONTE_CARLO_ADAPTIVE, lineup, lineupScore, countTotal, countCompleted, elapsedTimeMs, status);
     this.candidateLineups = candidateLineups;
     this.simulationsRequired = simulationsRequired;
   }

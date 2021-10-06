@@ -18,8 +18,8 @@ public class MonteCarloExhaustiveResult extends Result {
   }
 
   protected MonteCarloExhaustiveResult(OptimizerEnum optimizerEnum, BattingLineup lineup, double lineupScore,
-      long countTotal, long countCompleted,
-      long elapsedTimeMs, Map<Long, Long> histogram, double worstScore, ResultStatusEnum status) {
+      long countTotal, long countCompleted, long elapsedTimeMs, Map<Long, Long> histogram, double worstScore,
+      ResultStatusEnum status) {
     super(optimizerEnum, lineup, lineupScore, countTotal, countCompleted, elapsedTimeMs, status);
     this.histogram = histogram;
     this.worstScore = worstScore;

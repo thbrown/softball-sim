@@ -1,6 +1,5 @@
 package com.github.thbrown.softballsim.cloud;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import com.github.thbrown.softballsim.datasource.gcpfunctions.DataSourceGcpBuckets;
 import com.github.thbrown.softballsim.util.GsonAccessor;
@@ -9,15 +8,11 @@ import com.google.cloud.functions.HttpFunction;
 import com.google.cloud.functions.HttpRequest;
 import com.google.cloud.functions.HttpResponse;
 import com.google.gson.Gson;
-import com.google.api.services.compute.Compute;
-import com.google.api.services.compute.model.*;
-import com.google.common.collect.ImmutableList;
 
 /**
- * A second GCP function that gets an intermediate result for an optimization
- * run.
+ * A GCP function that gets an intermediate result for an optimization run.
  * 
- * Intermediate result are stored in a cloud bucket while the *Start function is
+ * Intermediate result are stored in a cloud bucket on an interval while the *Start function is
  * running.
  */
 public class GcpFunctionsEntryPointQuery implements HttpFunction {
@@ -40,7 +35,7 @@ public class GcpFunctionsEntryPointQuery implements HttpFunction {
     Logger.log("ID " + id + " " + map);
 
     if (id == null) {
-      send400Error(response, "Missing required field 'I' (Id)");
+      CloudUtils.send400Error(response, "Missing required field '" + DataSourceGcpBuckets.ID + "' (Id)");
       return;
     }
 
@@ -50,14 +45,8 @@ public class GcpFunctionsEntryPointQuery implements HttpFunction {
       response.setStatusCode(200);
       response.getOutputStream().write(contentString.getBytes());
     } catch (Exception e) {
-      send400Error(response, e.toString());
+      CloudUtils.send400Error(response, e.toString());
     }
-  }
-
-  private void send400Error(HttpResponse response, String message) throws IOException {
-    response.setContentType("text/plain");
-    response.setStatusCode(400);
-    response.getOutputStream().write(message.getBytes());
   }
 
 }

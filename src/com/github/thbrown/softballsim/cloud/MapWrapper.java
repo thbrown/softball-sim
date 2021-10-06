@@ -9,7 +9,15 @@ import java.util.Set;
  */
 public class MapWrapper {
 
-  HashMap<String, String> arguments = new HashMap<>();
+  private HashMap<String, String> arguments;
+
+  public MapWrapper() {
+    arguments = new HashMap<>();
+  }
+
+  public MapWrapper(MapWrapper toCopy) {
+    arguments = new HashMap<>(toCopy.arguments);
+  }
 
   public String get(String id) {
     return arguments.get(id);
@@ -27,4 +35,8 @@ public class MapWrapper {
     return arguments.keySet();
   }
 
+  @Override
+  public String toString() {
+    return arguments.toString();
+  }
 }

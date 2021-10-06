@@ -1,7 +1,8 @@
 # SoftballSim
+
 Lineup optimization tool for making sure you choose the best batting order for your softball, baseball, or kickball team. Used by softball.app for lineup optimizations but can also be run from the command line on file system data.
 
-### Build (requires Java 11*, in the instructions below replace `./gradlew` with `./gradlew.bat` for windows machines):
+### Build (requires Java 11\*, in the instructions below replace `./gradlew` with `./gradlew.bat` for windows machines):
 
 ```
 # Build (Note: this runs tests and formats code)
@@ -12,7 +13,7 @@ Lineup optimization tool for making sure you choose the best batting order for y
 
 ```
 
-### Run 
+### Run
 
 By default the stats used for the optimization can be found in `./stats/exampleData.json`. You can replace or edit this file to use different stats.
 
@@ -33,8 +34,8 @@ java -jar ./build/libs/softball-sim.jar --help
 # Run all tests, ignore cache, show output
 ./gradlew clean test --info
 
-# Run a particular test/tests based on a filter, show output, and wait for remote debugger to be attached
-./gradlew test -i --tests Aggrigate* --debug-jvm
+# Run a particular test/tests based on a filter, show output, ignore cached results, and wait for remote debugger to be attached
+./gradlew test -info --rerun-tasks --tests Aggrigate* --debug-jvm
 ```
 
 ### Flags
@@ -46,7 +47,7 @@ Flags (more command line flags will be available based on which optimizer and da
                                 GCP_BUCKETS]. Default: FILE_SYSTEM
  -f,--force                     If this flag is provided, application will not attempt to use any
                                 previously calculated results from the /cache directory to resume
-                                the optimization from its state when it was inturrupted or last run.
+                                the optimization from its state when it was interrupted or last run.
  -h,--help                      Prints the available flags. Help output will change depending on the
                                 optimizer and dataSource specified.
  -l,--players-in-lineup <arg>   Comma separated list of player ids that should be included in the
@@ -65,54 +66,24 @@ Flags (more command line flags will be available based on which optimizer and da
 
 #### Available optimizer Options
 
-* 0 - MONTE\_CARLO\_EXHAUSTIVE
-* 1 - MONTE\_CARLO\_ADAPTIVE
-* 2 - MONTE\_CARLO\_ANNEALING
-* 3 - EXPECTED\_VALUE
+- 0 - MONTE_CARLO_EXHAUSTIVE
+- 1 - MONTE_CARLO_ADAPTIVE
+- 2 - MONTE_CARLO_ANNEALING
+- 3 - EXPECTED_VALUE
 
 #### Available dataSource Options
 
-* FILE_SYSTEM - Gets data from files in the `./stats` directory. See the `stats` directory in this repository for example files. Application will attempt to read data of all files in the `./stats` directory. You can also specify a specific file using the `-f` flag.
+- FILE_SYSTEM - Gets data from files in the `./stats` directory. See the `stats` directory in this repository for example files. Application will attempt to read data of all files in the `./stats` directory. You can also specify a specific file using the `-f` flag.
 
-* GCP_BUCKETS - Gets data from GCP cloud storage buckets. This option is intended to be used only by the softball-scorer app (https://github.com/thbrown/softball-scorer).
+- GCP_BUCKETS - Gets data from GCP cloud storage buckets. This option is intended to be used only by the softball-scorer app (https://github.com/thbrown/softball-scorer).
 
 #### Available lineupType Options
 
 Available lineup types:
-*  0 - STANDARD
-*  1 - ALTERNATING_GENDER
-*  2 - NO\_CONSECUTIVE\_FEMALES
 
-### GCP Functions Deployment
-
-Shorter optimizations (< 8 minutes) can be executed on GCP cloud functions. There are two endpoints for this:
-
-1. https://us-central1-optimum-library-250223.cloudfunctions.net/softball-sim-start
-2. https://us-central1-optimum-library-250223.cloudfunctions.net/softball-sim-query
-
-The first is a synchronous query that will start an optimization, the second is also a synchronous query that can be run in parallel to retrieve the 1st query's progress.
-
-These calls are associated by an id parameter that is passed to both. 'zsjdklasaskfjaskfdjs' is id used in the example. If you are calling these endpoints, you should change this id to something random, long, and unique because if you don't, the runs might conflict. Furthermore, you might see other peoples data and other people might see your data.
-
-#### GCP Functions: To Deploy
-
-Make sure 'WRITE_LOG_TO_FILE = false' in com.github.thbrown.softballsim.util.Logger before building.
-
-Then, from the project root directory, run:
-
-`gcloud functions deploy softball-sim-start --entry-point=com.github.thbrown.softballsim.cloud.GcpFunctionsEntryPointStart --timeout=540 --memory=256 --runtime=java11 --trigger-http --source=build/libs --allow-unauthenticated`
-
-`gcloud functions deploy softball-sim-query --entry-point=com.github.thbrown.softballsim.cloud.GcpFunctionsEntryPointQuery --timeout=20 --memory=256 --runtime=java11 --trigger-http --source=build/libs --allow-unauthenticated`
-
-#### GCP Functions: To Test
-
-Make sure you have params you like in ./stats/exampleGcpFunctionsParams.json. Then:
-
-`curl -X POST "https://us-central1-optimum-library-250223.cloudfunctions.net/softball-sim-start" -H "Content-Type:application/json" --data @./stats/exampleGcpFunctionsParams.json`
-
-To see incremental progress, use:
-
-`curl -X POST "https://us-central1-optimum-library-250223.cloudfunctions.net/softball-sim-query" -N -H "Content-Type:application/json" --data {"I":zsjdklasaskfjaskfdjs}`
+- 0 - STANDARD
+- 1 - ALTERNATING_GENDER
+- 2 - NO_CONSECUTIVE_FEMALES
 
 ## Contributing
 
@@ -120,6 +91,6 @@ See CONTRIBUTING.md
 
 ## Other Notes
 
-* *All code checked into this repository must build against Java 11 for cloud computing compatibility reasons, but if you have a newer version of Java and just want to get this tool working, you can bypass the Java 11 requirement by commenting out the `sourceCompatibility` and `targetCompatibility` lines in the `java` section of the `build.gradle` file before running the build command.
+- \*All code checked into this repository must build against Java 11 for cloud computing compatibility reasons, but if you have a newer version of Java and just want to get this tool working, you can bypass the Java 11 requirement by commenting out the `sourceCompatibility` and `targetCompatibility` lines in the `java` section of the `build.gradle` file before running the build command.
 
-* This CLI uses ANSI escape sequences to color error messages for readability. These are not enabled by default in common Windows shells. So, on Windows you may see some text artifacts before and after error messages.
+- This CLI uses ANSI escape sequences to color error messages for readability. These are not enabled by default in common Windows shells. So, on Windows you may see some text artifacts before and after error messages.

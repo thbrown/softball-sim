@@ -5,13 +5,17 @@ import java.nio.ByteBuffer;
 import java.nio.channels.WritableByteChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import com.github.thbrown.softballsim.util.GsonAccessor;
 import com.github.thbrown.softballsim.util.Logger;
 import com.google.cloud.functions.HttpResponse;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.Storage;
+import com.google.cloud.storage.StorageException;
 import com.google.cloud.storage.StorageOptions;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 
 /**
  * Collection of utils for cloud operations.
@@ -72,13 +76,27 @@ public class CloudUtils {
     Storage storage = StorageOptions.getDefaultInstance().getService();
 
     BlobId blobId = BlobId.of(bucketName, blobName);
-    byte[] content = storage.readAllBytes(blobId);
-    return new String(content, CloudUtils.ENCODING);
+    try {
+      byte[] content = storage.readAllBytes(blobId);
+      return new String(content, CloudUtils.ENCODING);
+    } catch (StorageException e) {
+      Logger.log("Unable to read " + bucketName + ":" + blobName + " returning null " + e.toString());
+      return null;
+    }
   }
 
   public static void send400Error(HttpResponse response, String message) throws IOException {
-    response.setContentType("text/plain");
+    response.setContentType("application/json");
     response.setStatusCode(400);
-    response.getOutputStream().write(message.getBytes());
+    String payload = getResponseJson("ERROR", message);
+    response.getOutputStream().write(payload.getBytes());
+    response.getOutputStream().flush();
+  }
+
+  public static String getResponseJson(String status, String message) {
+    JsonObject jsonObject = new JsonObject();
+    jsonObject.add("status", new JsonPrimitive(status));
+    jsonObject.add("message", new JsonPrimitive(message));
+    return GsonAccessor.getInstance().getDefault().toJson(jsonObject);
   }
 }

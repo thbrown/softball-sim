@@ -48,15 +48,14 @@ public class CommandLineOptions {
 
   // Help
   public final static String HELP_HEADER_1 =
-      "An application for optimizing batting lineups using historical hitting data. Powered by by open source optimization engines at https://github.com/thbrown/softball-sim. For more options, specify an optimizer. Check the help command or see https://optimizers.softball.app for the gallery of optimizers.\t"
+      "An application for optimizing batting lineups using historical hitting data. Powered by by open source lineup optimization engines at https://github.com/thbrown/softball-sim. For more options, specify an optimizer. Run the application with the --help flag or see https://optimizers.softball.app to see a list of available optimizers.\t"
           + System.lineSeparator() + System.lineSeparator() + "options:";
   public final static String HELP_HEADER_2 = "Showing additional flags for ";
-  public final static String HELP_FOOTER =
-      System.lineSeparator() + System.lineSeparator()
-          + String.join(" ", "example:", APPLICATION_NAME, "-" + DATA_SOURCE,
-              "FILE_SYSTEM", "-" + OPTIMIZER, "MONTE_CARLO_EXHAUSTIVE", "-" + LINEUP, "Maya,PJ,Rex,Bodie,Lizzy,Julia",
-              "-" + MonteCarloExhaustiveArgumentParser.GAMES,
-              String.valueOf(10000), "-" + MonteCarloExhaustiveArgumentParser.INNINGS, String.valueOf(7));
+  public final static String HELP_FOOTER = System.lineSeparator() + System.lineSeparator()
+      + String.join(" ", "example:", APPLICATION_NAME, "-" + DATA_SOURCE, "FILE_SYSTEM", "-" + OPTIMIZER,
+          "MONTE_CARLO_EXHAUSTIVE", "-" + LINEUP, "Maya,PJ,Rex,Bodie,Lizzy,Julia",
+          "-" + MonteCarloExhaustiveArgumentParser.GAMES, String.valueOf(10000),
+          "-" + MonteCarloExhaustiveArgumentParser.INNINGS, String.valueOf(7));
 
   private final static CommandLineOptions INSTANCE = new CommandLineOptions();
   private final static CommandLineParser parser = new DefaultParser();
@@ -77,70 +76,38 @@ public class CommandLineOptions {
   public List<Option> getCommonOptions() {
     List<Option> commonOptions = new ArrayList<>();
     // Common options
-    commonOptions.add(Option.builder(DATA_SOURCE)
-        .longOpt("data-source")
+    commonOptions.add(Option.builder(DATA_SOURCE).longOpt("data-source")
         .desc("Where to read the source data from (e.g. the stats file). Options are "
-            + DataSourceEnum.getValuesAsString() + ". Default: "
-            + DATA_SOURCE_DEFAULT)
-        .hasArg(true)
-        .required(false)
-        .build());
-    commonOptions.add(Option.builder(FORCE)
-        .longOpt("force")
-        .desc(
-            "If this flag is provided, application will not attempt to use any previously calculated results from cache to resume the optimization from its state when it was inturrupted or last run.")
-        .hasArg(false)
-        .required(false)
-        .build());
-    commonOptions.add(Option.builder(LINEUP_TYPE)
-        .longOpt("lineup-type")
+            + DataSourceEnum.getValuesAsString() + ". Default: " + DATA_SOURCE_DEFAULT)
+        .hasArg(true).required(false).build());
+    commonOptions.add(Option.builder(FORCE).longOpt("force").desc(
+        "If this flag is provided, application will not attempt to use any previously calculated results from cache to resume the optimization from its state when it was interrupted or last run.")
+        .hasArg(false).required(false).build());
+    commonOptions.add(Option.builder(LINEUP_TYPE).longOpt("lineup-type")
         .desc("Type of lineup to be simulated. You may specify the name or the id. Options are "
             + LineupTypeEnum.getValuesAsString() + ". Default: " + TYPE_LINEUP_DEFAULT)
-        .hasArg(true)
-        .required(false)
+        .hasArg(true).required(false).build());
+    commonOptions.add(Option.builder(OPTIMIZER).longOpt("optimizer").desc(
+        "Required. The optimizer to be used to optimize the lineup. You may specify the name or the id. Options are "
+            + OptimizerEnum.getValuesAsString() + ".")
+        .hasArg(true).required(false) // This is a required field, but we'll enforce it manually (i.e. no using Apache
+                                      // cli)
         .build());
-    commonOptions.add(Option.builder(OPTIMIZER)
-        .longOpt("optimizer")
-        .desc(
-            "Required. The optimizer to be used to optimize the lineup. You may specify the name or the id. Options are "
-                + OptimizerEnum.getValuesAsString() + ".")
-        .hasArg(true)
-        .required(false) // This is a required field, but we'll enforce it manually (i.e. no using Apache cli)
-        .build());
-    commonOptions.add(Option.builder(LINEUP)
-        .longOpt("players-in-lineup")
-        .desc(
-            "Comma separated list of player ids that should be included in the optimized lineup. Defaults to all players.")
-        .hasArg(true)
-        .required(false)
-        .build());
-    commonOptions.add(Option.builder(HELP)
-        .longOpt("help")
+    commonOptions.add(Option.builder(LINEUP).longOpt("players-in-lineup").desc(
+        "Comma separated list of player ids that should be included in the optimized lineup. Defaults to all players.")
+        .hasArg(true).required(false).build());
+    commonOptions.add(Option.builder(HELP).longOpt("help")
         .desc(
             "Prints the available flags. Help output will change depending on the optimizer and dataSource specified.")
-        .hasArg(false)
-        .required(false)
-        .build());
-    commonOptions.add(Option.builder(VERBOSE)
-        .longOpt("verbose")
-        .desc("In development. If present, print debuging details on error.")
-        .hasArg(false)
-        .required(false)
-        .build());
-    commonOptions.add(Option.builder(UPDATE_INTERVAL)
-        .longOpt("update-interval")
-        .desc("Time period, in milliseconds, that the application should report results. Default: "
-            + UPDATE_INTERVAL_DEFAULT)
-        .hasArg(true)
-        .required(false)
-        .build());
-    commonOptions.add(Option.builder(ESTIMATE_ONLY)
-        .longOpt("estimate-only")
-        .desc(
-            "If this flag is enabled, the application will only run for UPDATE_INTERVAL milliseconds. The produced result is useful for estimating optimization completion time.")
-        .hasArg(false)
-        .required(false)
-        .build());
+        .hasArg(false).required(false).build());
+    commonOptions.add(Option.builder(VERBOSE).longOpt("verbose")
+        .desc("In development. If present, print debuging details on error.").hasArg(false).required(false).build());
+    commonOptions.add(Option.builder(UPDATE_INTERVAL).longOpt("update-interval").desc(
+        "Time period, in milliseconds, that the application should report results. Default: " + UPDATE_INTERVAL_DEFAULT)
+        .hasArg(true).required(false).build());
+    commonOptions.add(Option.builder(ESTIMATE_ONLY).longOpt("estimate-only").desc(
+        "If this flag is enabled, the application will only run for UPDATE_INTERVAL milliseconds. The produced result is useful for estimating optimization completion time.")
+        .hasArg(false).required(false).build());
     return commonOptions;
   }
 
@@ -203,7 +170,7 @@ public class CommandLineOptions {
             // TODO: handle UNINITIALIZED and UNLIMITED_VALUES better?
             // UNLIMITED_VALUES is currently treated as no-arg
             throw new UnsupportedOperationException(
-                "Unlimited args are not currently supported, consider accepting a delimited string and spliting it manually");
+                "Unlimited args are not currently supported, consider accepting a delimited string and splitting it manually");
           }
           break;
         }

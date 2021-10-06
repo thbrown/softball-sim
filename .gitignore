@@ -10,6 +10,9 @@ build
 .metadata
 .settings
 
+# VSCode
+.vscode
+
 # Build Stuff
 *.jar
 gson-*.jar
@@ -17,6 +20,9 @@ gson-*.jar
 
 # Cached optimizations
 /cache
+
+# Flags for optimizations
+/flags
 
 # Application log files
 *.log

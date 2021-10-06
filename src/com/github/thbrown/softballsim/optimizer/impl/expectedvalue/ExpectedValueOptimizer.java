@@ -32,8 +32,8 @@ public class ExpectedValueOptimizer implements Optimizer<MonteCarloExhaustiveRes
 
   @Override
   public MonteCarloExhaustiveResult optimize(List<String> playersInLineup, LineupTypeEnum lineupType,
-      DataStats battingData,
-      Map<String, String> arguments, ProgressTracker progressTracker, MonteCarloExhaustiveResult existingResult) {
+      DataStats battingData, Map<String, String> arguments, ProgressTracker progressTracker,
+      MonteCarloExhaustiveResult existingResult) {
 
     // Start the timer
     long startTimestamp = System.currentTimeMillis();
@@ -44,7 +44,8 @@ public class ExpectedValueOptimizer implements Optimizer<MonteCarloExhaustiveRes
     // Get the arguments as their expected types
     ExpectedValueArgumentParser parsedArguments = new ExpectedValueArgumentParser(arguments);
 
-    // Since this optimizer involves iterating over all possible lineups, we'll use the lineup indexer
+    // Since this optimizer involves iterating over all possible lineups, we'll use
+    // the lineup indexer
     BattingLineupIndexer indexer = lineupType.getLineupIndexer(battingData, playersInLineup);
 
     // Print the details before we start
@@ -56,7 +57,8 @@ public class ExpectedValueOptimizer implements Optimizer<MonteCarloExhaustiveRes
     Logger.log("Threads used: \t\t\t" + parsedArguments.getThreads());
     Logger.log("*********************************************************************");
 
-    // Our optimizer is parallelizable so we want to take advantage of multiple cores
+    // Our optimizer is parallelizable so we want to take advantage of multiple
+    // cores
     ExecutorService executor = Executors.newFixedThreadPool(parsedArguments.getThreads());
     Queue<Future<TaskResult>> results = new LinkedList<>();
 
@@ -69,12 +71,13 @@ public class ExpectedValueOptimizer implements Optimizer<MonteCarloExhaustiveRes
     List<DataPlayer> someLineup = indexer.getLineup(STARTING_INDEX).asList();
     HitGenerator hitGenerator = new HitGenerator(someLineup);
 
-    // Queue up a few tasks to process (number of tasks is capped by TASK_BUFFER_SIZE)
+    // Queue up a few tasks to process (number of tasks is capped by
+    // TASK_BUFFER_SIZE)
     long startIndex = Optional.ofNullable(existingResult).map(v -> v.getCountCompleted()).orElse(0L);
     long max = indexer.size() - startIndex > TASK_BUFFER_SIZE ? TASK_BUFFER_SIZE + startIndex : indexer.size();
     for (long l = startIndex; l < max; l++) {
-      ExpectedValueTask task =
-          new ExpectedValueTask(indexer.getLineup(l), parsedArguments.getMaxBatters(), parsedArguments.getInnings());
+      ExpectedValueTask task = new ExpectedValueTask(indexer.getLineup(l), parsedArguments.getMaxBatters(),
+          parsedArguments.getInnings());
       results.add(executor.submit(task));
     }
 
@@ -86,8 +89,8 @@ public class ExpectedValueOptimizer implements Optimizer<MonteCarloExhaustiveRes
       initialLineup.populateStats(battingData);
     }
     TaskResult bestResult = new TaskResult(initialScore, initialLineup);
-    Map<Long, Long> histo =
-        Optional.ofNullable(existingResult).map(v -> v.getHistogram()).orElse(new HashMap<Long, Long>());
+    Map<Long, Long> histo = Optional.ofNullable(existingResult).map(v -> v.getHistogram())
+        .orElse(new HashMap<Long, Long>());
     long progressCounter = startIndex; // Lineups completed
     long lineupQueueCounter = max; // Lineups ready to be enqueued
     while (!results.isEmpty()) {
@@ -127,17 +130,16 @@ public class ExpectedValueOptimizer implements Optimizer<MonteCarloExhaustiveRes
       progressCounter++;
       long elapsedTime = (System.currentTimeMillis() - startTimestamp)
           + Optional.ofNullable(existingResult).map(v -> v.getElapsedTimeMs()).orElse(0l);
-      ExpectedValueResult partialResult = new ExpectedValueResult(bestResult.getLineup(),
-          bestResult.getScore(), indexer.size(), progressCounter, elapsedTime, histo, worstScore,
-          ResultStatusEnum.PARTIAL);
+      ExpectedValueResult partialResult = new ExpectedValueResult(bestResult.getLineup(), bestResult.getScore(),
+          indexer.size(), progressCounter, elapsedTime, histo, worstScore, ResultStatusEnum.IN_PROGRESS);
       progressTracker.updateProgress(partialResult);
 
       // Add another task to the buffer if there are any left
       BattingLineup lineup = indexer.getLineup(lineupQueueCounter);
       if (lineup != null) {
         lineupQueueCounter++;
-        ExpectedValueTask s =
-            new ExpectedValueTask(lineup, parsedArguments.getMaxBatters(), parsedArguments.getInnings());
+        ExpectedValueTask s = new ExpectedValueTask(lineup, parsedArguments.getMaxBatters(),
+            parsedArguments.getInnings());
         results.add(executor.submit(s));
 
         // Good for debugging
@@ -148,9 +150,8 @@ public class ExpectedValueOptimizer implements Optimizer<MonteCarloExhaustiveRes
     executor.shutdown();
     long elapsedTime = (System.currentTimeMillis() - startTimestamp)
         + Optional.ofNullable(existingResult).map(v -> v.getElapsedTimeMs()).orElse(0l);
-    ExpectedValueResult finalResult = new ExpectedValueResult(bestResult.getLineup(),
-        bestResult.getScore(), indexer.size(), progressCounter, elapsedTime, histo, worstScore,
-        ResultStatusEnum.COMPLETE);
+    ExpectedValueResult finalResult = new ExpectedValueResult(bestResult.getLineup(), bestResult.getScore(),
+        indexer.size(), progressCounter, elapsedTime, histo, worstScore, ResultStatusEnum.COMPLETE);
     return finalResult;
   }
 

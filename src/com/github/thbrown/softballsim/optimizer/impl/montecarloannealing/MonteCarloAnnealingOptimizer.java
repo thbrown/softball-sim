@@ -31,7 +31,8 @@ public class MonteCarloAnnealingOptimizer implements Optimizer<Result> {
 
   private static final int FINAL_RESULT_ITERATIONS = 1000000;
 
-  // [0-1] A value closer to 0 results in a steeper decline in temperature near the beginning
+  // [0-1] A value closer to 0 results in a steeper decline in temperature near
+  // the beginning
   private static final double SKEW = 1;
 
   private static final double ALPHA = .001;
@@ -50,7 +51,8 @@ public class MonteCarloAnnealingOptimizer implements Optimizer<Result> {
     MonteCarloAnnealingArgumentParser parsedArguments = new MonteCarloAnnealingArgumentParser(arguments);
     BattingLineupIndexer indexer = lineupType.getLineupIndexer(battingData, playersInLineup);
 
-    // Determine some statistical information about the data, we use this to inform our annealing
+    // Determine some statistical information about the data, we use this to inform
+    // our annealing
     // parameters
     SummaryStatistics dataStats = new SummaryStatistics();
     for (int i = 0; i < PRELIMINARY_DATA_SAMPLE_SIZE; i++) {
@@ -84,17 +86,20 @@ public class MonteCarloAnnealingOptimizer implements Optimizer<Result> {
       long comparisonLinupIndex = comparisonPair.getFirst();
       BattingLineup comparisonLineup = comparisonPair.getSecond();
       HitGenerator comparisonLineupHitGenerator = new HitGenerator(comparisonLineup.asList());
-      LineupComposite comparisonComposite =
-          new LineupComposite(comparisonLineup, comparisonLineupHitGenerator, comparisonLinupIndex);
+      LineupComposite comparisonComposite = new LineupComposite(comparisonLineup, comparisonLineupHitGenerator,
+          comparisonLinupIndex);
 
-      // Simulate both until we achieve a small enough t-value (or we reach the max number of allowed
+      // Simulate both until we achieve a small enough t-value (or we reach the max
+      // number of allowed
       // optimizations)
       List<LineupComposite> lineupsToTTest = new ArrayList<>(2);
       lineupsToTTest.add(activeComposite);
       lineupsToTTest.add(comparisonComposite);
 
-      // This transform modifies the tTest such that it now tells us the confidence that the mean of the
-      // two populations is within 'temperature' of each other. This requires a smaller a sample size to
+      // This transform modifies the tTest such that it now tells us the confidence
+      // that the mean of the
+      // two populations is within 'temperature' of each other. This requires a
+      // smaller a sample size to
       // determine.
       SummaryStatisticsTransform transform = new RangeSummaryStatisticsTransform(temperature);
       TTestTask task = new TTestTask(lineupsToTTest, parsedArguments.getInnings(), ALPHA, transform);
@@ -103,7 +108,8 @@ public class MonteCarloAnnealingOptimizer implements Optimizer<Result> {
       totalSimulations += result.getSimulationsRequired();
 
       // Update the two lineupComposites under test
-      // TTest returns the best lineup composite, we'll need to check whether that one is the active or
+      // TTest returns the best lineup composite, we'll need to check whether that one
+      // is the active or
       // comparison
       if (result.getBestLineupComposite().equals(activeComposite)) {
         activeComposite = result.getBestLineupComposite();
@@ -113,11 +119,14 @@ public class MonteCarloAnnealingOptimizer implements Optimizer<Result> {
         activeComposite = result.getEliminatedLineupComposites().iterator().next(); // Should only have one element
       }
 
-      // Accept the comparisonLineup if the mean difference in runs is less than the temperature
-      // this.getTemperature(maxTemperature, annealingStartTimestamp, annealingStartTimestamp +
+      // Accept the comparisonLineup if the mean difference in runs is less than the
+      // temperature
+      // this.getTemperature(maxTemperature, annealingStartTimestamp,
+      // annealingStartTimestamp +
       // parsedArguments.getDuration(), System.currentTimeMillis());
       double diff = activeComposite.getStats().getMean() - comparisonComposite.getStats().getMean();
-      // Logger.log(temperature + " " + diff + ((diff < temperature) ? " ACCEPT" : " REJECT"));
+      // Logger.log(temperature + " " + diff + ((diff < temperature) ? " ACCEPT" : "
+      // REJECT"));
       if (diff < temperature) {
         // Logger.log(comparisonComposite.getStats().getMean() + " is better than " +
         // activeComposite.getStats().getMean());
@@ -126,20 +135,19 @@ public class MonteCarloAnnealingOptimizer implements Optimizer<Result> {
 
       progressTracker.updateProgress(new Result(OptimizerEnum.MONTE_CARLO_ANNEALING, activeComposite.getLineup(),
           activeComposite.getStats().getMean(), (long) iterations, (long) i,
-          System.currentTimeMillis() - startTimestamp, ResultStatusEnum.PARTIAL));
+          System.currentTimeMillis() - startTimestamp, ResultStatusEnum.IN_PROGRESS));
     }
 
     // Make sure the final result has at least FINAL_RESULT_ITERATIONS iterations
     for (long i = activeComposite.getStats().getN(); i < FINAL_RESULT_ITERATIONS; i++) {
-      double score =
-          MonteCarloGameSimulation.simulateGame(activeComposite.getLineup(), parsedArguments.getInnings(),
-              activeComposite.getHitGenerator());
+      double score = MonteCarloGameSimulation.simulateGame(activeComposite.getLineup(), parsedArguments.getInnings(),
+          activeComposite.getHitGenerator());
       activeComposite.addSample(score);
     }
 
-    System.out.println("Simulations Required " + totalSimulations + " which is " + totalSimulations / iterations
-        + " per iteration or " + totalSimulations / (indexer.size()) + " per lineup "
-        + activeComposite.getStats().getN());
+    System.out.println(
+        "Simulations Required " + totalSimulations + " which is " + totalSimulations / iterations + " per iteration or "
+            + totalSimulations / (indexer.size()) + " per lineup " + activeComposite.getStats().getN());
 
     return new Result(OptimizerEnum.MONTE_CARLO_ANNEALING, activeComposite.getLineup(),
         activeComposite.getStats().getMean(), (long) iterations, (long) iterations,
@@ -147,7 +155,8 @@ public class MonteCarloAnnealingOptimizer implements Optimizer<Result> {
   }
 
   private double getTemperature(double maxTemperature, long startIndex, long endIndex, long activeIndex) {
-    // Determine alpha value such that the temperature is maxTemperature at startIndex and nearly 0
+    // Determine alpha value such that the temperature is maxTemperature at
+    // startIndex and nearly 0
     // at endIndex
     maxTemperature = maxTemperature + SKEW;
     double alpha = Math.pow((SKEW / maxTemperature), 1.0 / (endIndex - startIndex));

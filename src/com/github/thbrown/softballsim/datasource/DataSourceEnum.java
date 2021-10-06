@@ -38,8 +38,8 @@ public enum DataSourceEnum implements DataSource {
   }
 
   public static String getValuesAsString() {
-    List<String> valuesString =
-        Arrays.stream(DataSourceEnum.values()).map(v -> v.toString()).collect(Collectors.toList());
+    List<String> valuesString = Arrays.stream(DataSourceEnum.values()).map(v -> v.toString())
+        .collect(Collectors.toList());
     return "[" + String.join(", ", valuesString) + "]";
   }
 
@@ -57,11 +57,6 @@ public enum DataSourceEnum implements DataSource {
   }
 
   @Override
-  public String[] getAdditionalOptions(CommandLine cmd) {
-    return dataSource.getAdditionalOptions(cmd);
-  }
-
-  @Override
   public String getControlFlag(CommandLine cmd, DataStats stats) {
     return dataSource.getControlFlag(cmd, stats);
   }
@@ -75,4 +70,5 @@ public enum DataSourceEnum implements DataSource {
   public void onComplete(CommandLine cmd, DataStats stats, Result finalResult) {
     dataSource.onComplete(cmd, stats, finalResult);
   }
+
 }

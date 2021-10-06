@@ -14,10 +14,10 @@ import java.util.Map;
 public class Logger {
 
   // Config
-  private final static boolean SHOW_TIMESTAMPS = false;
-  private final static boolean SHOW_FILE_AND_LINE = false;
-  private final static boolean APPEND_MODE = false;
-  private final static boolean WRITE_LOG_TO_FILE = true;
+  private final static boolean SHOW_TIMESTAMPS = System.getenv("APP_SHOW_TIMESTAMPS") == null ? false : true;
+  private final static boolean SHOW_FILE_AND_LINE = System.getenv("APP_SHOW_FILE_AND_LINE") == null ? false : true;
+  private final static boolean APPEND_MODE = System.getenv("APP_APPEND_MODE") == null ? false : true;
+  private final static boolean WRITE_LOG_TO_FILE = System.getenv("APP_WRITE_LOG_TO_FILE") == null ? false : true;
 
   // Color constants
   private final static String ANSI_RESET = "\u001B[0m";
@@ -73,8 +73,10 @@ public class Logger {
   }
 
   public static void log(Exception e) {
-    synchronized (lock) {
-      writer.println(e);
+    if (WRITE_LOG_TO_FILE) {
+      synchronized (lock) {
+        writer.println(e);
+      }
     }
     e.printStackTrace();
   }
@@ -121,7 +123,8 @@ public class Logger {
       loggerLocation = ste[i].toString();
       break;
     }
-    // Eclipse will not hyperlink properly if there is no space before loggerLocation
+    // Eclipse will not hyperlink properly if there is no space before
+    // loggerLocation
     return s + "\tat " + loggerLocation;
   }
 

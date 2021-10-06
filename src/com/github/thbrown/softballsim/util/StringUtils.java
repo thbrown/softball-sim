@@ -4,6 +4,10 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
 
 /**
  * Using custom stringUtils to avoid using Apache commons to keep jar size down.
@@ -60,6 +64,17 @@ public class StringUtils {
       hexChars[j * 2 + 1] = HEX_ARRAY[v & 0x0F];
     }
     return new String(hexChars);
+  }
+
+  public static String escapeJson(String input) {
+    JsonPrimitive json = new JsonPrimitive(input);
+    return new Gson().toJson(json);
+  }
+
+  public static String unescapeJson(String input) {
+    Gson gson = new GsonBuilder().setLenient().create();
+    JsonElement data = gson.fromJson(input.trim(), JsonElement.class);
+    return data.getAsJsonPrimitive().getAsString();
   }
 
   /**
@@ -131,8 +146,7 @@ public class StringUtils {
     }
 
     if (state == inQuote || state == inDoubleQuote) {
-      throw new IllegalArgumentException("Unbalanced quotes in "
-          + toProcess);
+      throw new IllegalArgumentException("Unbalanced quotes in " + toProcess);
     }
 
     final String[] args = new String[list.size()];

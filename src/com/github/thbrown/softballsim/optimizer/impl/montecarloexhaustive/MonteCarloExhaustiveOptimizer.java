@@ -29,19 +29,20 @@ public class MonteCarloExhaustiveOptimizer implements Optimizer<MonteCarloExhaus
 
   @Override
   public MonteCarloExhaustiveResult optimize(List<String> playersInLineup, LineupTypeEnum lineupType,
-      DataStats battingData,
-      Map<String, String> arguments, ProgressTracker progressTracker, MonteCarloExhaustiveResult existingResult) {
+      DataStats battingData, Map<String, String> arguments, ProgressTracker progressTracker,
+      MonteCarloExhaustiveResult existingResult) {
 
     // Start the timer
     long startTimestamp = System.currentTimeMillis();
 
-    // Check that the batting data we have is sufficient to run this optmizer
+    // Check that the batting data we have is sufficient to run this optimizer
     validateData(battingData, playersInLineup);
 
     // Get the arguments as their expected types
     MonteCarloExhaustiveArgumentParser parsedArguments = new MonteCarloExhaustiveArgumentParser(arguments);
 
-    // Since this optimizer involves iterating over all possible lineups, we'll use the lineup indexer
+    // Since this optimizer involves iterating over all possible lineups, we'll use
+    // the lineup indexer
     BattingLineupIndexer indexer = lineupType.getLineupIndexer(battingData, playersInLineup);
 
     // Print the details before we start
@@ -53,7 +54,8 @@ public class MonteCarloExhaustiveOptimizer implements Optimizer<MonteCarloExhaus
     Logger.log("Threads used: \t\t\t" + parsedArguments.getThreads());
     Logger.log("*********************************************************************");
 
-    // Our optimizer is parallelizable so we want to take advantage of multiple cores
+    // Our optimizer is parallelizable so we want to take advantage of multiple
+    // cores
     ExecutorService executor = Executors.newFixedThreadPool(parsedArguments.getThreads());
     Queue<Future<TaskResult>> results = new LinkedList<>();
 
@@ -66,13 +68,13 @@ public class MonteCarloExhaustiveOptimizer implements Optimizer<MonteCarloExhaus
     List<DataPlayer> someLineup = indexer.getLineup(STARTING_INDEX).asList();
     HitGenerator hitGenerator = new HitGenerator(someLineup);
 
-    // Queue up a few tasks to process (number of tasks is capped by TASK_BUFFER_SIZE)
+    // Queue up a few tasks to process (number of tasks is capped by
+    // TASK_BUFFER_SIZE)
     long startIndex = Optional.ofNullable(existingResult).map(v -> v.getCountCompleted()).orElse(0L);
     long max = indexer.size() - startIndex > TASK_BUFFER_SIZE ? TASK_BUFFER_SIZE + startIndex : indexer.size();
     for (long l = startIndex; l < max; l++) {
-      MonteCarloMultiGameSimulationTask task =
-          new MonteCarloMultiGameSimulationTask(indexer.getLineup(l), parsedArguments.getGames(),
-              parsedArguments.getInnings(), hitGenerator);
+      MonteCarloMultiGameSimulationTask task = new MonteCarloMultiGameSimulationTask(indexer.getLineup(l),
+          parsedArguments.getGames(), parsedArguments.getInnings(), hitGenerator);
       results.add(executor.submit(task));
     }
 
@@ -80,12 +82,12 @@ public class MonteCarloExhaustiveOptimizer implements Optimizer<MonteCarloExhaus
     double worstScore = Optional.ofNullable(existingResult).map(v -> v.getWorstScore()).orElse(Double.MAX_VALUE);
     double initialScore = Optional.ofNullable(existingResult).map(v -> v.getLineupScore()).orElse(0.0);
     BattingLineup initialLineup = Optional.ofNullable(existingResult).map(v -> v.getLineup()).orElse(null);
-    if (existingResult != null) {
+    if (existingResult != null && initialLineup != null) {
       initialLineup.populateStats(battingData);
     }
     TaskResult bestResult = new TaskResult(initialScore, initialLineup);
-    Map<Long, Long> histo =
-        Optional.ofNullable(existingResult).map(v -> v.getHistogram()).orElse(new HashMap<Long, Long>());
+    Map<Long, Long> histo = Optional.ofNullable(existingResult).map(v -> v.getHistogram())
+        .orElse(new HashMap<Long, Long>());
     long progressCounter = startIndex; // Lineups completed
     long lineupQueueCounter = max; // Lineups ready to be enqueued
     while (!results.isEmpty()) {
@@ -128,10 +130,9 @@ public class MonteCarloExhaustiveOptimizer implements Optimizer<MonteCarloExhaus
       progressCounter++;
       long elapsedTime = (System.currentTimeMillis() - startTimestamp)
           + Optional.ofNullable(existingResult).map(v -> v.getElapsedTimeMs()).orElse(0l);
-      MonteCarloExhaustiveResult partialResult =
-          new MonteCarloExhaustiveResult(bestResult.getLineup(),
-              bestResult.getScore(), indexer.size(), progressCounter, elapsedTime, histo, worstScore,
-              ResultStatusEnum.PARTIAL);
+      MonteCarloExhaustiveResult partialResult = new MonteCarloExhaustiveResult(bestResult.getLineup(),
+          bestResult.getScore(), indexer.size(), progressCounter, elapsedTime, histo, worstScore,
+          ResultStatusEnum.IN_PROGRESS);
       progressTracker.updateProgress(partialResult);
 
       // Add another task to the buffer if there are any left
@@ -150,10 +151,9 @@ public class MonteCarloExhaustiveOptimizer implements Optimizer<MonteCarloExhaus
     executor.shutdown();
     long elapsedTime = (System.currentTimeMillis() - startTimestamp)
         + Optional.ofNullable(existingResult).map(v -> v.getElapsedTimeMs()).orElse(0l);
-    MonteCarloExhaustiveResult finalResult =
-        new MonteCarloExhaustiveResult(bestResult.getLineup(),
-            bestResult.getScore(), indexer.size(), progressCounter, elapsedTime, histo, worstScore,
-            ResultStatusEnum.COMPLETE);
+    MonteCarloExhaustiveResult finalResult = new MonteCarloExhaustiveResult(bestResult.getLineup(),
+        bestResult.getScore(), indexer.size(), progressCounter, elapsedTime, histo, worstScore,
+        ResultStatusEnum.COMPLETE);
     return finalResult;
   }
 

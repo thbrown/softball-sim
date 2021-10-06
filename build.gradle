@@ -82,6 +82,7 @@ spotless {
 
 task message {
   doLast {
+    println "Build completed: " + new Date().format('MM/dd/yyyy HH:mm:ss')
     println "Build successful: output jar can be found in ./build/libs"
     println "Run with `java -jar ./build/libs/softball-sim.jar`"
   }
@@ -103,21 +104,21 @@ task generateGalleryHtml(type: Test) {
 task serve {
   doLast {
     int port = 8085;
-	SimpleHttpFileServerFactory factory = new SimpleHttpFileServerFactory();
-	String path = System.getProperty("user.dir") + File.separator + "docs";
-	println("Serving " + path);
-	HttpFileServer server = factory.start(new File(path), port)
-	println("Running on port " + port + " See gallery on http://localhost:" + port + "/index.html ");
-	println("Stop server with ctrl+c (this doesn't work sometimes on windows, in which case you'll have to stop the process in Task Manager OR 'netstat -ano | findstr :port:' then 'tskill :pid:') ");
-	java.lang.Thread.sleep(Long.MAX_VALUE);
+    SimpleHttpFileServerFactory factory = new SimpleHttpFileServerFactory();
+    String path = System.getProperty("user.dir") + File.separator + "docs";
+    println("Serving " + path);
+    HttpFileServer server = factory.start(new File(path), port)
+    println("Running on port " + port + " See gallery on http://localhost:" + port + "/index.html ");
+    println("Stop server with ctrl+c (this doesn't work sometimes on windows, in which case you'll have to stop the process in Task Manager OR 'netstat -ano | findstr :port:' then 'tskill :pid:') ");
+    java.lang.Thread.sleep(Long.MAX_VALUE);
   }
 }
 
-// Print the message after assembly completes
-assemble.finalizedBy message
-
 // Generate the gallery html as part of the build process
 assemble.finalizedBy generateGalleryHtml
+
+// Print the message after nuild is complete
+assemble.finalizedBy message
 
 // Auto format files on build
 assemble.dependsOn spotlessApply

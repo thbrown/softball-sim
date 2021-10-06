@@ -26,7 +26,6 @@ public class CircularArrayTest {
     assertEquals(array.get(25), null);
   }
 
-
   @Test
   public void testValidCircularInserts() throws Exception {
     Integer A = 8;

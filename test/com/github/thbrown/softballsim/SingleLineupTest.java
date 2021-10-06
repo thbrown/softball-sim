@@ -1,7 +1,9 @@
 package com.github.thbrown.softballsim;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -22,6 +24,25 @@ import org.junit.Test;
 public class SingleLineupTest {
 
   @Test
+  public void gcpFunctionTest() throws IOException, InterruptedException {
+    String command = "curl -X POST \""
+        + "https://us-central1-optimum-library-250223.cloudfunctions.net/softball-sim-compute"
+        + "\" -i -N -H \"Content-Type:application/json\" --data {} ";
+
+    Logger.log("OUTPUT:" + executeCommand(command));
+  }
+
+  private String executeCommand(String command) {
+    try {
+      Runtime rt = Runtime.getRuntime();
+      Process pr = rt.exec(command);
+      return new BufferedReader(new InputStreamReader(pr.getInputStream())).lines().collect(Collectors.joining("\n"));
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Test
   public void simulateSingleGame() {
 
     // Get stats from file
@@ -35,10 +56,9 @@ public class SingleLineupTest {
         if (filesOnly.size() == 1) {
           json = new String(Files.readAllBytes(Paths.get(filesOnly.get(0).getCanonicalPath())));
         } else {
-          throw new RuntimeException(
-              "There were " + filesOnly.size() + " files in the stats-path directory specified ("
-                  + file.getAbsolutePath()
-                  + "), but this application expects only one, or a path direclty to the stats file");
+          throw new RuntimeException("There were " + filesOnly.size() + " files in the stats-path directory specified ("
+              + file.getAbsolutePath()
+              + "), but this application expects only one, or a path direclty to the stats file");
         }
       } else {
         json = new String(Files.readAllBytes(Paths.get(statsFileLocation)));
@@ -59,13 +79,12 @@ public class SingleLineupTest {
     playerList.add(stats.getPlayerById("00000000000004"));
 
     // Simulate a games
-    final int GAMES = 1000000;
+    final int GAMES = 10;
     BattingLineup lineup = new StandardBattingLineup(playerList);
     HitGenerator hitGenerator = new HitGenerator(playerList);
 
     // Run on the current thread
-    MonteCarloMultiGameSimulationTask task =
-        new MonteCarloMultiGameSimulationTask(lineup, GAMES, 7, hitGenerator);
+    MonteCarloMultiGameSimulationTask task = new MonteCarloMultiGameSimulationTask(lineup, GAMES, 7, hitGenerator);
     TaskResult result = task.run();
     Logger.log(result.getScore());
     Logger.log(result.getLineup());

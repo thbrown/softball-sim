@@ -51,8 +51,8 @@ public enum OptimizerEnum {
     this.optimizerImplementation = optimizer;
     try {
       String optimizerDefinitionJson = readFromFileOrClassPath("./docs/definitions/" + id + ".json");
-      this.optimizerDefinition =
-          GsonAccessor.getInstance().getCustom().fromJson(optimizerDefinitionJson, OptimizerDefinition.class);
+      this.optimizerDefinition = GsonAccessor.getInstance().getCustom().fromJson(optimizerDefinitionJson,
+          OptimizerDefinition.class);
     } catch (IOException e) {
       throw new RuntimeException("Error while deserializing " + id + ".json", e);
     }
@@ -101,13 +101,12 @@ public enum OptimizerEnum {
    */
   @SuppressWarnings("unchecked")
   public <T extends Result> Result optimize(List<String> players, LineupTypeEnum lineupType, DataStats data,
-      Map<String, String> arguments,
-      ProgressTracker progressTracker, T existingResult) {
+      Map<String, String> arguments, ProgressTracker progressTracker, T existingResult) {
 
-    // Cast the optimizer to itself, this gets us a reference to an Optimizer that uses a particular
-    // generic (Optimizer<T>) rather than a reference with a bounded wildcard generic (Optimizer<?
-    // extends Result>). With this new reference we can pass that optimizer a specific subclass of
-    // result (T).
+    // Cast the optimizer to itself, this gets us a reference to an Optimizer that
+    // uses a particular generic (Optimizer<T>) rather than a reference with a
+    // bounded wildcard generic (Optimizer<? extends Result>). With this new
+    // reference we can pass that optimizer a specific subclass of result (T).
     Optimizer<T> optimizer = this.optimizerImplementation.getClass().cast(this.optimizerImplementation);
 
     // Print the arguments we are using for this optimization before we start

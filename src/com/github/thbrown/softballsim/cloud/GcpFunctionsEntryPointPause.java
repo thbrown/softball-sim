@@ -33,23 +33,20 @@ public class GcpFunctionsEntryPointPause implements HttpFunction {
       // Some error checking for the id
       String id = map.get(DataSourceGcpBuckets.ID);
       if (id == null) {
-        CloudUtils.send400Error(response, "Required json field 'I' (id) was not specified in the body");
-        return;
-      }
-      int length = id.length();
-      if (length < 15 || length > 63) {
         CloudUtils.send400Error(response,
-            "Please provide an Id (-I) that is longer than 15 characters and shorter than 64 characters. Was " + length
-                + " characters");
+            "Required json field " + DataSourceGcpBuckets.ID + " was not specified in the body");
         return;
       }
 
-      // We'll add flag to the control bucket to indicate that a currently running optimization should
-      // stop
+      // We'll add flag to the control bucket to indicate that a currently running
+      // optimization should stop
       CloudUtils.upsertBlob("HALT", id, DataSourceGcpBuckets.CONTROL_FLAGS_BUCKET);
 
       // Success, but no response needed
-      response.setStatusCode(201);
+      response.setContentType("application/json");
+      response.setStatusCode(200);
+      String payload = CloudUtils.getResponseJson("SUCCESS", "Successfully sent pause request");
+      response.getOutputStream().write(payload.getBytes());
     } catch (Exception e) {
       // Log stack
       StringWriter sw = new StringWriter();

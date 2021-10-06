@@ -20,7 +20,8 @@ public class MapWrapperDeserializer implements JsonDeserializer<MapWrapper> {
     JsonObject jsonObject = json.getAsJsonObject();
     for (String key : jsonObject.keySet()) {
       String value = jsonObject.get(key).toString();
-      result.put(key, value.replaceAll("^\"|\"$", "")); // Don't put strings in double quotes
+      result.put(key, value.replaceAll("^\"|\"$", "").replaceAll("\\\"", "\"")); // Don't put strings in double quotes,
+                                                                                 // remove escaped quotes
     }
     return result;
   }

@@ -62,4 +62,8 @@ public class CircularArray<T> {
     return elem;
   }
 
+  public T latest() {
+    return this.get(0);
+  }
+
 }

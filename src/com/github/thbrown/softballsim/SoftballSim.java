@@ -22,73 +22,80 @@ public class SoftballSim {
 
   public static void main(String[] args) throws ParseException {
     try {
-      mainInternal(args);
+      // When running the application we'll want to make sure we shut down everything
+      // at the end, in particular optimizer threads that may still be running
+      // (perhaps because of a pause or and error). However, we want library consumers
+      // to be able to accept responsibility for ending the program if they so choose,
+      // so we'll pass the kill command in as a runnable to be invoked after the
+      // main thread finishes executing.
+      mainInternal(args, () -> {
+        System.exit(0);
+      });
     } catch (Exception e) {
       Logger.error(e.getMessage());
       e.printStackTrace();
     }
   }
 
+  // Currently just a convenience method for tests :(
   public static Result mainInternal(String[] args) throws MissingArgumentException {
-    // The valid command line flags change based on which optimizer and data source are supplied.
+    return mainInternal(args, null);
+  }
+
+  public static Result mainInternal(String[] args, Runnable cleanup) throws MissingArgumentException {
+    // The valid command line flags change based on which optimizer and data source
+    // are supplied.
     CommandLineOptions commandLineOptions = CommandLineOptions.getInstance();
 
-    // If there were no arguments supplied, show help with only the common options (i.e. no additional
+    // If there were no arguments supplied, show help with only the common options
+    // (i.e. no additional
     // flags for optimizer, and the default flags for data source)
     if (args.length == 0) {
-      Options availableOptions =
-          commandLineOptions.getOptionsForFlags(DataSourceEnum.getEnumFromName(CommandLineOptions.DATA_SOURCE_DEFAULT),
-              null);
+      Options availableOptions = commandLineOptions
+          .getOptionsForFlags(DataSourceEnum.getEnumFromName(CommandLineOptions.DATA_SOURCE_DEFAULT), null);
       HelpFormatter formatter = CommandLineOptions.getInstance().getHelpFormatter();
       formatter.printHelp(
           CommandLineOptions.APPLICATION_NAME + " [OPTIONS]" + System.lineSeparator() + System.lineSeparator(),
-          CommandLineOptions.HELP_HEADER_1, availableOptions,
-          CommandLineOptions.HELP_FOOTER);
+          CommandLineOptions.HELP_HEADER_1, availableOptions, CommandLineOptions.HELP_FOOTER);
       return null;
     }
 
-    // Some arguments have been supplied, parse only the common arguments for now (so we can identify
+    // Some arguments have been supplied, parse only the common arguments for now
+    // (so we can identify
     // the data source)
     Options commonOptions = commandLineOptions.getOptionsForFlags(null, null);
     CommandLine commonCmd = commandLineOptions.parse(commonOptions, args, true);
 
-    String dataSourceString =
-        commonCmd.getOptionValue(CommandLineOptions.DATA_SOURCE, CommandLineOptions.DATA_SOURCE_DEFAULT);
+    String dataSourceString = commonCmd.getOptionValue(CommandLineOptions.DATA_SOURCE,
+        CommandLineOptions.DATA_SOURCE_DEFAULT);
     DataSourceEnum dataSource = DataSourceEnum.getEnumFromName(dataSourceString);
 
     // Now consider both common options and data source options
     commonOptions = commandLineOptions.getOptionsForFlags(dataSource, null);
     commonCmd = commandLineOptions.parse(commonOptions, args, true);
 
-    // Concatenate any additional options that originate from the data source
-    String[] additionalOptions = dataSource.getAdditionalOptions(commonCmd);
-    if (additionalOptions != null) {
-      args = Stream.concat(Arrays.stream(args), Arrays.stream(additionalOptions))
-          .toArray(String[]::new);
-      Logger.log("Info: Additional args added, full argumets are: " + Arrays.toString(args));
-      commonCmd = commandLineOptions.parse(commonOptions, args, true);
-    }
-
     // Get players, lineup type, and optimizer from the cmd line flags
-    String lineupTypeString =
-        commonCmd.getOptionValue(CommandLineOptions.LINEUP_TYPE, CommandLineOptions.TYPE_LINEUP_DEFAULT);
+    String lineupTypeString = commonCmd.getOptionValue(CommandLineOptions.LINEUP_TYPE,
+        CommandLineOptions.TYPE_LINEUP_DEFAULT);
     LineupTypeEnum lineupType = LineupTypeEnum.getEnumFromIdOrName(lineupTypeString);
 
-    String playerString =
-        commonCmd.getOptionValue(CommandLineOptions.LINEUP, ""); // TODO: make this required?
+    String playerString = commonCmd.getOptionValue(CommandLineOptions.LINEUP, ""); // TODO: make this required?
     List<String> players = Arrays.asList(playerString.split(","));
 
-    OptimizerEnum optimizer = null;
+    final OptimizerEnum optimizer;
     if (commonCmd.hasOption(CommandLineOptions.OPTIMIZER)) {
       String optimizerString = commonCmd.getOptionValue(CommandLineOptions.OPTIMIZER);
       optimizer = OptimizerEnum.getEnumFromIdOrName(optimizerString);
+    } else {
+      optimizer = null;
     }
 
-    // Help will show the valid flags based on what optimizer and dataSource are supplied.
+    // Help will show the valid flags based on what optimizer and dataSource are
+    // supplied.
     Options availableOptions = commandLineOptions.getOptionsForFlags(dataSource, optimizer);
     if (commonCmd.hasOption(CommandLineOptions.HELP)) {
-      String helpHeader =
-          (optimizer == null) ? CommandLineOptions.HELP_HEADER_1 : CommandLineOptions.HELP_HEADER_2 + optimizer;
+      String helpHeader = (optimizer == null) ? CommandLineOptions.HELP_HEADER_1
+          : CommandLineOptions.HELP_HEADER_2 + optimizer;
       HelpFormatter formatter = CommandLineOptions.getInstance().getHelpFormatter();
       formatter.printHelp(CommandLineOptions.APPLICATION_NAME, helpHeader, availableOptions,
           CommandLineOptions.HELP_FOOTER);
@@ -97,8 +104,7 @@ public class SoftballSim {
 
     // Require that an optimizer is specified
     if (optimizer == null) {
-      throw new RuntimeException(
-          Msg.MISSING_OPTIMIZER.args(OptimizerEnum.getValuesAsString()));
+      throw new RuntimeException(Msg.MISSING_OPTIMIZER.args(OptimizerEnum.getValuesAsString()));
     }
 
     // Parse command line arguments
@@ -110,32 +116,53 @@ public class SoftballSim {
     // Convert arguments list to map
     Map<String, String> arguments = optimizer.getArgumentsAndValuesAsMap(allCmd);
 
-    // We accept both ids and names for this argument, but the optimizers expects ids only. This
-    // resolves
-    // any names to ids.
+    // We accept both ids and names for this argument, but the optimizers expects
+    // ids only. This resolves any names to ids.
     validatePlayersList(players, stats);
-    players = stats.convertPlayersListToIds(players);
+    final List<String> playersIdsOnly = stats.convertPlayersListToIds(players);
 
     // Check if there is a cached result for a run with the exact same args
-    Result existingResult = dataSource.getCachedResult(allCmd, stats);
-
-    ProgressTracker tracker = new ProgressTracker(existingResult, dataSource, allCmd, stats);
-    Thread trackerThread = new Thread(tracker);
-    trackerThread.start();
-
-    // Finally, call the actual optimizer
-    try {
-      Result result = optimizer.optimize(players, lineupType, stats, arguments, tracker, existingResult);
-      dataSource.onComplete(allCmd, stats, result);
-      return result;
-    } catch (Exception e) {
-      Result errorResult = new Result(tracker.getCurrentResult(), ResultStatusEnum.ERROR, e.getMessage());
-      dataSource.onComplete(allCmd, stats, errorResult);
-      throw e;
-    } finally {
-      trackerThread.interrupt();
+    final Result existingResult;
+    if (!allCmd.hasOption(CommandLineOptions.FORCE)) {
+      existingResult = dataSource.getCachedResult(allCmd, stats);
+    } else {
+      existingResult = null;
     }
 
+    // Prep the progress tracker class so we can pass a reference to the optimizer
+    // thread
+    Thread mainThread = Thread.currentThread();
+    ProgressTracker tracker = new ProgressTracker(existingResult, dataSource, allCmd, stats, optimizer);
+
+    // Start the optimization in its own thread
+    final boolean verboseFlagEnabled = commonCmd.hasOption(CommandLineOptions.VERBOSE);
+    Thread optimizerThread = new Thread(() -> {
+      try {
+        Result result = optimizer.optimize(playersIdsOnly, lineupType, stats, arguments, tracker, existingResult);
+        result = new Result(result, 0L); // Set estimated completion time to zero
+        tracker.updateProgress(result); // Last update
+        dataSource.onComplete(allCmd, stats, result);
+      } catch (Exception e) {
+        Result errorResult = new Result(tracker.getCurrentResult(), ResultStatusEnum.ERROR, e.getMessage());
+        tracker.updateProgress(errorResult); // Last update
+        dataSource.onComplete(allCmd, stats, errorResult);
+        if (verboseFlagEnabled) {
+          Logger.log(e);
+        }
+      } finally {
+        mainThread.interrupt();
+      }
+    });
+    optimizerThread.start();
+
+    // Finally, start the progress tracker on the main thread
+    Result finalResult = tracker.run();
+
+    // Almost done, just run the cleanup procedure supplied on invocation (if any)
+    if (cleanup != null) {
+      cleanup.run();
+    }
+    return finalResult;
   }
 
   /**
@@ -154,8 +181,7 @@ public class SoftballSim {
           .collect(Collectors.joining(System.lineSeparator()));
       throw new RuntimeException(
           "No players were specified. Please specify a comma separated list of player names or ids using the -"
-              + CommandLineOptions.LINEUP + " flag. Avaliable players " + System.lineSeparator()
-              + playersAsString);
+              + CommandLineOptions.LINEUP + " flag. Available players " + System.lineSeparator() + playersAsString);
     }
   }
 
