@@ -54,6 +54,19 @@ public class StringUtils {
     }
   }
 
+  public static String calculateSha256AsHex(String input) {
+    MessageDigest md;
+    try {
+      md = MessageDigest.getInstance("SHA-256");
+      md.update(input.getBytes());
+      byte[] digest = md.digest();
+      String hexHash = StringUtils.bytesToHex(digest);
+      return hexHash;
+    } catch (NoSuchAlgorithmException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
   private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
 
   public static String bytesToHex(byte[] bytes) {

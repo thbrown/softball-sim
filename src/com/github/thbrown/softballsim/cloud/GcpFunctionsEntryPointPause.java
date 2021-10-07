@@ -4,9 +4,11 @@ import java.io.BufferedWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 import com.github.thbrown.softballsim.datasource.gcpfunctions.DataSourceGcpBuckets;
 import com.github.thbrown.softballsim.util.GsonAccessor;
 import com.github.thbrown.softballsim.util.Logger;
+import com.github.thbrown.softballsim.util.StringUtils;
 import com.google.cloud.functions.HttpFunction;
 import com.google.cloud.functions.HttpRequest;
 import com.google.cloud.functions.HttpResponse;
@@ -22,6 +24,8 @@ public class GcpFunctionsEntryPointPause implements HttpFunction {
     try {
       // Setup
       Gson gson = GsonAccessor.getInstance().getCustom();
+      final String PASSWORD_HASH = Optional.ofNullable(System.getenv("PASSWORD_HASH"))
+          .orElseThrow(() -> new RuntimeException("PASSWORD_HASH is not set in the environment"));
 
       // Extract body
       byte[] jsonBodyBytes = request.getInputStream().readAllBytes();
@@ -29,6 +33,21 @@ public class GcpFunctionsEntryPointPause implements HttpFunction {
 
       // Parse JSON to map
       MapWrapper map = gson.fromJson(jsonBody, MapWrapper.class);
+
+      // Password checking
+      String pwd = Optional.ofNullable(map.get(GcpFunctionsEntryPointStart.PASSWORD_KEY)).orElseThrow(() -> {
+        try {
+          Thread.sleep(3000); // Delay to prevent excessive guessing
+        } catch (InterruptedException e) {
+        }
+        return new RuntimeException("Missing Password");
+      });
+
+      String pwdHash = StringUtils.calculateSha256AsHex(pwd.trim());
+      if (!pwdHash.equals(PASSWORD_HASH)) {
+        throw new RuntimeException("Invalid Password");
+      }
+      map.remove(GcpFunctionsEntryPointStart.PASSWORD_KEY);
 
       // Some error checking for the id
       String id = map.get(DataSourceGcpBuckets.ID);
@@ -54,11 +73,8 @@ public class GcpFunctionsEntryPointPause implements HttpFunction {
       e.printStackTrace(pw);
       Logger.log(sw.toString());
 
-      // Sent exception as plain text
-      response.setContentType("test/plain");
-      response.setStatusCode(400);
-      BufferedWriter writer = response.getWriter();
-      writer.write(e.toString());
+      // Send exceptions
+      CloudUtils.send400Error(response, e.toString());
     }
   }
 

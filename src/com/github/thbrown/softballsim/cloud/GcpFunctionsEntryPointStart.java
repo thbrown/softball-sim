@@ -49,6 +49,7 @@ public class GcpFunctionsEntryPointStart implements HttpFunction {
   private static final String ID_KEY = "-" + DataSourceGcpBuckets.ID;
   private static final String DATA_SOURCE_KEY = "-" + CommandLineOptions.DATA_SOURCE;
   private static final String ESTIMATE_ONLY_KEY = "-" + CommandLineOptions.ESTIMATE_ONLY;
+  public static final String PASSWORD_KEY = "PASSWORD";
 
   @Override
   public void service(HttpRequest request, HttpResponse response) throws Exception {
@@ -58,6 +59,8 @@ public class GcpFunctionsEntryPointStart implements HttpFunction {
       Gson gson = GsonAccessor.getInstance().getCustom();
       String COMPUTE_FUNCTION_ENDPOINT = Optional.ofNullable(System.getenv("COMPUTE_FUNCTION_ENDPOINT"))
           .orElseThrow(() -> new RuntimeException("COMPUTE_FUNCTION_ENDPOINT is not set in the environment"));
+      final String PASSWORD_HASH = Optional.ofNullable(System.getenv("PASSWORD_HASH"))
+          .orElseThrow(() -> new RuntimeException("PASSWORD_HASH is not set in the environment"));
 
       // Extract post body into a map for consumption
       byte[] jsonBodyBytes = Optional.ofNullable(request.getInputStream().readAllBytes())
@@ -67,6 +70,22 @@ public class GcpFunctionsEntryPointStart implements HttpFunction {
         throw new RuntimeException("Missing POST request body");
       }
       MapWrapper map = gson.fromJson(jsonBody, MapWrapper.class);
+
+      // Password checking
+      String pwd = Optional.ofNullable(map.get(PASSWORD_KEY)).orElseThrow(() -> {
+        try {
+          Thread.sleep(3000); // Delay to prevent excessive guessing
+        } catch (InterruptedException e) {
+        }
+        return new RuntimeException("Missing Password");
+      });
+
+      String pwdHash = StringUtils.calculateSha256AsHex(pwd.trim());
+      if (!pwdHash.equals(PASSWORD_HASH)) {
+        throw new RuntimeException("Invalid Password");
+      }
+      map.remove(PASSWORD_KEY);
+
       Logger.log("Map " + map);
 
       // Error checking
@@ -140,8 +159,10 @@ public class GcpFunctionsEntryPointStart implements HttpFunction {
           jsonObject.add(GcpFunctionsEntryPointCompute.ARGS_KEY, new JsonPrimitive(stringArguments));
           jsonObject.add(GcpFunctionsEntryPointCompute.ID_KEY, new JsonPrimitive(map.get(ID_KEY)));
           jsonObject.add(GcpFunctionsEntryPointCompute.ZONES_KEY, new JsonPrimitive(ZONES));
+          jsonObject.add(PASSWORD_KEY, new JsonPrimitive(pwd));
           String jsonPayload = gson.toJson(jsonObject);
 
+          // TODO: can't we just invoke this directly?
           Logger.log(id + " timeout exceeded, sending compute request " + jsonPayload);
           int status = this.sendPost(COMPUTE_FUNCTION_ENDPOINT, jsonPayload);
           Logger.log(id + " compute request status: " + status);

@@ -45,12 +45,30 @@ public class GcpFunctionsEntryPointCompute implements HttpFunction {
           .orElseThrow(() -> new RuntimeException("HOME_DIRECTORY is not set in the environment"));
       final String PROJECT = Optional.ofNullable(System.getenv("PROJECT"))
           .orElseThrow(() -> new RuntimeException("PROJECT is not set in the environment"));
+      final String PASSWORD_HASH = Optional.ofNullable(System.getenv("PASSWORD_HASH"))
+          .orElseThrow(() -> new RuntimeException("PASSWORD_HASH is not set in the environment"));
 
       // Extract post body into a map for consumption
       byte[] jsonBodyBytes = Optional.ofNullable(request.getInputStream().readAllBytes())
           .orElseThrow(() -> new RuntimeException("Missing POST request body"));
       String jsonBody = new String(jsonBodyBytes, StandardCharsets.UTF_8);
       MapWrapper map = gson.fromJson(jsonBody, MapWrapper.class);
+
+      // Password checking
+      String pwd = Optional.ofNullable(map.get(GcpFunctionsEntryPointStart.PASSWORD_KEY)).orElseThrow(() -> {
+        try {
+          Thread.sleep(3000); // Delay to prevent excessive guessing
+        } catch (InterruptedException e) {
+        }
+        return new RuntimeException("Missing Password");
+      });
+
+      String pwdHash = StringUtils.calculateSha256AsHex(pwd.trim());
+      if (!pwdHash.equals(PASSWORD_HASH)) {
+        throw new RuntimeException("Invalid Password");
+      }
+      map.remove(GcpFunctionsEntryPointStart.PASSWORD_KEY);
+
       Logger.log("Body: " + map.toString());
 
       String args = map.get(ARGS_KEY).replace("\\\"", "\"");
@@ -92,7 +110,7 @@ public class GcpFunctionsEntryPointCompute implements HttpFunction {
 
       // TODO: retry on failure?
       Operation operation = makeInstance(id, nextZone, PROJECT, MACHINE_TYPE, id + "-" + futureZones.length,
-          HOME_DIRECTORY, SNAPSHOT_NAME, args, futureZones);
+          HOME_DIRECTORY, SNAPSHOT_NAME, args, futureZones, pwd);
       Logger.log(id + " operation: " + operation.getSelfLink());
 
       // Send the response
@@ -107,8 +125,8 @@ public class GcpFunctionsEntryPointCompute implements HttpFunction {
   }
 
   private Operation makeInstance(String optimizationId, String zone, String project, String machineType,
-      String instanceName, String homeDirectory, String snapshotName, String applicationArguments, String[] futureZones)
-      throws IOException, GeneralSecurityException {
+      String instanceName, String homeDirectory, String snapshotName, String applicationArguments, String[] futureZones,
+      String pwd) throws IOException, GeneralSecurityException {
 
     Logger.log("Starting instance: " + instanceName);
 
@@ -138,6 +156,7 @@ public class GcpFunctionsEntryPointCompute implements HttpFunction {
       jsonObject.add(GcpFunctionsEntryPointCompute.ARGS_KEY, new JsonPrimitive(applicationArguments));
       jsonObject.add(GcpFunctionsEntryPointCompute.ID_KEY, new JsonPrimitive(optimizationId));
       jsonObject.add(GcpFunctionsEntryPointCompute.ZONES_KEY, new JsonPrimitive(String.join(",", futureZones)));
+      jsonObject.add(GcpFunctionsEntryPointStart.PASSWORD_KEY, new JsonPrimitive(pwd)); // TODO: this is pretty sloppy, switch to use service accounts
       Gson gson = GsonAccessor.getInstance().getCustom();
       String jsonPayload = gson.toJson(jsonObject);
       Logger.log("Payload on shutdown " + jsonPayload);

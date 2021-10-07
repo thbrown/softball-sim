@@ -7,6 +7,7 @@
   "-u": 5000,
   "-f": true,
   "-e": false,
+  "PASSWORD": "<your_pwd>",
   "data": {
     "players": [
       {

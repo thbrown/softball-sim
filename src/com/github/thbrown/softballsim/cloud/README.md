@@ -32,17 +32,19 @@ First, do a gradle build.
 
 Then, from the project root directory, run these commands to deploy each function:
 
-`gcloud functions deploy softball-sim-compute --entry-point=com.github.thbrown.softballsim.cloud.GcpFunctionsEntryPointCompute --timeout=120 --memory=256 --runtime=java11 --trigger-http --source=build/libs --max-instances=10 --max-instances=10 --set-env-vars HOME_DIRECTORY=/home/softballdotapp,PROJECT=optimum-library-250223`
+`gcloud functions deploy softball-sim-compute --entry-point=com.github.thbrown.softballsim.cloud.GcpFunctionsEntryPointCompute --timeout=120 --memory=256 --runtime=java11 --trigger-http --source=build/libs --max-instances=10 --max-instances=10 --set-env-vars HOME_DIRECTORY=/home/softballdotapp,PROJECT=optimum-library-250223,PASSWORD_HASH=<your_pwd_hash>`
 
-`gcloud functions deploy softball-sim-start --entry-point=com.github.thbrown.softballsim.cloud.GcpFunctionsEntryPointStart --timeout=540 --memory=256 --runtime=java11 --trigger-http --source=build/libs --allow-unauthenticated --max-instances=10 --set-env-vars=COMPUTE_FUNCTION_ENDPOINT=https://us-central1-optimum-library-250223.cloudfunctions.net/softball-sim-compute`
+`gcloud functions deploy softball-sim-start --entry-point=com.github.thbrown.softballsim.cloud.GcpFunctionsEntryPointStart --timeout=540 --memory=256 --runtime=java11 --trigger-http --source=build/libs --allow-unauthenticated --max-instances=10 --set-env-vars=COMPUTE_FUNCTION_ENDPOINT=https://us-central1-optimum-library-250223.cloudfunctions.net/softball-sim-compute,PASSWORD_HASH=<your_pwd_hash>`
 
-`gcloud functions deploy softball-sim-query --entry-point=com.github.thbrown.softballsim.cloud.GcpFunctionsEntryPointQuery --timeout=20 --memory=256 --runtime=java11 --trigger-http --source=build/libs --allow-unauthenticated --max-instances=10`
+`gcloud functions deploy softball-sim-query --entry-point=com.github.thbrown.softballsim.cloud.GcpFunctionsEntryPointQuery --timeout=20 --memory=256 --runtime=java11 --trigger-http --source=build/libs --allow-unauthenticated --max-instances=10 --set-env-vars=PASSWORD_HASH=<your_pwd_hash>`
 
-`gcloud functions deploy softball-sim-pause --entry-point=com.github.thbrown.softballsim.cloud.GcpFunctionsEntryPointPause --timeout=20 --memory=256 --runtime=java11 --trigger-http --source=build/libs --allow-unauthenticated --max-instances=10`
+`gcloud functions deploy softball-sim-pause --entry-point=com.github.thbrown.softballsim.cloud.GcpFunctionsEntryPointPause --timeout=20 --memory=256 --runtime=java11 --trigger-http --source=build/libs --allow-unauthenticated --max-instances=10 --set-env-vars=PASSWORD_HASH=<your_pwd_hash>`
 
 ### Testing
 
-Unlike running the the application from the command line, which uses the hash of the arguments and data to create an identifier for optimization run. The function requires that you supply your own identifier. 'zsjdklasaskfjaskfdjs' is id used in the example.
+Unlike running the the application from the command line, which uses the hash of the arguments and data to create an identifier for optimization run. The function requires that you supply your own identifier. `zsjdklasaskfjaskfdjs` is id used in the example.
+
+You will need to replace `<your_pwd>` with your own password and `<your_pwd_hash>` with the shaw256 of your password. Don't forget the entry in exampleGcpFunctionsParams.json.
 
 Default parameters are set in `./stats/exampleGcpFunctionsParams.json`
 
@@ -52,8 +54,8 @@ To start an optimization:
 
 To query for job progress:
 
-`curl -X POST "https://us-central1-optimum-library-250223.cloudfunctions.net/softball-sim-query" -N -H "Content-Type:application/json" --data {"i":zsjdklasaskfjaskfdjs}`
+`curl -X POST "https://us-central1-optimum-library-250223.cloudfunctions.net/softball-sim-pause" -N -H "Content-Type:application/json" --data '{"i":"zsjdklasaskfjaskfdjs","PASSWORD":"<your_pwd>"}'`
 
 To pause a running optimization:
 
-`curl -X POST "https://us-central1-optimum-library-250223.cloudfunctions.net/softball-sim-pause" -N -H "Content-Type:application/json" --data {"i":zsjdklasaskfjaskfdjs}`
+`curl -X POST "https://us-central1-optimum-library-250223.cloudfunctions.net/softball-sim-pause" -N -H "Content-Type:application/json" --data '{"i":"zsjdklasaskfjaskfdjs","PASSWORD":"<your_pwd>"}'`
