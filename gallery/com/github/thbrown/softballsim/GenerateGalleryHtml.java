@@ -12,6 +12,7 @@ import org.owasp.html.PolicyFactory;
 import org.owasp.html.Sanitizers;
 import com.github.thbrown.softballsim.optimizer.OptimizerDefinitionComposite;
 import com.github.thbrown.softballsim.optimizer.gson.OptimizerDefinition;
+import com.github.thbrown.softballsim.optimizer.gson.VisibilityEnum;
 import com.github.thbrown.softballsim.util.GsonAccessor;
 import j2html.tags.ContainerTag;
 import j2html.tags.Tag;
@@ -39,7 +40,9 @@ public class GenerateGalleryHtml {
       String contents = new String(Files.readAllBytes(Paths.get(fileList[i].getCanonicalPath())));
       OptimizerDefinition definition = GsonAccessor.getInstance().getCustom().fromJson(contents,
           OptimizerDefinition.class);
-      definitions.add(new OptimizerDefinitionComposite(definition, fileList[i].getName()));
+      if (definition.getUiVisibility() == null || definition.getUiVisibility() == VisibilityEnum.STANDERD) {
+        definitions.add(new OptimizerDefinitionComposite(definition, fileList[i].getName()));
+      }
     }
 
     // Render the remainder of the html

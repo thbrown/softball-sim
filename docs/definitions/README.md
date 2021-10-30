@@ -10,13 +10,14 @@ This document describes the format of the definition files. Unit tests will vali
 - **longDescriptionFile** - String. The name of the file which serves as a README for the optimzer. In this file you can get into all the dirty details about how your optimizer works. The actual file should be added inside the ../descriptions directory.
 - **supportedLineupTypes** - Array of Strings. The lineup types that this optimizer supports, optimizers don't have to support all lineup types, but you must support at least one! Valid values `NORMAL`, `ALTERNATING_GENDER`, and `NO_CONSECUTIVE_FEMALES`
 - **options** - Array of Objects. these are the arguments that the optimizer consumes. If the optimizer has no options, set this to an empty array.
+- **uiVisibility** - Enum. Defines whether or not this optimizer should appear in the optimizer gallery web page. The gallery HTML is generated as part of the build process. Choices are `STANDARD` or `HIDDEN`. Defaults to `STANDARD`.
 
 ### Options Fields
 - **type** - String. The data type of the field. Here are the supported types: `String`, `Number`, `Boolean`, `Enumeration`. Each of these values may add additional fields to the options object. See the "Additional Fields" sections below for more details.
 - **shortLabel** - String. A single character to describe this option. Used as the short flag for this argument in the CLI. Must be uppercase. Since there are 26 letters in the English alphabet, this leaves you with a maximum of 26 possible options.
 - **longLabel** - String. A single word (no spaces allowed) to describe this option. Used as the long flag for this argument in the CLI. Case-sensitive. 
 - **description** - String. A short paragraph describing the purpose of this option, the tradeoffs of using various values, and any other pertinent information about how it should be used.
-- **uiVissibility** - String. Not required. Defines whether or not this field will appear in the softball.app ui. Choices are `STANDARD` or `HIDDEN`. Defaults to `STANDARD`.
+- **uiVisibility** - Enum. Defines whether or not this field will appear in the softball.app ui. Choices are `STANDARD` or `HIDDEN`. Defaults to `STANDARD`.
 
 #### Additional Fields for Number
 - **max** - Number. Not required. The maximum value allowed (inclusive). Application will throw an exception if user attempts to provide a value higher than max.

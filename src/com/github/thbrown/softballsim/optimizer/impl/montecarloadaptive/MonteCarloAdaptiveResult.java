@@ -9,9 +9,7 @@ import com.github.thbrown.softballsim.util.StringUtils;
 
 /**
  * 
- * 
  * SummaryStatistics are not serializable (https://bugs.openjdk.java.net/browse/JDK-8043747)
- *
  */
 public class MonteCarloAdaptiveResult extends Result {
 
@@ -29,9 +27,8 @@ public class MonteCarloAdaptiveResult extends Result {
     return candidateLineups;
   }
 
-  public String toString() {
-    String base = super.toString();
-    return base + "\nAvg simulations per lineup: "
+  public String getHumanReadableDetails() {
+    return "Avg simulations per lineup: "
         + StringUtils.formatDecimal(((double) simulationsRequired / (double) super.getCountCompleted()), 2);
   }
 }

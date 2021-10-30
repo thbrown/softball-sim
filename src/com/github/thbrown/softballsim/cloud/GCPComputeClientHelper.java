@@ -28,18 +28,6 @@ public class GCPComputeClientHelper {
     // Create http transporter needed for Compute client
     HttpTransport HTTP_TRANSPORTER = GoogleNetHttpTransport.newTrustedTransport();
 
-    // Read GCP service account credentials JSON key file
-    // InputStream serviceAccountJsonKey =
-    // GCPComputeClientHelper.class.getClassLoader()
-    // .getResourceAsStream("mykeyfile.json");
-
-    // Authenticate based on the JSON key file
-    // GoogleCredentials credentials =
-    // GoogleCredentials.fromStream(serviceAccountJsonKey);
-    // credentials = credentials.createScoped(ComputeScopes.CLOUD_PLATFORM);
-    // GoogleCredential cred = GoogleCredential.fromStream(credentialsJSON
-    // ,httpTransport,JSON_FACTORY);
-
     GoogleCredentials credentials = GoogleCredentials.getApplicationDefault();
 
     HttpRequestInitializer requestInitializer = new HttpCredentialsAdapter(credentials);

@@ -99,7 +99,7 @@ public class GcpFunctionsEntryPointCompute implements HttpFunction {
         Logger.log("ERROR - Zones exhausted");
         String resultJsonOriginal = CloudUtils.readBlob(id, DataSourceGcpBuckets.CACHED_RESULTS_BUCKET);
         Result resultOriginal = gson.fromJson(resultJsonOriginal, Result.class);
-        Result updatedResult = new Result(resultOriginal, ResultStatusEnum.ERROR,
+        Result updatedResult = resultOriginal.copyWithNewStatus(ResultStatusEnum.ERROR,
             "Cloud resources unavailable, try again later");
         CloudUtils.upsertBlob(gson.toJson(updatedResult), id, DataSourceGcpBuckets.CACHED_RESULTS_BUCKET);
         throw new RuntimeException("Zones Exhausted");

@@ -11,12 +11,12 @@ import com.github.thbrown.softballsim.data.gson.DataStats;
 public interface BattingLineup {
 
   /**
-   * TODO
+   * Representation of this lineup as a simple list of players. As you'd write is on a lineup card.
    */
   public List<DataPlayer> asList();
 
   /**
-   * TODO
+   * Same as {@link #asList()}, but returns a list of playerIds instead of DataPlayer objects
    */
   public default List<String> asListOfIds() {
     return asList().stream().map(p -> p.getId()).collect(Collectors.toList());
@@ -42,6 +42,8 @@ public interface BattingLineup {
    * their counterparts from DataStats that do have stats info.
    */
   public void populateStats(DataStats battingData);
+
+  public void populateStats(List<DataPlayer> playersWithStatsData);
 
   public int size();
 

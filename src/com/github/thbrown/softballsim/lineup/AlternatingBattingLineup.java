@@ -126,6 +126,31 @@ public class AlternatingBattingLineup implements BattingLineup {
     }
   }
 
+  @Override
+  public void populateStats(List<DataPlayer> playersWithStatsData) {
+    for (int i = 0; i < groupA.size(); i++) {
+      DataPlayer statslessPlayer = groupA.get(i);
+      DataPlayer statsfullPlayer =
+          playersWithStatsData.stream().filter(v -> v.getId() == statslessPlayer.getId()).findAny()
+              .orElse(null);
+      if (statsfullPlayer == null) {
+        throw new RuntimeException("Failed to populate stats for player " + statslessPlayer
+            + " as no stats for this player were found in batting data. Try running the optimization again with the -F flag.");
+      }
+      groupA.set(i, statsfullPlayer);
+    }
+    for (int i = 0; i < groupB.size(); i++) {
+      DataPlayer statslessPlayer = groupB.get(i);
+      DataPlayer statsfullPlayer =
+          playersWithStatsData.stream().filter(v -> v.getId() == statslessPlayer.getId()).findAny()
+              .orElse(null);
+      if (statsfullPlayer == null) {
+        throw new RuntimeException("Failed to populate stats for player " + statslessPlayer
+            + " as no stats for this player were found in batting data. Try running the optimization again with the -F flag.");
+      }
+      groupB.set(i, statsfullPlayer);
+    }
+  }
 
   @Override
   public int size() {

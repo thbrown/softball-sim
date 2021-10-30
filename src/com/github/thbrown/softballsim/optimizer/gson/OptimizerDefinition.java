@@ -15,8 +15,7 @@ public class OptimizerDefinition {
   private String img;
   private List<String> supportedLineupTypes;
   private List<OptimizerDefinitionOption> options;
-  private String uiVisibility;
-  private String cliVisibility;
+  private VisibilityEnum uiVisibility;
 
   public String getId() {
     return id;
@@ -46,12 +45,8 @@ public class OptimizerDefinition {
     return options;
   }
 
-  public String getUiVisibility() {
+  public VisibilityEnum getUiVisibility() {
     return uiVisibility;
-  }
-
-  public String getCliVisibility() {
-    return cliVisibility;
   }
 
   /**

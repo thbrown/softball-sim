@@ -50,7 +50,6 @@ public class ExpectedValueOptimizer implements Optimizer<MonteCarloExhaustiveRes
 
     // Print the details before we start
     DecimalFormat formatter = new DecimalFormat("#,###");
-    Logger.log("*********************************************************************");
     Logger.log("Possible lineups: \t\t" + formatter.format(indexer.size()));
     Logger.log("Maximum batters per game: \t" + parsedArguments.getMaxBatters());
     Logger.log("Innings per game: \t\t" + parsedArguments.getInnings());
@@ -84,10 +83,13 @@ public class ExpectedValueOptimizer implements Optimizer<MonteCarloExhaustiveRes
     // Process results as they finish executing
     double worstScore = Optional.ofNullable(existingResult).map(v -> v.getWorstScore()).orElse(Double.MAX_VALUE);
     double initialScore = Optional.ofNullable(existingResult).map(v -> v.getLineupScore()).orElse(0.0);
-    BattingLineup initialLineup = Optional.ofNullable(existingResult).map(v -> v.getLineup()).orElse(null);
-    if (existingResult != null) {
-      initialLineup.populateStats(battingData);
-    }
+    BattingLineup initialLineup = Optional.ofNullable(existingResult).map(MonteCarloExhaustiveResult::getLineup)
+        // The serialized result does not save the players stats
+        .map(lineup -> {
+          lineup.populateStats(battingData);
+          return lineup;
+        }).orElse(null);
+
     TaskResult bestResult = new TaskResult(initialScore, initialLineup);
     Map<Long, Long> histo = Optional.ofNullable(existingResult).map(v -> v.getHistogram())
         .orElse(new HashMap<Long, Long>());

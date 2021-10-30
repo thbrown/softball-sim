@@ -21,6 +21,7 @@ import com.github.thbrown.softballsim.lineup.BattingLineup;
 import com.github.thbrown.softballsim.lineupindexer.BattingLineupIndexer;
 import com.github.thbrown.softballsim.lineupindexer.LineupTypeEnum;
 import com.github.thbrown.softballsim.optimizer.Optimizer;
+import com.github.thbrown.softballsim.optimizer.impl.montecarloadaptive.MonteCarloAdaptiveResult;
 import com.github.thbrown.softballsim.util.Logger;
 
 public class MonteCarloExhaustiveOptimizer implements Optimizer<MonteCarloExhaustiveResult> {
@@ -47,7 +48,6 @@ public class MonteCarloExhaustiveOptimizer implements Optimizer<MonteCarloExhaus
 
     // Print the details before we start
     DecimalFormat formatter = new DecimalFormat("#,###");
-    Logger.log("*********************************************************************");
     Logger.log("Possible lineups: \t\t" + formatter.format(indexer.size()));
     Logger.log("Games to simulate per lineup: \t" + parsedArguments.getGames());
     Logger.log("Innings per game: \t\t" + parsedArguments.getInnings());
@@ -81,10 +81,13 @@ public class MonteCarloExhaustiveOptimizer implements Optimizer<MonteCarloExhaus
     // Process results as they finish executing
     double worstScore = Optional.ofNullable(existingResult).map(v -> v.getWorstScore()).orElse(Double.MAX_VALUE);
     double initialScore = Optional.ofNullable(existingResult).map(v -> v.getLineupScore()).orElse(0.0);
-    BattingLineup initialLineup = Optional.ofNullable(existingResult).map(v -> v.getLineup()).orElse(null);
-    if (existingResult != null && initialLineup != null) {
-      initialLineup.populateStats(battingData);
-    }
+    BattingLineup initialLineup = Optional.ofNullable(existingResult).map(MonteCarloExhaustiveResult::getLineup)
+        // The serialized result does not save the players stats
+        .map(lineup -> {
+          lineup.populateStats(battingData);
+          return lineup;
+        }).orElse(null);
+
     TaskResult bestResult = new TaskResult(initialScore, initialLineup);
     Map<Long, Long> histo = Optional.ofNullable(existingResult).map(v -> v.getHistogram())
         .orElse(new HashMap<Long, Long>());

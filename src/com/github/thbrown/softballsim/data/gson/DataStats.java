@@ -7,6 +7,9 @@ import java.util.stream.Collectors;
 import com.github.thbrown.softballsim.util.LevenshteinDistance;
 import com.github.thbrown.softballsim.util.Logger;
 
+/**
+ * This is the root of the data object created by deserilization of a stats JSON payload.
+ */
 public class DataStats {
   private List<DataPlayer> players;
   private List<DataTeam> teams;

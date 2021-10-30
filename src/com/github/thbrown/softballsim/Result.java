@@ -1,9 +1,14 @@
 package com.github.thbrown.softballsim;
 
+import java.util.List;
 import java.util.Optional;
 import com.github.thbrown.softballsim.lineup.BattingLineup;
 import com.github.thbrown.softballsim.optimizer.OptimizerEnum;
+import com.github.thbrown.softballsim.optimizer.impl.montecarloexhaustive.MonteCarloExhaustiveResult;
+import com.github.thbrown.softballsim.util.GsonAccessor;
 import com.github.thbrown.softballsim.util.StringUtils;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
 /**
  * This class contains the output of an optimization. It's used for reporting to the end user as
@@ -20,6 +25,10 @@ import com.github.thbrown.softballsim.util.StringUtils;
  */
 @SuppressWarnings("unused")
 public class Result {
+
+  public static final String HUMAN_READABLE = "humanReadableDetails";
+  public static final String FLAT_LINEUP = "flatLineup";
+
   private final OptimizerEnum optimizer;
   private final BattingLineup lineup;
   private final double lineupScore;
@@ -29,6 +38,12 @@ public class Result {
   private final ResultStatusEnum status;
   private final String statusMessage;
   private final Long estimatedTimeRemainingMs;
+
+  // Make sure these match teh actual variable name used above!
+  // TODO: test these are valid in unit test with this.getClass().getDeclaredFields()
+  private final static String ESTIMATED_TIME_VARIABLE_NAME = "estimatedTimeRemainingMs";
+  private final static String STATUS_VARIABLE_NAME = "status";
+  private final static String STATUS_MESSAGE_VARIABLE_NAME = "statusMessage";
 
   public Result(OptimizerEnum optimizer, BattingLineup lineup, double lineupScore, long countTotal, long countCompleted,
       long elapsedTimeMs, ResultStatusEnum status) {
@@ -51,7 +66,7 @@ public class Result {
   /**
    * Copy an existing Result but provide an updated status and statusMessage
    */
-  public Result(Result toCopy, ResultStatusEnum newStatus, String newStatusMessage) {
+  protected Result(Result toCopy, ResultStatusEnum newStatus, String newStatusMessage) {
     this.optimizer = toCopy.optimizer;
     this.lineup = toCopy.lineup;
     this.lineupScore = toCopy.lineupScore;
@@ -66,7 +81,7 @@ public class Result {
   /**
    * Copy an existing Result but provide timeRemainingMs
    */
-  public Result(Result toCopy, Long estimatedTimeRemainingMs) {
+  protected Result(Result toCopy, Long estimatedTimeRemainingMs) {
     this.optimizer = toCopy.optimizer;
     this.lineup = toCopy.lineup;
     this.lineupScore = toCopy.lineupScore;
@@ -78,14 +93,48 @@ public class Result {
     this.estimatedTimeRemainingMs = estimatedTimeRemainingMs;
   }
 
+  /**
+   * Copy an existing Result but provide timeRemainingMs. This uses Gson serialization/deserialization
+   * to maintain subclass status (i.e. If call this on a MonteCarloExaustiveResult, you will get back
+   * a MonteCarloExaustiveResult)
+   */
+  public final Result copyWithNewEstimatedTimeRemainingMs(Long estimatedTimeRemainingMs) {
+    Gson g = GsonAccessor.getInstance().getCustom();
+    JsonObject obj = (JsonObject) g.toJsonTree(this);
+    obj.addProperty(Result.ESTIMATED_TIME_VARIABLE_NAME, estimatedTimeRemainingMs);
+
+    Result toReturn = g.fromJson(obj, this.getClass());
+    toReturn.getLineup().populateStats(this.getLineup().asList());
+    return toReturn;
+  }
+
+  /**
+   * Copy an existing Result but provide an updated status and statusMessages. This uses Gson
+   * serialization/deserialization to maintain subclass status (i.e. If call this on a
+   * MonteCarloExaustiveResult, you will get back a MonteCarloExaustiveResult)
+   */
+  public final Result copyWithNewStatus(ResultStatusEnum newStatus, String newStatusMessage) {
+    Gson g = GsonAccessor.getInstance().getCustom();
+    JsonObject obj = (JsonObject) g.toJsonTree(this);
+    obj.addProperty(Result.STATUS_VARIABLE_NAME, newStatus.name());
+    obj.addProperty(Result.STATUS_VARIABLE_NAME, newStatusMessage);
+
+    Result toReturn = g.fromJson(obj, this.getClass());
+    toReturn.getLineup().populateStats(this.getLineup().asList());
+    return toReturn;
+  }
+
   @Override
-  public String toString() {
+  public final String toString() {
     String percentage = StringUtils.formatDecimal((double) getCountCompleted() / (double) getCountTotal() * 100, 2);
-    return "Optimal lineup: \n" + Optional.ofNullable(lineup).map(v -> v.toString()).orElse("null") + "\n"
-        + "Lineup expected score: " + this.lineupScore + "\n" + getHumanReadableDetails() + "\n" + "Status: "
-        + getStatus() + "\n" + "Progress: " + getCountCompleted() + "/" + getCountTotal() + " (" + percentage + "%)"
-        + "\n" + "Elapsed time (ms): " + this.elapsedTimeMs + "\n" + "Estimated time remaining (ms): "
-        + this.getEstimatedTimeRemainingMs();
+    return "Optimal lineup: \n"
+        + Optional.ofNullable(lineup).map(v -> v.toString()).orElse("null") + "\n"
+        + "Lineup expected score: " + this.lineupScore + "\n"
+        + "Details: " + getHumanReadableDetails() + "\n"
+        + "Status: " + getStatus() + "\n"
+        + "Progress: " + getCountCompleted() + "/" + getCountTotal() + " (" + percentage + "%)" + "\n"
+        + "Elapsed time (ms): " + this.elapsedTimeMs + "\n"
+        + "Estimated time remaining (ms): " + this.getEstimatedTimeRemainingMs();
   }
 
   public double getLineupScore() {
@@ -108,15 +157,23 @@ public class Result {
     return lineup;
   }
 
-  public String getHumanReadableDetails() {
-    return "";
-  }
-
   public ResultStatusEnum getStatus() {
     return status;
   }
 
   public Long getEstimatedTimeRemainingMs() {
     return estimatedTimeRemainingMs;
+  }
+
+  // Derived fields, these are included in the serialized result by direction of
+  // ResultDeserializerSerializer
+  // They are ignored on deserialization of JSON data
+
+  public String getHumanReadableDetails() {
+    return "N/A";
+  }
+
+  public List<String> getFlatLineup() {
+    return lineup == null ? null : lineup.asListOfIds();
   }
 }

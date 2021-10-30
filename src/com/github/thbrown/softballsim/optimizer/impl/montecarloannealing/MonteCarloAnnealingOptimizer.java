@@ -52,8 +52,7 @@ public class MonteCarloAnnealingOptimizer implements Optimizer<Result> {
     BattingLineupIndexer indexer = lineupType.getLineupIndexer(battingData, playersInLineup);
 
     // Determine some statistical information about the data, we use this to inform
-    // our annealing
-    // parameters
+    // our annealing parameters
     SummaryStatistics dataStats = new SummaryStatistics();
     for (int i = 0; i < PRELIMINARY_DATA_SAMPLE_SIZE; i++) {
       long randomIndex = ThreadLocalRandom.current().nextLong(0, indexer.size());

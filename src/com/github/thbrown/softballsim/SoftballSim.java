@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.MissingArgumentException;
@@ -55,7 +54,8 @@ public class SoftballSim {
           .getOptionsForFlags(DataSourceEnum.getEnumFromName(CommandLineOptions.DATA_SOURCE_DEFAULT), null);
       HelpFormatter formatter = CommandLineOptions.getInstance().getHelpFormatter();
       formatter.printHelp(
-          CommandLineOptions.APPLICATION_NAME + " [OPTIONS]" + System.lineSeparator() + System.lineSeparator(),
+          CommandLineOptions.APPLICATION_NAME + " [OPTIONS]" + System.lineSeparator()
+              + System.lineSeparator(),
           CommandLineOptions.HELP_HEADER_1, availableOptions, CommandLineOptions.HELP_FOOTER);
       return null;
     }
@@ -129,8 +129,7 @@ public class SoftballSim {
       existingResult = null;
     }
 
-    // Prep the progress tracker class so we can pass a reference to the optimizer
-    // thread
+    // Prep the progress tracker class so we can pass a reference to the optimizer thread
     Thread mainThread = Thread.currentThread();
     ProgressTracker tracker = new ProgressTracker(existingResult, dataSource, allCmd, stats, optimizer);
 
@@ -138,12 +137,13 @@ public class SoftballSim {
     final boolean verboseFlagEnabled = commonCmd.hasOption(CommandLineOptions.VERBOSE);
     Thread optimizerThread = new Thread(() -> {
       try {
-        Result result = optimizer.optimize(playersIdsOnly, lineupType, stats, arguments, tracker, existingResult);
-        result = new Result(result, 0L); // Set estimated completion time to zero
+        Result result = optimizer.optimize(playersIdsOnly, lineupType, stats, arguments, tracker,
+            existingResult);
+        result = result.copyWithNewEstimatedTimeRemainingMs(0L); // Set estimated completion time to zero
         tracker.updateProgress(result); // Last update
         dataSource.onComplete(allCmd, stats, result);
       } catch (Exception e) {
-        Result errorResult = new Result(tracker.getCurrentResult(), ResultStatusEnum.ERROR, e.getMessage());
+        Result errorResult = tracker.getCurrentResult().copyWithNewStatus(ResultStatusEnum.ERROR, e.getMessage());
         tracker.updateProgress(errorResult); // Last update
         dataSource.onComplete(allCmd, stats, errorResult);
         if (verboseFlagEnabled) {
@@ -181,7 +181,8 @@ public class SoftballSim {
           .collect(Collectors.joining(System.lineSeparator()));
       throw new RuntimeException(
           "No players were specified. Please specify a comma separated list of player names or ids using the -"
-              + CommandLineOptions.LINEUP + " flag. Available players " + System.lineSeparator() + playersAsString);
+              + CommandLineOptions.LINEUP + " flag. Available players " + System.lineSeparator()
+              + playersAsString);
     }
   }
 

@@ -26,7 +26,7 @@ public final class ProgressTracker {
   private final static int RESULTS_BUFFER_SIZE = 512;
 
   // Multiple threads have read/write access to 'results' all use must sync on
-  // this class - used for determining estimating run used a sampleing of recent
+  // this class - used for determining estimating run used a sampling of recent
   // results. All results may not be included in this array!
   private CircularArray<Result> results = new CircularArray<>(RESULTS_BUFFER_SIZE);
 
@@ -97,7 +97,7 @@ public final class ProgressTracker {
       long remainingMs = (long) (remainingCalculations / rate);
       long msTotal = remainingMs + (updatedResult.getElapsedTimeMs());
 
-      updatedResult = new Result(updatedResult, remainingMs);
+      updatedResult = updatedResult.copyWithNewEstimatedTimeRemainingMs(remainingMs);
 
       synchronized (this) {
         this.estimatedSecondsRemaining = remainingMs / 1000;
@@ -132,7 +132,7 @@ public final class ProgressTracker {
       if (estimateOnly) {
         // Make sure onUpdate will use the result with the ESTIMATE status
         synchronized (this) {
-          this.updateProgress(new Result(this.getCurrentResult(), ResultStatusEnum.ESTIMATE, null));
+          this.updateProgress(this.getCurrentResult().copyWithNewStatus(ResultStatusEnum.ESTIMATE, null));
           dataSource.onUpdate(cmd, stats, this);
           Logger.log(getCurrentResult().toString());
           Logger.log("Exiting, estimate only");
@@ -145,7 +145,7 @@ public final class ProgressTracker {
       if (control != null && control.equals("HALT")) {
         // Make sure onUpdate will use the result with the PAUSED status
         synchronized (this) {
-          this.updateProgress(new Result(this.getCurrentResult(), ResultStatusEnum.PAUSED, null));
+          this.updateProgress(this.getCurrentResult().copyWithNewStatus(ResultStatusEnum.PAUSED, null));
           dataSource.onUpdate(cmd, stats, this);
           Logger.log(getCurrentResult().toString());
           Logger.log("Exiting, halt flag detected");

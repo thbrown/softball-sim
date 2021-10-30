@@ -54,9 +54,6 @@ public class GsonAccessor {
     if (!lookup.contains(OptimizerDefinitionOption.class)) {
       gsonBuilder.registerTypeAdapter(OptimizerDefinitionOption.class, new OptimizerDefinitionOptioneDeserializer());
     }
-    if (!lookup.contains(Result.class)) {
-      gsonBuilder.registerTypeAdapter(Result.class, new ResultDeserializer());
-    }
     if (!lookup.contains(MapWrapper.class)) {
       gsonBuilder.registerTypeAdapter(MapWrapper.class, new MapWrapperDeserializer());
     }
@@ -64,6 +61,9 @@ public class GsonAccessor {
     // Serializers & Deserializers
     if (!lookup.contains(BattingLineup.class)) {
       gsonBuilder.registerTypeAdapter(BattingLineup.class, new BattingLineupSerializerDeserializer());
+    }
+    if (!lookup.contains(Result.class)) {
+      gsonBuilder.registerTypeAdapter(Result.class, new ResultSerializerDeserializer());
     }
 
     // Allow NaN

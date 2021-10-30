@@ -116,7 +116,7 @@ public enum OptimizerEnum {
     Logger.log("*********************************************************************");
     for (String key : arguments.keySet()) {
       // TODO: Some left pad here to make the value align
-      Logger.log(key + ": " + arguments.get(key));
+      Logger.log(key + ": " + (arguments.get(key) == null ? "default" : arguments.get(key)));
     }
     Logger.log("*********************************************************************");
 

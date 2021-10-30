@@ -9,6 +9,7 @@ public abstract class OptimizerDefinitionOption {
   private String longLabel;
   private String description;
   private String type;
+  private VisibilityEnum uiVisibility;
 
   public String getShortLabel() {
     return shortLabel;
@@ -24,6 +25,10 @@ public abstract class OptimizerDefinitionOption {
 
   public String getType() {
     return type;
+  }
+
+  public VisibilityEnum getUiVisibility() {
+    return uiVisibility;
   }
 
   public abstract Option getCommandLineOption();

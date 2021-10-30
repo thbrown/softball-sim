@@ -46,6 +46,8 @@ public class CommandLineOptions {
   public final static String TYPE_LINEUP_DEFAULT = "STANDARD";
   public final static String UPDATE_INTERVAL_DEFAULT = "5000";
 
+  public final static int WIDTH = 110;
+
   // Help
   public final static String HELP_HEADER_1 =
       "An application for optimizing batting lineups using historical hitting data. Powered by by open source lineup optimization engines at https://github.com/thbrown/softball-sim. For more options, specify an optimizer. Run the application with the --help flag or see https://optimizers.softball.app to see a list of available optimizers.\t"
@@ -69,7 +71,7 @@ public class CommandLineOptions {
   private CommandLineOptions() {
     HelpFormatter formatter = new HelpFormatter();
     formatter.setOptionComparator(getComparatorHelp());
-    formatter.setWidth(110);
+    formatter.setWidth(WIDTH);
     this.helpFormatter = formatter;
   }
 
