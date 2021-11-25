@@ -72,8 +72,7 @@ public final class ProgressTracker {
       oldResult = results.earliest();
     }
 
-    // If we have two or more different results, we can update the estimated
-    // completion time
+    // If we have two or more different results, we can update the estimated completion time
     // TODO: Some kind of non-linear regression to improve estimation times?
     if (oldResult != null && updatedResult != null && !updatedResult.equals(oldResult)) {
 

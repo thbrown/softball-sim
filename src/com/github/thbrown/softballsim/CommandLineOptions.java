@@ -18,8 +18,8 @@ import com.github.thbrown.softballsim.optimizer.impl.montecarloexhaustive.MonteC
 /**
  * Central point that controls what command line flags are valid.
  * 
- * Common arguments are defined here. Arguments that are only applicable to a specific optimizer or
- * data source are defined in the respective data source or optimizer class files.
+ * Common flags are defined here. Arguments that are only applicable to a specific optimizer or data
+ * source are defined in the respective data source or optimizer class files.
  * 
  * Project convention is that common flags and flags applicable only for a particular data source
  * use short names made up of a single lower case character. Flags that are applicable only to a
@@ -92,7 +92,7 @@ public class CommandLineOptions {
     commonOptions.add(Option.builder(OPTIMIZER).longOpt("optimizer").desc(
         "Required. The optimizer to be used to optimize the lineup. You may specify the name or the id. Options are "
             + OptimizerEnum.getValuesAsString() + ".")
-        .hasArg(true).required(false) // This is a required field, but we'll enforce it manually (i.e. no using Apache
+        .hasArg(true).required(false) // This is a required field, but we'll enforce it manually (i.e. not using Apache
                                       // cli)
         .build());
     commonOptions.add(Option.builder(LINEUP).longOpt("players-in-lineup").desc(

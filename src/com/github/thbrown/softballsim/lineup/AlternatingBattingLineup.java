@@ -157,4 +157,12 @@ public class AlternatingBattingLineup implements BattingLineup {
     return this.size;
   }
 
+  public List<DataPlayer> getGroupA() {
+    return this.groupA;
+  }
+
+  public List<DataPlayer> getGroupB() {
+    return this.groupB;
+  }
+
 }

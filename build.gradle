@@ -50,6 +50,12 @@ jar {
   }
 }
 
+/*
+test {
+  testLogging.showStandardStreams = true
+}
+ */
+ 
 sourceSets {
   main {
     java {

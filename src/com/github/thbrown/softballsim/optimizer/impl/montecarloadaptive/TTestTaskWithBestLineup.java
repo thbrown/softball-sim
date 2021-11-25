@@ -9,8 +9,8 @@ public class TTestTaskWithBestLineup extends TTestTask {
   long newLineupsAdded;
 
   public TTestTaskWithBestLineup(SynchronizedLineupCompositeWrapper bestLineup, List<LineupComposite> toTest,
-      int inningsPerGame, double alpha, long newLineupsAdded) {
-    super(toTest, inningsPerGame, alpha);
+      int inningsPerGame, double alpha, long newLineupsAdded, boolean lowest) {
+    super(toTest, inningsPerGame, alpha, lowest);
     this.overallBestLineup = bestLineup;
     this.newLineupsAdded = newLineupsAdded;
   }

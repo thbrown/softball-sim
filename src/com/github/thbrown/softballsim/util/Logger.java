@@ -3,8 +3,10 @@ package com.github.thbrown.softballsim.util;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
+
 
 /**
  * General logger implementation.
@@ -62,6 +64,14 @@ public class Logger {
       }
     }
     System.out.println(toWrite);
+  }
+
+  public static void error(Exception e) {
+    StringWriter sw = new StringWriter();
+    PrintWriter pw = new PrintWriter(sw);
+    e.printStackTrace(pw);
+    String sStackTrace = sw.toString(); // stack trace as a string
+    Logger.log(ANSI_RED + sStackTrace + ANSI_RESET);
   }
 
   public static void error(String error) {

@@ -9,6 +9,8 @@ import com.github.thbrown.softballsim.util.GsonAccessor;
 import com.github.thbrown.softballsim.util.StringUtils;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.github.thbrown.softballsim.util.Logger;
+
 
 /**
  * This class contains the output of an optimization. It's used for reporting to the end user as
@@ -64,39 +66,9 @@ public class Result {
   }
 
   /**
-   * Copy an existing Result but provide an updated status and statusMessage
-   */
-  protected Result(Result toCopy, ResultStatusEnum newStatus, String newStatusMessage) {
-    this.optimizer = toCopy.optimizer;
-    this.lineup = toCopy.lineup;
-    this.lineupScore = toCopy.lineupScore;
-    this.countTotal = toCopy.countTotal;
-    this.countCompleted = toCopy.countCompleted;
-    this.elapsedTimeMs = toCopy.elapsedTimeMs;
-    this.status = newStatus;
-    this.statusMessage = newStatusMessage;
-    this.estimatedTimeRemainingMs = toCopy.estimatedTimeRemainingMs;
-  }
-
-  /**
-   * Copy an existing Result but provide timeRemainingMs
-   */
-  protected Result(Result toCopy, Long estimatedTimeRemainingMs) {
-    this.optimizer = toCopy.optimizer;
-    this.lineup = toCopy.lineup;
-    this.lineupScore = toCopy.lineupScore;
-    this.countTotal = toCopy.countTotal;
-    this.countCompleted = toCopy.countCompleted;
-    this.elapsedTimeMs = toCopy.elapsedTimeMs;
-    this.status = toCopy.status;
-    this.statusMessage = toCopy.statusMessage;
-    this.estimatedTimeRemainingMs = estimatedTimeRemainingMs;
-  }
-
-  /**
    * Copy an existing Result but provide timeRemainingMs. This uses Gson serialization/deserialization
-   * to maintain subclass status (i.e. If call this on a MonteCarloExaustiveResult, you will get back
-   * a MonteCarloExaustiveResult)
+   * to maintain subclass status (i.e. If you call this on a MonteCarloExaustiveResult, you will get
+   * back a MonteCarloExaustiveResult)
    */
   public final Result copyWithNewEstimatedTimeRemainingMs(Long estimatedTimeRemainingMs) {
     Gson g = GsonAccessor.getInstance().getCustom();
@@ -104,23 +76,30 @@ public class Result {
     obj.addProperty(Result.ESTIMATED_TIME_VARIABLE_NAME, estimatedTimeRemainingMs);
 
     Result toReturn = g.fromJson(obj, this.getClass());
-    toReturn.getLineup().populateStats(this.getLineup().asList());
+    if (this.getLineup() != null) {
+      // Re-populate player's stats (these do not get serilized)
+      toReturn.getLineup().populateStats(this.getLineup().asList());
+    }
     return toReturn;
   }
 
   /**
    * Copy an existing Result but provide an updated status and statusMessages. This uses Gson
-   * serialization/deserialization to maintain subclass status (i.e. If call this on a
+   * serialization/deserialization to maintain subclass status (i.e. If you call this on a
    * MonteCarloExaustiveResult, you will get back a MonteCarloExaustiveResult)
    */
   public final Result copyWithNewStatus(ResultStatusEnum newStatus, String newStatusMessage) {
     Gson g = GsonAccessor.getInstance().getCustom();
     JsonObject obj = (JsonObject) g.toJsonTree(this);
+
     obj.addProperty(Result.STATUS_VARIABLE_NAME, newStatus.name());
-    obj.addProperty(Result.STATUS_VARIABLE_NAME, newStatusMessage);
+    obj.addProperty(Result.STATUS_MESSAGE_VARIABLE_NAME, newStatusMessage);
 
     Result toReturn = g.fromJson(obj, this.getClass());
-    toReturn.getLineup().populateStats(this.getLineup().asList());
+    if (this.getLineup() != null) {
+      // Re-populate player's stats (these do not get serilized)
+      toReturn.getLineup().populateStats(this.getLineup().asList());
+    }
     return toReturn;
   }
 

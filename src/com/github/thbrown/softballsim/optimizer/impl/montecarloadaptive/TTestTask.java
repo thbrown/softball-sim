@@ -27,26 +27,27 @@ public class TTestTask implements Callable<TTestTaskResult> {
   protected final List<LineupComposite> toTest;
   private final int inningsPerGame;
   private final double alpha;
+  private final boolean lowest;
 
   private long simulationsRequired = 0;
 
   private SummaryStatisticsTransform transform;
 
   public TTestTask(List<LineupComposite> toTest, int inningsPerGame, double alpha,
-      SummaryStatisticsTransform transform) {
+      SummaryStatisticsTransform transform, boolean lowest) {
     this.inningsPerGame = inningsPerGame;
     this.toTest = toTest;
     this.alpha = alpha;
     this.transform = transform;
+    this.lowest = lowest;
   }
 
-  public TTestTask(List<LineupComposite> toTest, int inningsPerGame, double alpha) {
-    this(toTest, inningsPerGame, alpha, null);
+  public TTestTask(List<LineupComposite> toTest, int inningsPerGame, double alpha, boolean lowest) {
+    this(toTest, inningsPerGame, alpha, null, lowest);
   }
 
   @Override
   public TTestTaskResult call() {
-
     // Run simulations for the lineups if they have none.
     for (LineupComposite toEvaluate : toTest) {
       // T-test requires at least 2 toEvaluate
@@ -107,13 +108,24 @@ public class TTestTask implements Callable<TTestTaskResult> {
         }
       }
 
-      // Has the new lineup we are testing de-throned the champion?
-      if (statsB.getMean() > statsA.getMean()) {
-        // Logger.log("New Champ: " + statsB.getMean() + " " + statsB.getN());
-        eliminatedLineups.add(bestSoFar);
-        bestSoFar = toEvaluate;
+      if (this.lowest) {
+        // Has the new lineup we are testing de-throned the champion? - we are looking for the lowest
+        // scroing lineup
+        if (statsB.getMean() < statsA.getMean()) {
+          eliminatedLineups.add(bestSoFar);
+          bestSoFar = toEvaluate;
+        } else {
+          eliminatedLineups.add(toEvaluate);
+        }
       } else {
-        eliminatedLineups.add(toEvaluate);
+        // Has the new lineup we are testing de-throned the champion? - we are looking for the highest
+        // scroing lineup
+        if (statsB.getMean() > statsA.getMean()) {
+          eliminatedLineups.add(bestSoFar);
+          bestSoFar = toEvaluate;
+        } else {
+          eliminatedLineups.add(toEvaluate);
+        }
       }
     }
 

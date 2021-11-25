@@ -2,6 +2,7 @@ package com.github.thbrown.softballsim.lineupindexer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Arrays;
 import java.util.concurrent.ThreadLocalRandom;
 import org.apache.commons.math3.util.Pair;
 import com.github.thbrown.softballsim.CommandLineOptions;
@@ -10,8 +11,9 @@ import com.github.thbrown.softballsim.data.gson.DataStats;
 import com.github.thbrown.softballsim.lineup.BattingLineup;
 import com.github.thbrown.softballsim.lineup.StandardBattingLineup;
 import com.github.thbrown.softballsim.util.CombinatoricsUtil;
+import com.github.thbrown.softballsim.util.Logger;
 
-public class StandardBattingLineupIndexer implements BattingLineupIndexer {
+public class StandardBattingLineupIndexer implements BattingLineupIndexer<StandardBattingLineup> {
   private List<DataPlayer> players = new ArrayList<>();
   private long size;
 
@@ -36,7 +38,7 @@ public class StandardBattingLineupIndexer implements BattingLineupIndexer {
   }
 
   @Override
-  public BattingLineup getLineup(long index) {
+  public StandardBattingLineup getLineup(long index) {
     if (index >= this.size) {
       return null;
     }
@@ -46,7 +48,7 @@ public class StandardBattingLineupIndexer implements BattingLineupIndexer {
   }
 
   @Override
-  public Pair<Long, BattingLineup> getRandomNeighbor(long index) {
+  public Pair<Long, StandardBattingLineup> getRandomNeighbor(long index) {
     // Get the current order
     int[] order = CombinatoricsUtil.getIthPermutation(players.size(), index);
 
@@ -72,9 +74,9 @@ public class StandardBattingLineupIndexer implements BattingLineupIndexer {
   }
 
   @Override
-  public long getIndex(BattingLineup lineup) {
+  public long getIndex(StandardBattingLineup lineup) {
     List<DataPlayer> listLineup = lineup.asList();
-    int[] order = CombinatoricsUtil.getOrdering(listLineup, players);
+    int[] order = CombinatoricsUtil.getOrdering(players, listLineup);
     return CombinatoricsUtil.getPermutationIndex(order);
   }
 

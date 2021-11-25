@@ -9,7 +9,7 @@ public class MonteCarloAnnealingTest {
   public void testMonteCarloAnnealing() throws Exception {
     final int INNINGS = 7;
     final double ALPHA = .01;
-    final int DURATION = 10;
+    final int DURATION = 5;
     final int LINEUP_TYPE = 0;
     final String LINEUP = "1OiRCCmrn16iyK,Nelly,1CV6WRyspDjA7Z,1MPJ24EEyS0g6p,Devon,Jordyn";
 

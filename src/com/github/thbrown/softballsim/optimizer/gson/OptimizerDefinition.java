@@ -16,6 +16,7 @@ public class OptimizerDefinition {
   private List<String> supportedLineupTypes;
   private List<OptimizerDefinitionOption> options;
   private VisibilityEnum uiVisibility;
+  private boolean pausable;
 
   public String getId() {
     return id;
@@ -47,6 +48,10 @@ public class OptimizerDefinition {
 
   public VisibilityEnum getUiVisibility() {
     return uiVisibility;
+  }
+
+  public boolean isPausable() {
+    return pausable;
   }
 
   /**

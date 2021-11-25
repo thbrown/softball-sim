@@ -59,15 +59,16 @@ public class CombinatoricsUtil {
     return toReturn;
   }
 
-  public static <T> int[] getOrdering(List<T> shuffledList, List<T> originalList) {
+  public static <T> int[] getOrdering(List<T> originalList, List<T> shuffledList) {
+
     // TODO: can we do this better than n^2
     // TODO: check that lists are = length?
-    int[] order = new int[originalList.size()];
+    int[] order = new int[shuffledList.size()];
     int counter = 0;
-    for (int i = 0; i < originalList.size(); i++) {
-      T originalElement = originalList.get(i);
-      for (int j = 0; j < shuffledList.size(); j++) {
-        T shuffledElement = shuffledList.get(j);
+    for (int i = 0; i < shuffledList.size(); i++) {
+      T originalElement = shuffledList.get(i);
+      for (int j = 0; j < originalList.size(); j++) {
+        T shuffledElement = originalList.get(j);
         if (originalElement.equals(shuffledElement)) {
           order[counter] = j;
           counter++;
@@ -104,15 +105,20 @@ public class CombinatoricsUtil {
     return initialOrder;
   }
 
-  // TODO: int isn't enough here (will fail on normal lineups of 13 players or more)
+  // This will fail on standard lineups of 20 players or more because long can't index that many
+  // possibilities - this should be fine
   // http://webhome.cs.uvic.ca/~ruskey/Publications/RankPerm/MyrvoldRuskey.pdf - rank1
-  public static int getPermutationIndex(int[] permutation) {
+  public static long getPermutationIndex(int[] permutation) {
+    if (permutation.length >= 20) {
+      throw new RuntimeException("getPermutatuonIndex doesn't support lineups of 20 players or more");
+    }
+
     int[] permutaionCopy = permutation.clone();
     int[] inversePermutaion = new int[permutation.length];
     for (int i = 0; i < inversePermutaion.length; i++) {
       inversePermutaion[permutation[i]] = i;
     }
-    int result = getPermutationIndex(permutation.length, permutaionCopy, inversePermutaion);
+    long result = getPermutationIndex(permutation.length, permutaionCopy, inversePermutaion);
 
     // Index adjustment to make the 0th permutation match the initial order
     if (result == factorial(permutation.length) - 1) {
@@ -122,7 +128,7 @@ public class CombinatoricsUtil {
     }
   }
 
-  private static int getPermutationIndex(int size, int[] order, int[] inverseOrder) {
+  private static long getPermutationIndex(int size, int[] order, int[] inverseOrder) {
     if (size == 1) {
       return 0;
     }

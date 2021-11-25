@@ -74,8 +74,6 @@ public class StandardBattingLineup implements BattingLineup {
 
   @Override
   public void populateStats(List<DataPlayer> playersWithStatsData) {
-    // TODO Auto-generated method stub
-
     for (int i = 0; i < players.size(); i++) {
       DataPlayer statslessPlayer = players.get(i);
       DataPlayer statsfullPlayer =

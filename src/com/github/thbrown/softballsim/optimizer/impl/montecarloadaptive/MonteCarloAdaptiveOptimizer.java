@@ -55,6 +55,7 @@ public class MonteCarloAdaptiveOptimizer implements Optimizer<MonteCarloAdaptive
     MonteCarloAdaptiveArgumentParser parsedArguments = new MonteCarloAdaptiveArgumentParser(arguments);
     final double ALPHA = parsedArguments.getAlpha();
     final int INNINGS = parsedArguments.getInnings();
+    final boolean LOWEST = parsedArguments.isLowestScore();
 
     // Since this optimizer involves iterating over all possible lineups, we'll use
     // the lineup indexer
@@ -146,7 +147,7 @@ public class MonteCarloAdaptiveOptimizer implements Optimizer<MonteCarloAdaptive
       long newLineupsAdded = this.lineupIndex - savedLineupIndexerIndex;
       if (lineupsToTest.size() > 0) {
         TTestTask task = new TTestTaskWithBestLineup(bestLineupComposite, lineupsToTest, INNINGS, ALPHA,
-            newLineupsAdded);
+            newLineupsAdded, LOWEST);
         results.add(executor.submit(task));
       }
     }
@@ -217,7 +218,7 @@ public class MonteCarloAdaptiveOptimizer implements Optimizer<MonteCarloAdaptive
 
       if (lineupsToTest.size() > 0) {
         TTestTask task = new TTestTaskWithBestLineup(bestLineupComposite, lineupsToTest, INNINGS, ALPHA,
-            newLineupsAdded);
+            newLineupsAdded, LOWEST);
         results.add(executor.submit(task));
       }
 

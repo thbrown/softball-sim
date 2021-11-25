@@ -90,4 +90,9 @@ public class DataStats {
   }
 
 
+  @Override
+  public String toString() {
+    return "Stats object " + players.size() + " players " + teams.size() + " teams";
+  }
+
 }

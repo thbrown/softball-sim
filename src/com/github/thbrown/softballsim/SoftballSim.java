@@ -3,6 +3,9 @@ package com.github.thbrown.softballsim;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.stream.Collectors;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
@@ -10,12 +13,15 @@ import org.apache.commons.cli.MissingArgumentException;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import com.github.thbrown.softballsim.data.gson.DataStats;
+import com.github.thbrown.softballsim.data.gson.DataPlayer;
 import com.github.thbrown.softballsim.datasource.DataSourceEnum;
 import com.github.thbrown.softballsim.datasource.ProgressTracker;
 import com.github.thbrown.softballsim.lineupindexer.LineupTypeEnum;
 import com.github.thbrown.softballsim.optimizer.OptimizerEnum;
 import com.github.thbrown.softballsim.util.Logger;
 import com.github.thbrown.softballsim.util.StringUtils;
+import com.github.thbrown.softballsim.util.CollectionUtils;
+
 
 public class SoftballSim {
 
@@ -118,8 +124,9 @@ public class SoftballSim {
 
     // We accept both ids and names for this argument, but the optimizers expects
     // ids only. This resolves any names to ids.
-    validatePlayersList(players, stats);
+    checkForBlanks(players, stats);
     final List<String> playersIdsOnly = stats.convertPlayersListToIds(players);
+    validatePlayersList(playersIdsOnly, stats);
 
     // Check if there is a cached result for a run with the exact same args
     final Result existingResult;
@@ -143,12 +150,14 @@ public class SoftballSim {
         tracker.updateProgress(result); // Last update
         dataSource.onComplete(allCmd, stats, result);
       } catch (Exception e) {
+        if (verboseFlagEnabled) {
+          Logger.error(e);
+        } else {
+          Logger.error("Exception: " + e.getMessage());
+        }
         Result errorResult = tracker.getCurrentResult().copyWithNewStatus(ResultStatusEnum.ERROR, e.getMessage());
         tracker.updateProgress(errorResult); // Last update
         dataSource.onComplete(allCmd, stats, errorResult);
-        if (verboseFlagEnabled) {
-          Logger.log(e);
-        }
       } finally {
         mainThread.interrupt();
       }
@@ -166,10 +175,9 @@ public class SoftballSim {
   }
 
   /**
-   * Validates the players list. Right now this just checks to see if the list is empty or filled with
-   * blanks and prints the available options.
+   * Checks to see if the list is empty or filled with blanks and prints the available options.
    */
-  private static void validatePlayersList(List<String> players, DataStats stats) {
+  private static void checkForBlanks(List<String> players, DataStats stats) {
     boolean effectivlyBlank = true;
     for (String s : players) {
       if (!StringUtils.isBlank(s)) {
@@ -185,5 +193,34 @@ public class SoftballSim {
               + playersAsString);
     }
   }
+
+  /**
+   * Validates the players list: No duplicate players specified, All players have at least one
+   * offensive data point
+   */
+  private static void validatePlayersList(List<String> players, DataStats stats) {
+
+    // Check for duplicates
+    Set<String> duplicates = CollectionUtils.findDuplicates(players);
+    if (duplicates.size() != 0) {
+      throw new RuntimeException(
+          "Duplicate players were specified in the lineup:\n"
+              + duplicates.stream().map(playerId -> playerId + " - " + stats.getPlayerById(playerId).getName())
+                  .collect(Collectors.toList()));
+    }
+
+    // Check for stats
+    for (String playerId : players) {
+      DataPlayer player = stats.getPlayerById(playerId);
+      if (player.getPlateAppearanceCount() == 0) {
+        throw new RuntimeException(
+            "At least one player in the lineup has no plate appearances: '" + playerId + " - " + player.getName()
+                + "'. Add plate appearance for this player an re-run the optimizer.");
+      }
+    }
+
+  }
+
+
 
 }

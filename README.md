@@ -31,7 +31,7 @@ java -jar ./build/libs/softball-sim.jar --help
 ### Test/Debug
 
 ```
-# Run all tests, ignore cache, show output
+# Run all tests, ignore cache, show output (this will remove an exiting built jar, run `./gradlew build -x test` to regenerate)
 ./gradlew clean test --info
 
 # Run a particular test/tests based on a filter, show output, ignore cached results, and wait for remote debugger to be attached

@@ -1,4 +1,4 @@
-Runs Monte Carlo simulations of games for all possible lineups. The optimizer then averages the runs scored acrosss all possible lineups and returns the lineup with the highest average runs scored.
+Runs Monte Carlo simulations of games for all possible lineups. The optimizer then averages the runs scored acrosss all possible lineups and returns the lineup with the highest average runs scored. This is likely the slowest optimizer available,
 
 ### Overview
 

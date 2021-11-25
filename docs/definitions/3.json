@@ -10,6 +10,7 @@
     "ALTERNATING_GENDER",
     "NO_CONSECUTIVE_FEMALES"
   ],
+  "pausable": false,
   "options": [
     {
       "type": "Number",

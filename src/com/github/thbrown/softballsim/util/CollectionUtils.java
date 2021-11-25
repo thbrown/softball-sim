@@ -5,6 +5,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Collection;
+import java.util.Set;
 
 public class CollectionUtils {
 
@@ -34,5 +38,16 @@ public class CollectionUtils {
     args.put(newKey, args.get(oldKey));
     args.remove(oldKey);
     return;
+  }
+
+  public static <T> Set<T> findDuplicates(Collection<T> collection) {
+    Set<T> duplicates = new LinkedHashSet<>();
+    Set<T> uniques = new HashSet<>();
+    for (T t : collection) {
+      if (!uniques.add(t)) {
+        duplicates.add(t);
+      }
+    }
+    return duplicates;
   }
 }

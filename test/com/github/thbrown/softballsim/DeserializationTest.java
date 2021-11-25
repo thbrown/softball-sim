@@ -58,8 +58,6 @@ public class DeserializationTest {
     assertEquals("Fireballs", somePa.getGame().getOpponent());
     assertEquals("E", somePa.getResult());
     assertEquals("Cheryl", somePa.getPlayer().getName());
-
-    Logger.log(targetObject);
   }
 
   @Test
@@ -69,8 +67,6 @@ public class DeserializationTest {
     OptimizerDefinition targetObject = GsonAccessor.getInstance().getCustom().fromJson(json, OptimizerDefinition.class);
 
     // TODO: assert some fields
-
-    Logger.log(targetObject);
   }
 
   @Test
@@ -78,8 +74,6 @@ public class DeserializationTest {
     String json = new String(Files.readAllBytes(Paths.get("./stats/exampleData.json")));
 
     Map<String, String> targetObject = GsonAccessor.getInstance().getCustom().fromJson(json, Map.class);
-
-    Logger.log(targetObject);
   }
 
 }
