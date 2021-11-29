@@ -13,14 +13,12 @@ import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
 /**
- * Custom Serializer/Deserializer for Result
+ * Custom Deserializer for Result
  * 
- * Deserializer: Determines what subclass of Result a arbitrary serailized payload should be
+ * Deserializer: Determines what subclass of Result a arbitrary serialized payload should be
  * deserialized into based on the "optimizer" field in the top level of the json object.
- * 
- * Serializer: Includes select derived fields in the output. // ResultDeserializerSerializer
  */
-public class ResultSerializerDeserializer implements JsonSerializer<Result>, JsonDeserializer<Result> {
+public class ResultDeserializer implements JsonDeserializer<Result> {
 
   public final static String RESULT_TYPE = "optimizer";
 
@@ -45,14 +43,6 @@ public class ResultSerializerDeserializer implements JsonSerializer<Result>, Jso
     } else {
       return context.deserialize(data, targetClass);
     }
-  }
-
-  @Override
-  public JsonElement serialize(Result src, Type typeOfSrc, JsonSerializationContext context) {
-    JsonObject obj = (JsonObject) GsonAccessor.getInstance().getCustomWithExclusions(Result.class).toJsonTree(src);
-    obj.addProperty(Result.HUMAN_READABLE, src.getHumanReadableDetails());
-    obj.addProperty(Result.FLAT_LINEUP, GsonAccessor.getInstance().getDefault().toJson(src.getFlatLineup()));
-    return obj;
   }
 
 }

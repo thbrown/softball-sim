@@ -16,23 +16,6 @@ import com.github.thbrown.softballsim.util.GsonAccessor;
 import com.github.thbrown.softballsim.util.Logger;
 
 public class DeserializationTest {
-  // TODO: once network is implemented
-  /*
-   * @Test public void deserializeMonteCarloExaustiveData() throws IOException { String json = new
-   * String(Files.readAllBytes(Paths.get("./testData/monteCarloExaustiveData.json")));
-   * 
-   * GsonBuilder gsonBldr = new GsonBuilder();
-   * gsonBldr.registerTypeAdapter(BaseOptimizationDefinition.class, new
-   * OptimizationDefinitionDeserializer()); BaseOptimizationDefinition targetObject =
-   * gsonBldr.create().fromJson(json, BaseOptimizationDefinition.class);
-   * 
-   * MonteCarloExhaustiveOptimizatonDefinition data = (MonteCarloExhaustiveOptimizatonDefinition)
-   * targetObject; assertEquals(7, data.getInnings()); assertEquals(10000000, data.getIterations());
-   * assertEquals(0, data.getStartIndex()); assertEquals(1, data.getLineupType()); assertEquals(null,
-   * data.getInitialHistogram()); assertEquals(null, data.getInitialScore());
-   * 
-   * Logger.log(targetObject); }
-   */
 
   @Test
   public void deserializeExampleStatsData() throws IOException {

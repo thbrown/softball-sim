@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import com.github.thbrown.softballsim.Result;
+import com.github.thbrown.softballsim.ResultSerializer;
 import com.github.thbrown.softballsim.cloud.MapWrapper;
 import com.github.thbrown.softballsim.cloud.MapWrapperDeserializer;
 import com.github.thbrown.softballsim.data.gson.DataStats;
@@ -57,14 +58,17 @@ public class GsonAccessor {
     if (!lookup.contains(MapWrapper.class)) {
       gsonBuilder.registerTypeAdapter(MapWrapper.class, new MapWrapperDeserializer());
     }
+    if (!lookup.contains(Result.class)) {
+      gsonBuilder.registerTypeAdapter(Result.class, new ResultDeserializer());
+    }
 
     // Serializers & Deserializers
     if (!lookup.contains(BattingLineup.class)) {
       gsonBuilder.registerTypeAdapter(BattingLineup.class, new BattingLineupSerializerDeserializer());
     }
-    if (!lookup.contains(Result.class)) {
-      gsonBuilder.registerTypeAdapter(Result.class, new ResultSerializerDeserializer());
-    }
+
+    /// Other
+    gsonBuilder.registerTypeAdapterFactory(new ResultSerializer());
 
     // Allow NaN
     gsonBuilder.serializeSpecialFloatingPointValues();
@@ -92,6 +96,5 @@ public class GsonAccessor {
     register(gsonBuilder, exclusions);
     return gsonBuilder.create();
   }
-
 
 }

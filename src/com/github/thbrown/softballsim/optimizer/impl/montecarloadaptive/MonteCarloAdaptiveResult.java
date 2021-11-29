@@ -27,6 +27,7 @@ public class MonteCarloAdaptiveResult extends Result {
     return candidateLineups;
   }
 
+  @Override
   public String getHumanReadableDetails() {
     return "Avg simulations per lineup: "
         + StringUtils.formatDecimal(((double) simulationsRequired / (double) super.getCountCompleted()), 2);
