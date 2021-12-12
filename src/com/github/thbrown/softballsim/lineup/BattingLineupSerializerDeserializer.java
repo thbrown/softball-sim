@@ -1,6 +1,8 @@
 package com.github.thbrown.softballsim.lineup;
 
 import java.lang.reflect.Type;
+import com.github.thbrown.softballsim.data.gson.helpers.DataPlayerLookup;
+import com.github.thbrown.softballsim.util.Logger;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
@@ -13,6 +15,11 @@ public class BattingLineupSerializerDeserializer
     implements JsonDeserializer<BattingLineup>, JsonSerializer<BattingLineup> {
 
   public static final String JSON_COMMAND_TYPE = "lineupType";
+  public final DataPlayerLookup statsLookup;
+
+  public BattingLineupSerializerDeserializer(DataPlayerLookup statsLookup) {
+    this.statsLookup = statsLookup;
+  }
 
   @Override
   public BattingLineup deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
@@ -26,7 +33,15 @@ public class BattingLineupSerializerDeserializer
 
     // Deserialize that data based on the type
     JsonObject data = jsonObject.getAsJsonObject();
-    return context.deserialize(data, type.getDeserializationTarget());
+    BattingLineup deserialized = context.deserialize(data, type.getDeserializationTarget());
+
+    if (statsLookup == null) {
+      Logger.log(
+          "WARNING: A batting lineup was deserialized by a gson object without a DataPlayerLookup, players will have not associated stats");
+    } else {
+      deserialized.populateStats(statsLookup);
+    }
+    return deserialized;
   }
 
   @Override

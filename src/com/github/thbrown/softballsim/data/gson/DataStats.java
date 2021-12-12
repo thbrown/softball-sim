@@ -4,13 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import com.github.thbrown.softballsim.data.gson.helpers.DataPlayerLookup;
 import com.github.thbrown.softballsim.util.LevenshteinDistance;
 import com.github.thbrown.softballsim.util.Logger;
 
 /**
- * This is the root of the data object created by deserilization of a stats JSON payload.
+ * This is the root of the data object created by deserialization of a stats JSON payload.
  */
-public class DataStats {
+public class DataStats implements DataPlayerLookup {
   private List<DataPlayer> players;
   private List<DataTeam> teams;
 
@@ -93,6 +94,11 @@ public class DataStats {
   @Override
   public String toString() {
     return "Stats object " + players.size() + " players " + teams.size() + " teams";
+  }
+
+  @Override
+  public DataPlayer getDataPlayer(String playerId) {
+    return getPlayerById(playerId);
   }
 
 }

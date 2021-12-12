@@ -4,12 +4,9 @@
   "img": "https://upload.wikimedia.org/wikipedia/commons/3/33/CEP1710-58.jpg",
   "shortDescription": "Calculates the expected runs scored mathematically up to a specified max number of batters. The number of batters is limited because there there are an infinite number of possibilities i.e. many teams could theoretical bat forever.",
   "longDescriptionFile": "expected-value.md",
-  "uiVisibility":"HIDDEN",
-  "supportedLineupTypes": [
-    "STANDARD",
-    "NO_CONSECUTIVE_FEMALES"
-  ],
-  "pausable": false,
+  "uiVisibility": "HIDDEN",
+  "supportedLineupTypes": ["STANDARD", "NO_CONSECUTIVE_FEMALES"],
+  "pauseable": false,
   "options": [
     {
       "type": "Number",

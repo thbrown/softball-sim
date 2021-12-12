@@ -55,7 +55,7 @@ public final class ProgressTracker {
     this.updateInterval = Long.parseLong(updateIntervalString);
 
     if (initialResult == null) {
-      initialResult = new Result(optimizer, null, 0, 0, 0, 0, ResultStatusEnum.NOT_STARTED);
+      initialResult = new Result(optimizer, null, 0, 0, 0, 0, ResultStatusEnum.NOT_STARTED) {};
     }
     updateResults(initialResult, true);
   }
@@ -68,7 +68,6 @@ public final class ProgressTracker {
   private void updateResults(Result updatedResult, boolean initialUpdate) {
     Result oldResult;
     synchronized (this) {
-      mostRecentResult = updatedResult;
       oldResult = results.earliest();
     }
 
@@ -101,13 +100,14 @@ public final class ProgressTracker {
       synchronized (this) {
         this.estimatedSecondsRemaining = remainingMs / 1000;
         this.estimatedSecondsTotal = msTotal / 1000;
-        mostRecentResult = updatedResult;
+        this.mostRecentResult = updatedResult;
         results.add(updatedResult);
       }
 
     } else {
       // Otherwise, we'll just update the list of results
       synchronized (this) {
+        this.mostRecentResult = updatedResult;
         results.add(updatedResult);
       }
     }

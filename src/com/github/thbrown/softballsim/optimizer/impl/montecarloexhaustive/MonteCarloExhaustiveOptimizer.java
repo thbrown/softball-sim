@@ -21,7 +21,6 @@ import com.github.thbrown.softballsim.lineup.BattingLineup;
 import com.github.thbrown.softballsim.lineupindexer.BattingLineupIndexer;
 import com.github.thbrown.softballsim.lineupindexer.LineupTypeEnum;
 import com.github.thbrown.softballsim.optimizer.Optimizer;
-import com.github.thbrown.softballsim.optimizer.impl.montecarloadaptive.MonteCarloAdaptiveResult;
 import com.github.thbrown.softballsim.util.Logger;
 
 public class MonteCarloExhaustiveOptimizer implements Optimizer<MonteCarloExhaustiveResult> {
@@ -52,6 +51,7 @@ public class MonteCarloExhaustiveOptimizer implements Optimizer<MonteCarloExhaus
     Logger.log("Games to simulate per lineup: \t" + parsedArguments.getGames());
     Logger.log("Innings per game: \t\t" + parsedArguments.getInnings());
     Logger.log("Threads used: \t\t\t" + parsedArguments.getThreads());
+    Logger.log("Select lowest scoring lineup?: \t" + parsedArguments.isLowestScore());
     Logger.log("*********************************************************************");
 
     // Our optimizer is parallelizable so we want to take advantage of multiple
@@ -78,17 +78,30 @@ public class MonteCarloExhaustiveOptimizer implements Optimizer<MonteCarloExhaus
       results.add(executor.submit(task));
     }
 
+    double optimalScoreStart = parsedArguments.isLowestScore() ? Double.MAX_VALUE : 0;
+    double oppositeOfOptimalScoreStart = parsedArguments.isLowestScore() ? 0 : Double.MAX_VALUE;
+
     // Process results as they finish executing
-    double worstScore = Optional.ofNullable(existingResult).map(v -> v.getWorstScore()).orElse(Double.MAX_VALUE);
-    double initialScore = Optional.ofNullable(existingResult).map(v -> v.getLineupScore()).orElse(0.0);
+    double initialOppositeLineupScore =
+        Optional.ofNullable(existingResult).map(v -> v.getOppositeOfOptimalScore()).orElse(oppositeOfOptimalScoreStart);
+    BattingLineup initialOppositeLineup =
+        Optional.ofNullable(existingResult).map(MonteCarloExhaustiveResult::getOppositeOfOptimalLineup)
+            // The serialized result does not save the player's stats
+            .map(lineup -> {
+              lineup.populateStats(battingData);
+              return lineup;
+            }).orElse(null);
+
+    double initialScore = Optional.ofNullable(existingResult).map(v -> v.getLineupScore()).orElse(optimalScoreStart);
     BattingLineup initialLineup = Optional.ofNullable(existingResult).map(MonteCarloExhaustiveResult::getLineup)
-        // The serialized result does not save the players stats
+        // The serialized result does not save the player's stats
         .map(lineup -> {
           lineup.populateStats(battingData);
           return lineup;
         }).orElse(null);
 
-    TaskResult bestResult = new TaskResult(initialScore, initialLineup);
+    TaskResult optimalResult = new TaskResult(initialScore, initialLineup);
+    TaskResult oppositeOfOptimalResult = new TaskResult(initialOppositeLineupScore, initialOppositeLineup);
     Map<Long, Long> histo = Optional.ofNullable(existingResult).map(v -> v.getHistogram())
         .orElse(new HashMap<Long, Long>());
     long progressCounter = startIndex; // Lineups completed
@@ -108,11 +121,6 @@ public class MonteCarloExhaustiveOptimizer implements Optimizer<MonteCarloExhaus
       // Print Lineup Index and Score (For research purposes)
       // Logger.log(indexer.getIndex(result.getLineup()) + "\t" + result.getScore());
 
-      // Update worst score
-      if (result.getScore() < worstScore) {
-        worstScore = result.getScore();
-      }
-
       // Update histogram
       long key = (long) (result.getScore() * 10);
       if (histo.containsKey(key)) {
@@ -121,9 +129,24 @@ public class MonteCarloExhaustiveOptimizer implements Optimizer<MonteCarloExhaus
         histo.put(key, 1L);
       }
 
-      // Update the best lineup, if necessary
-      if (bestResult == null || result.getScore() > bestResult.getScore()) {
-        bestResult = result;
+      if (parsedArguments.isLowestScore()) {
+        // Update the optimal lineup, if necessary
+        if (optimalResult == null || result.getScore() < optimalResult.getScore()) {
+          optimalResult = result;
+        }
+        // Update the oppositeOfOptimal lineup, if necessary
+        if (oppositeOfOptimalResult == null || result.getScore() > oppositeOfOptimalResult.getScore()) {
+          oppositeOfOptimalResult = result;
+        }
+      } else {
+        // Update the optimal lineup, if necessary
+        if (optimalResult == null || result.getScore() > optimalResult.getScore()) {
+          optimalResult = result;
+        }
+        // Update the oppositeOfOptimal lineup, if necessary
+        if (oppositeOfOptimalResult == null || result.getScore() < oppositeOfOptimalResult.getScore()) {
+          oppositeOfOptimalResult = result;
+        }
       }
 
       // DEBUG: Print index and score
@@ -133,9 +156,9 @@ public class MonteCarloExhaustiveOptimizer implements Optimizer<MonteCarloExhaus
       progressCounter++;
       long elapsedTime = (System.currentTimeMillis() - startTimestamp)
           + Optional.ofNullable(existingResult).map(v -> v.getElapsedTimeMs()).orElse(0l);
-      MonteCarloExhaustiveResult partialResult = new MonteCarloExhaustiveResult(bestResult.getLineup(),
-          bestResult.getScore(), indexer.size(), progressCounter, elapsedTime, histo, worstScore,
-          ResultStatusEnum.IN_PROGRESS);
+      MonteCarloExhaustiveResult partialResult = new MonteCarloExhaustiveResult(optimalResult.getLineup(),
+          optimalResult.getScore(), indexer.size(), progressCounter, elapsedTime, histo,
+          ResultStatusEnum.IN_PROGRESS, oppositeOfOptimalResult.getLineup(), oppositeOfOptimalResult.getScore());
       progressTracker.updateProgress(partialResult);
 
       // Add another task to the buffer if there are any left
@@ -152,11 +175,12 @@ public class MonteCarloExhaustiveOptimizer implements Optimizer<MonteCarloExhaus
       }
     }
     executor.shutdown();
+
     long elapsedTime = (System.currentTimeMillis() - startTimestamp)
         + Optional.ofNullable(existingResult).map(v -> v.getElapsedTimeMs()).orElse(0l);
-    MonteCarloExhaustiveResult finalResult = new MonteCarloExhaustiveResult(bestResult.getLineup(),
-        bestResult.getScore(), indexer.size(), progressCounter, elapsedTime, histo, worstScore,
-        ResultStatusEnum.COMPLETE);
+    MonteCarloExhaustiveResult finalResult = new MonteCarloExhaustiveResult(optimalResult.getLineup(),
+        optimalResult.getScore(), indexer.size(), progressCounter, elapsedTime, histo,
+        ResultStatusEnum.COMPLETE, oppositeOfOptimalResult.getLineup(), oppositeOfOptimalResult.getScore());
     return finalResult;
   }
 

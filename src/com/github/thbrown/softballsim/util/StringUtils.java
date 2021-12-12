@@ -23,9 +23,12 @@ public class StringUtils {
     return String.format(java.util.Locale.US, "%." + numberOfValuesAfterDecimal + "f", value);
   }
 
-  // http://stackoverflow.com/questions/388461/how-can-i-pad-a-string-in-java
   public static String padRight(String s, int n) {
-    return String.format("%1$-" + n + "s", s);
+    return String.format("%-" + n + "s", s);
+  }
+
+  public static String padLeft(String s, int n) {
+    return String.format("%" + n + "s", s);
   }
 
   public static boolean isBlank(final CharSequence cs) {
@@ -164,5 +167,64 @@ public class StringUtils {
 
     final String[] args = new String[list.size()];
     return list.toArray(args);
+  }
+
+  // https://commons.apache.org/proper/commons-lang/apidocs/src-html/org/apache/commons/lang3/StringUtils.html
+  /**
+   * <p>
+   * Truncates a String. This will turn "Now is the time for all good men" into "Now is the time for".
+   * </p>
+   *
+   * <p>
+   * Specifically:
+   * </p>
+   * <ul>
+   * <li>If {@code str} is less than {@code maxWidth} characters long, return it.</li>
+   * <li>Else truncate it to {@code substring(str, 0, maxWidth)}.</li>
+   * <li>If {@code maxWidth} is less than {@code 0}, throw an {@code IllegalArgumentException}.</li>
+   * <li>In no case will it return a String of length greater than {@code maxWidth}.</li>
+   * </ul>
+   *
+   * @param str the String to truncate, may be null
+   * @param maxWidth maximum length of result String, must be positive
+   * @return truncated String, {@code null} if null String input
+   * @throws IllegalArgumentException If {@code maxWidth} is less than {@code 0}
+   * @since 3.5
+   */
+  public static String truncate(final String str, final int maxWidth) {
+    return truncate(str, 0, maxWidth);
+  }
+
+  /**
+   * <p>
+   * Truncates a String. This will turn "Now is the time for all good men" into "is the time for all".
+   * </p>
+   *
+   * <p>
+   * Works like {@code truncate(String, int)}, but allows you to specify a "left edge" offset.
+   */
+  public static String truncate(final String str, final int offset, final int maxWidth) {
+    if (offset < 0) {
+      throw new IllegalArgumentException("offset cannot be negative");
+    }
+    if (maxWidth < 0) {
+      throw new IllegalArgumentException("maxWith cannot be negative");
+    }
+    if (str == null) {
+      return null;
+    }
+    if (offset > str.length()) {
+      return "";
+    }
+    if (str.length() > maxWidth) {
+      final int ix = Math.min(offset + maxWidth, str.length());
+      return str.substring(offset, ix);
+    }
+    return str.substring(offset);
+  }
+
+  public static String indent(String input, int amount) {
+    return input.replaceAll("\r?\n", System.lineSeparator() + StringUtils.padLeft("", amount)).replaceAll("^",
+        StringUtils.padLeft("", amount));
   }
 }

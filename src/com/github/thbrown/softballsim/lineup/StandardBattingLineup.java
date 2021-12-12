@@ -4,7 +4,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import com.github.thbrown.softballsim.data.gson.DataPlayer;
-import com.github.thbrown.softballsim.data.gson.DataStats;
+import com.github.thbrown.softballsim.data.gson.helpers.DataPlayerLookup;
+import com.github.thbrown.softballsim.util.StringUtils;
 
 public class StandardBattingLineup implements BattingLineup {
 
@@ -21,12 +22,36 @@ public class StandardBattingLineup implements BattingLineup {
 
   @Override
   public String toString() {
-    StringBuilder result = new StringBuilder();
-    result.append("\t").append(DataPlayer.getListHeader()).append("\n");
+    final int SPACING = 3;
+
+    // Max name length
+    final int MAX_NAME_LENGTH_ALLOWED = 18;
+    int maxNameLength = 0;
     for (DataPlayer p : players) {
-      result.append("\t").append(p).append("\n");
+      maxNameLength = p.getName().length() > maxNameLength ? p.getName().length() : maxNameLength;
     }
-    return result.toString();
+    maxNameLength = Math.min(maxNameLength, MAX_NAME_LENGTH_ALLOWED);
+
+    StringBuilder builder = new StringBuilder();
+
+    // Header
+    builder.append(
+        StringUtils.padRight("Name", maxNameLength + SPACING));
+    // builder.append(StringUtils.padLeft("Id", 14 + SPACING));
+    builder.append(StringUtils.padLeft("Avg", 5 + SPACING));
+    builder.append(StringUtils.padLeft("Slg", 5 + SPACING));
+
+    // Content
+    for (DataPlayer p : players) {
+      String truncatedName = StringUtils.trim(p.getName());
+      builder.append("\n");
+      builder.append(StringUtils.padRight(truncatedName, maxNameLength + SPACING));
+      // builder.append(StringUtils.padLeft(p.getId(), 14 + SPACING));
+      builder.append(StringUtils.padLeft(StringUtils.formatDecimal(p.getBattingAverage(), 3), 5 + SPACING));
+      builder.append(StringUtils.padLeft(StringUtils.formatDecimal(p.getSluggingPercentage(), 3), 5 + SPACING));
+
+    }
+    return builder.toString();
   }
 
   @Override
@@ -60,24 +85,10 @@ public class StandardBattingLineup implements BattingLineup {
   }
 
   @Override
-  public void populateStats(DataStats battingData) {
+  public void populateStats(DataPlayerLookup statsPlayers) {
     for (int i = 0; i < players.size(); i++) {
       DataPlayer statslessPlayer = players.get(i);
-      DataPlayer statsfullPlayer = battingData.getPlayerById(statslessPlayer.getId());
-      if (statsfullPlayer == null) {
-        throw new RuntimeException("Failed to populate stats for player " + statslessPlayer
-            + " as no stats for this player were found in batting data. Try running the optimization again with the -F flag.");
-      }
-      players.set(i, statsfullPlayer);
-    }
-  }
-
-  @Override
-  public void populateStats(List<DataPlayer> playersWithStatsData) {
-    for (int i = 0; i < players.size(); i++) {
-      DataPlayer statslessPlayer = players.get(i);
-      DataPlayer statsfullPlayer =
-          playersWithStatsData.stream().filter(v -> v.getId() == statslessPlayer.getId()).findAny().orElse(null);
+      DataPlayer statsfullPlayer = statsPlayers.getDataPlayer(statslessPlayer.getId());
       if (statsfullPlayer == null) {
         throw new RuntimeException("Failed to populate stats for player " + statslessPlayer
             + " as no stats for this player were found in batting data. Try running the optimization again with the -F flag.");
@@ -89,6 +100,10 @@ public class StandardBattingLineup implements BattingLineup {
   @Override
   public int size() {
     return this.size;
+  }
+
+  public String getDisplayInfo() {
+    return null; // No additional interesting information in the Standard batting lineup
   }
 
 

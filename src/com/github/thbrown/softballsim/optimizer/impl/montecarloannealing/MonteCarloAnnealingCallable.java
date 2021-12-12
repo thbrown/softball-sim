@@ -9,15 +9,11 @@ import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.apache.commons.math3.util.Pair;
 import com.github.thbrown.softballsim.Result;
 import com.github.thbrown.softballsim.ResultStatusEnum;
-import com.github.thbrown.softballsim.data.gson.DataStats;
 import com.github.thbrown.softballsim.datasource.ProgressTracker;
 import com.github.thbrown.softballsim.lineup.BattingLineup;
 import com.github.thbrown.softballsim.lineupindexer.BattingLineupIndexer;
-import com.github.thbrown.softballsim.lineupindexer.LineupTypeEnum;
-import com.github.thbrown.softballsim.optimizer.Optimizer;
 import com.github.thbrown.softballsim.optimizer.OptimizerEnum;
 import com.github.thbrown.softballsim.optimizer.impl.montecarloadaptive.LineupComposite;
-import com.github.thbrown.softballsim.optimizer.impl.montecarloadaptive.SynchronizedLineupCompositeWrapper;
 import com.github.thbrown.softballsim.optimizer.impl.montecarloadaptive.TTestTask;
 import com.github.thbrown.softballsim.optimizer.impl.montecarloadaptive.TTestTaskResult;
 import com.github.thbrown.softballsim.optimizer.impl.montecarloadaptive.statstransform.RangeSummaryStatisticsTransform;
@@ -26,10 +22,6 @@ import com.github.thbrown.softballsim.optimizer.impl.montecarloexhaustive.HitGen
 import com.github.thbrown.softballsim.optimizer.impl.montecarloexhaustive.MonteCarloGameSimulation;
 import com.github.thbrown.softballsim.util.Logger;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 public class MonteCarloAnnealingCallable implements Callable<Result> {
 
@@ -171,9 +163,10 @@ public class MonteCarloAnnealingCallable implements Callable<Result> {
 
       // Update the progress if it's time and our result is better than current best one
       if (progressTracker != null && System.currentTimeMillis() > nextUpdateTime) {
-        Result newResult = new Result(OptimizerEnum.MONTE_CARLO_ANNEALING, activeComposite.getLineup(),
-            activeComposite.getStats().getMean(), (long) durationMs, (long) i,
-            System.currentTimeMillis() - startTimestamp, ResultStatusEnum.IN_PROGRESS);
+        Result newResult =
+            new MonteCarloAnnealingResult(activeComposite.getLineup(),
+                activeComposite.getStats().getMean(), (long) durationMs, (long) i,
+                System.currentTimeMillis() - startTimestamp, ResultStatusEnum.IN_PROGRESS);
 
         Result r = progressTracker.getCurrentResult();
         if (newResult.getCountCompleted() > r.getCountCompleted()) {
@@ -196,7 +189,7 @@ public class MonteCarloAnnealingCallable implements Callable<Result> {
      * " simulations per lineup " + activeComposite.getStats().getN());
      */
 
-    return new Result(OptimizerEnum.MONTE_CARLO_ANNEALING, activeComposite.getLineup(),
+    return new MonteCarloAnnealingResult(activeComposite.getLineup(),
         activeComposite.getStats().getMean(), (long) durationMs, (long) durationMs,
         System.currentTimeMillis() - startTimestamp, ResultStatusEnum.COMPLETE);
   };

@@ -42,7 +42,7 @@ public class HistogramUtils {
           + padString(entry.getValue().toString(), maxValueStringLength) + " | "
           + character.repeat(normalizedValue) + System.lineSeparator());
     }
-    return sb.toString();
+    return sb.toString().trim();
   }
 
 }

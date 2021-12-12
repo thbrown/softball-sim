@@ -39,10 +39,10 @@ public class ResultSerializer implements TypeAdapterFactory {
           JsonObject jsonObject = (JsonObject) delegate.toJsonTree(src);
 
           // Then, add any derived fields
-          jsonObject.addProperty(Result.HUMAN_READABLE, src.getHumanReadableDetails());
-          jsonObject.addProperty(Result.FLAT_LINEUP,
-              GsonAccessor.getInstance().getDefault().toJson(src.getFlatLineup()));
 
+          jsonObject.addProperty(Result.HUMAN_READABLE, src.getHumanReadableDetails());
+          jsonObject.add(Result.FLAT_LINEUP,
+              GsonAccessor.getInstance().getDefault().toJsonTree(src.getFlatLineup()));
           // Write the final object
           elementAdapter.write(out, jsonObject);
         }

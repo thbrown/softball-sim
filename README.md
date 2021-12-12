@@ -35,7 +35,7 @@ java -jar ./build/libs/softball-sim.jar --help
 ./gradlew clean test --info
 
 # Run a particular test/tests based on a filter, show output, ignore cached results, and wait for remote debugger to be attached
-./gradlew test -info --rerun-tasks --tests Aggrigate* --debug-jvm
+./gradlew test -info --rerun-tasks --tests Aggregate* --debug-jvm
 ```
 
 ### Flags

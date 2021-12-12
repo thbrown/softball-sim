@@ -42,7 +42,7 @@ public class AlternatingGenderLineupIndexer implements BattingLineupIndexer<Alte
   @Override
   public AlternatingBattingLineup getLineup(long index) {
     if (index >= this.size) {
-      Logger.log("Size " + index + " " + this.size);
+      // Logger.log("Size " + index + " " + this.size);
       return null;
     }
 

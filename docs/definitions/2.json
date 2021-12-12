@@ -4,13 +4,12 @@
   "img": "https://upload.wikimedia.org/wikipedia/commons/f/f8/Fotothek_df_n-08_0000320.jpg",
   "shortDescription": "A faster but less accurate optimizer that doesn't test the entire search space of possible lineups. Instead, it employs [simulated annealing](https://en.wikipedia.org/wiki/Simulated_annealing) to seaerch only a subset of possible lineups. If you have 11 or more batters in your lineup, this is most likely the optimizer you'll want to use.",
   "longDescriptionFile": "monte-carlo-annealing.md",
-  "uiVisibility":"HIDDEN",
   "supportedLineupTypes": [
     "STANDARD",
     "ALTERNATING_GENDER",
     "NO_CONSECUTIVE_FEMALES"
   ],
-  "pausable": false,
+  "pauseable": false,
   "options": [
     {
       "type": "Number",
@@ -26,7 +25,7 @@
       "shortLabel": "D",
       "longLabel": "Duration",
       "description": "How long should this optimization run for (in seconds)? Longer times will produce better results.",
-      "defaultValue": "30",
+      "defaultValue": "60",
       "max": "3600",
       "min": "1"
     },

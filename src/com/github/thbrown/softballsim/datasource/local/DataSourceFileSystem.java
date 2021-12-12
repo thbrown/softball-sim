@@ -134,7 +134,7 @@ public class DataSourceFileSystem implements DataSource {
           + " flag to disregard this cached result.");
       try {
         String data = new String(Files.readAllBytes(Paths.get(cacheFile.getCanonicalPath())));
-        return gson.fromJson(data, Result.class);
+        return GsonAccessor.getInstance().getCustomWithStatsLookup(stats).fromJson(data, Result.class);
       } catch (Exception e) {
         Logger.warn("Failed to read/parse cached result file: " + cacheFile.getName() + " because " + e.getMessage()
             + ". Ignoring cached result and running a new simulation.");

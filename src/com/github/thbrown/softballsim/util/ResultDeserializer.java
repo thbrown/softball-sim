@@ -9,8 +9,6 @@ import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import com.google.gson.JsonSerializationContext;
-import com.google.gson.JsonSerializer;
 
 /**
  * Custom Deserializer for Result
@@ -38,11 +36,7 @@ public class ResultDeserializer implements JsonDeserializer<Result> {
 
     // Avoid stack overflow caused by recursion: use the default deserializer if the
     // optimizer is using the base result class
-    if (targetClass == Result.class) {
-      return GsonAccessor.getInstance().getCustomWithExclusions(Result.class).fromJson(jsonObject, Result.class);
-    } else {
-      return context.deserialize(data, targetClass);
-    }
+    return context.deserialize(data, targetClass);
   }
 
 }

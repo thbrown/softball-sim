@@ -12,17 +12,8 @@ import org.apache.commons.math3.stat.descriptive.StatisticalSummary;
 import org.apache.commons.math3.stat.descriptive.StatisticalSummaryValues;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.junit.Test;
-import com.github.thbrown.softballsim.data.gson.DataGame;
-import com.github.thbrown.softballsim.data.gson.DataPlateAppearance;
-import com.github.thbrown.softballsim.data.gson.DataPlayer;
-import com.github.thbrown.softballsim.data.gson.DataStats;
-import com.github.thbrown.softballsim.data.gson.DataTeam;
-import com.github.thbrown.softballsim.lineupindexer.BattingLineupIndexer;
-import com.github.thbrown.softballsim.optimizer.gson.OptimizerDefinition;
-import com.github.thbrown.softballsim.util.GsonAccessor;
-import com.github.thbrown.softballsim.util.Logger;
 
-public class AggrigateTest {
+public class AggregateTest {
 
   @Test
   public void deserializeExampleStatsData() throws IOException {

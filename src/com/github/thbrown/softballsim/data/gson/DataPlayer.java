@@ -186,9 +186,24 @@ public class DataPlayer {
 
   @Override
   public String toString() {
+    calculatePlayerStats();
+    // Test
     return StringUtils.padRight(this.name, NAME_PADDING) + " " + this.id + " "
         + StringUtils.formatDecimal(this.getBattingAverage(), 3) + " "
         + StringUtils.formatDecimal(this.getSluggingPercentage(), 3);
+    // + this.hitCount + " "
+    // + this.atBatCount + " "
+    // + this.getOutCount() + " "
+    // + this.directOutCount + " "
+    // + this.fcCount + " "
+    // + this.strikeoutCount + " "
+    // + this.errorCount + " "
+    // + this.hitCount + " "
+    // + this.singleCount + " "
+    // + this.doubleCount + " "
+    // + this.tripleCount + " "
+    // + this.homerunCount + " ";
+
   }
 
 }

@@ -47,7 +47,7 @@ public class DataSourceGcpBuckets implements DataSource {
     if (result == null) {
       return null;
     } else {
-      return gson.fromJson(result, Result.class);
+      return GsonAccessor.getInstance().getCustomWithStatsLookup(stats).fromJson(result, Result.class);
     }
   }
 

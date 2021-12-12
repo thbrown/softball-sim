@@ -3,7 +3,7 @@ package com.github.thbrown.softballsim.lineup;
 import java.util.List;
 import java.util.stream.Collectors;
 import com.github.thbrown.softballsim.data.gson.DataPlayer;
-import com.github.thbrown.softballsim.data.gson.DataStats;
+import com.github.thbrown.softballsim.data.gson.helpers.DataPlayerLookup;
 
 /**
  * Implementers must make sure this their implementations are immutable.
@@ -38,13 +38,13 @@ public interface BattingLineup {
 
   /**
    * Player statistics aren't stored in serialized result data. So players will appear to have no
-   * stats after deserialization. This method replaces the players that have empty stats objects with
+   * stats after de-serialization. This method replaces the players that have empty stats objects with
    * their counterparts from DataStats that do have stats info.
    */
-  public void populateStats(DataStats battingData);
-
-  public void populateStats(List<DataPlayer> playersWithStatsData);
+  public void populateStats(DataPlayerLookup battingData);
 
   public int size();
+
+  public String getDisplayInfo();
 
 }

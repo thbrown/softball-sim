@@ -3,9 +3,12 @@ package com.github.thbrown.softballsim.lineup;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import com.github.thbrown.softballsim.data.gson.DataPlayer;
 import com.github.thbrown.softballsim.data.gson.DataStats;
+import com.github.thbrown.softballsim.data.gson.helpers.DataPlayerLookup;
+import com.github.thbrown.softballsim.util.StringUtils;
 
 /**
  * Batting order that strictly alternates between two groups of players. (i.e. women and men or
@@ -67,20 +70,65 @@ public class AlternatingBattingLineup implements BattingLineup {
 
   @Override
   public String toString() {
-    StringBuilder result = new StringBuilder();
-    result.append("GroupA").append("\n");
-    result.append("\t").append(DataPlayer.getListHeader()).append("\n");
+    final int SPACING = 3;
+    final int INDENT = 1;
+
+    // Max name length
+    final int MAX_NAME_LENGTH_ALLOWED = 18;
+    int maxNameLength = 0;
     for (DataPlayer p : groupA) {
-      result.append("\t").append(p).append("\n");
+      maxNameLength = p.getName().length() > maxNameLength ? p.getName().length() : maxNameLength;
     }
-
-    result.append("GroupB").append("\n");
-    result.append("\t").append(DataPlayer.getListHeader()).append("\n");
     for (DataPlayer p : groupB) {
-      result.append("\t").append(p).append("\n");
+      maxNameLength = p.getName().length() > maxNameLength ? p.getName().length() : maxNameLength;
     }
-    return result.toString();
+    maxNameLength = Math.min(maxNameLength, MAX_NAME_LENGTH_ALLOWED);
 
+    StringBuilder builder = new StringBuilder();
+
+    // Header 1
+    builder.append("First Group").append("\n");
+    builder.append(StringUtils.padLeft("", INDENT));
+    builder.append(
+        StringUtils.padRight("Name", maxNameLength + SPACING));
+    // builder.append(StringUtils.padLeft("Id", 14 + SPACING));
+    builder.append(StringUtils.padLeft("Avg", 5 + SPACING));
+    builder.append(StringUtils.padLeft("Slg", 5 + SPACING));
+
+    // Content 1
+    for (DataPlayer p : groupA) {
+      builder.append("\n");
+      builder.append(StringUtils.padLeft("", INDENT));
+      String truncatedName = StringUtils.trim(p.getName());
+      builder
+          .append(StringUtils.padRight(truncatedName, maxNameLength + SPACING));
+      // builder.append(StringUtils.padLeft(p.getId(), 14 + SPACING));
+      builder.append(StringUtils.padLeft(StringUtils.formatDecimal(p.getBattingAverage(), 3), 5 + SPACING));
+      builder.append(StringUtils.padLeft(StringUtils.formatDecimal(p.getSluggingPercentage(), 3), 5 + SPACING));
+    }
+    builder.append("\n");
+
+    // Header 2
+    builder.append("Second Group").append("\n");
+    builder.append(StringUtils.padLeft("", INDENT));
+    builder.append(
+        StringUtils.padRight("Name", maxNameLength + SPACING));
+    // builder.append(StringUtils.padLeft("Id", 14 + SPACING));
+    builder.append(StringUtils.padLeft("Avg", 5 + SPACING));
+    builder.append(StringUtils.padLeft("Slg", 5 + SPACING));
+
+    // Content 2
+    for (DataPlayer p : groupB) {
+      builder.append("\n");
+      builder.append(StringUtils.padLeft("", INDENT));
+      String truncatedName = StringUtils.trim(p.getName());
+      builder
+          .append(StringUtils.padRight(truncatedName, maxNameLength + SPACING));
+      // builder.append(StringUtils.padLeft(p.getId(), 14 + SPACING));
+      builder.append(StringUtils.padLeft(StringUtils.formatDecimal(p.getBattingAverage(), 3), 5 + SPACING));
+      builder.append(StringUtils.padLeft(StringUtils.formatDecimal(p.getSluggingPercentage(), 3), 5 + SPACING));
+    }
+    return builder.toString();
   }
 
   public static String getType() {
@@ -103,12 +151,11 @@ public class AlternatingBattingLineup implements BattingLineup {
     return false;
   }
 
-
   @Override
-  public void populateStats(DataStats battingData) {
+  public void populateStats(DataPlayerLookup statsData) {
     for (int i = 0; i < groupA.size(); i++) {
       DataPlayer statslessPlayer = groupA.get(i);
-      DataPlayer statsfullPlayer = battingData.getPlayerById(statslessPlayer.getId());
+      DataPlayer statsfullPlayer = statsData.getDataPlayer(statslessPlayer.getId());
       if (statsfullPlayer == null) {
         throw new RuntimeException("Failed to populate stats for player " + statslessPlayer
             + " as no stats for this player were found in batting data. Try running the optimization again with the -F flag.");
@@ -117,7 +164,7 @@ public class AlternatingBattingLineup implements BattingLineup {
     }
     for (int i = 0; i < groupB.size(); i++) {
       DataPlayer statslessPlayer = groupB.get(i);
-      DataPlayer statsfullPlayer = battingData.getPlayerById(statslessPlayer.getId());
+      DataPlayer statsfullPlayer = statsData.getDataPlayer(statslessPlayer.getId());
       if (statsfullPlayer == null) {
         throw new RuntimeException("Failed to populate stats for player " + statslessPlayer
             + " as no stats for this player were found in batting data. Try running the optimization again with the -F flag.");
@@ -126,31 +173,6 @@ public class AlternatingBattingLineup implements BattingLineup {
     }
   }
 
-  @Override
-  public void populateStats(List<DataPlayer> playersWithStatsData) {
-    for (int i = 0; i < groupA.size(); i++) {
-      DataPlayer statslessPlayer = groupA.get(i);
-      DataPlayer statsfullPlayer =
-          playersWithStatsData.stream().filter(v -> v.getId() == statslessPlayer.getId()).findAny()
-              .orElse(null);
-      if (statsfullPlayer == null) {
-        throw new RuntimeException("Failed to populate stats for player " + statslessPlayer
-            + " as no stats for this player were found in batting data. Try running the optimization again with the -F flag.");
-      }
-      groupA.set(i, statsfullPlayer);
-    }
-    for (int i = 0; i < groupB.size(); i++) {
-      DataPlayer statslessPlayer = groupB.get(i);
-      DataPlayer statsfullPlayer =
-          playersWithStatsData.stream().filter(v -> v.getId() == statslessPlayer.getId()).findAny()
-              .orElse(null);
-      if (statsfullPlayer == null) {
-        throw new RuntimeException("Failed to populate stats for player " + statslessPlayer
-            + " as no stats for this player were found in batting data. Try running the optimization again with the -F flag.");
-      }
-      groupB.set(i, statsfullPlayer);
-    }
-  }
 
   @Override
   public int size() {
@@ -163,6 +185,10 @@ public class AlternatingBattingLineup implements BattingLineup {
 
   public List<DataPlayer> getGroupB() {
     return this.groupB;
+  }
+
+  public String getDisplayInfo() {
+    return this.toString();
   }
 
 }
