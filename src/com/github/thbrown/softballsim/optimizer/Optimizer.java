@@ -27,9 +27,15 @@ public interface Optimizer<R extends Result> {
    */
   public Result optimize(List<String> playersInLineup, LineupTypeEnum lineupType, DataStats battingData,
       Map<String, String> arguments, ProgressTracker progressTracker, R existingResult);
+  
+  /**
+   * Returns an estimate for the amount of time it will take your optimization to run.
+   */
+  public Result estimate(List<String> playersInLineup, LineupTypeEnum lineupType, DataStats battingData,
+      Map<String, String> arguments, ProgressTracker progressTracker, R existingResult);
 
   /**
-   * Just return the class of that result generic (Result.class if you are not using a custom result).
+   * Just return the class of that result generic (Result.class if you are not using your own subclass of result).
    * 
    * This is currently required to serialize/de-serialize partial results.
    * 

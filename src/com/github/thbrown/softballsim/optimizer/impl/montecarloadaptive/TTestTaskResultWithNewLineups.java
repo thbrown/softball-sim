@@ -12,8 +12,8 @@ public class TTestTaskResultWithNewLineups extends TTestTaskResult {
 
   public TTestTaskResultWithNewLineups(LineupComposite bestLineupComposite,
       Set<LineupComposite> eliminatedLineupComposites,
-      long simulationsRequired, long newTasksAdded) {
-    super(bestLineupComposite, eliminatedLineupComposites, simulationsRequired);
+      long simulationsRequired, long comparisonsThatReachedSimLimit, long newTasksAdded) {
+    super(bestLineupComposite, eliminatedLineupComposites, simulationsRequired, comparisonsThatReachedSimLimit);
     this.newLineupsProcessed = newTasksAdded;
   }
 

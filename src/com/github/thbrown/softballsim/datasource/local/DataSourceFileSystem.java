@@ -62,8 +62,7 @@ public class DataSourceFileSystem implements DataSource {
   public void onUpdate(CommandLine cmd, DataStats stats, ProgressTracker tracker) {
     DataSource.super.onUpdate(cmd, stats, tracker);
 
-    // Save the most recent result to the file system so we can start the
-    // optimization from this point
+    // Save the most recent result to the file system so we can start the optimization from this point
     // if it gets interrupted, unless we are doing an estimate only run
     Result currentResult = tracker.getCurrentResult();
 

@@ -203,7 +203,7 @@ public class GcpFunctionsEntryPointCompute implements HttpFunction {
     // @formatter:on
 
     // Send the request to create the instance
-    Compute compute = GCPComputeClientHelper.getComputeInstance();
+    Compute compute = GcpComputeClientHelper.getComputeInstance();
     return compute.instances().insert(project, zone, instance).execute();
   }
 }

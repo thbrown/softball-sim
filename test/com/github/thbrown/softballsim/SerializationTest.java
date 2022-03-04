@@ -43,6 +43,7 @@ public class SerializationTest {
     Result result = SoftballSim.mainInternal(args);
     Assert.assertNotNull("Expected the simulation to produce a result, but it produced null", result);
     String json = GsonAccessor.getInstance().getCustom().toJson(result);
+    Logger.log(json);
     JsonObject jsonObject = (JsonObject) JsonParser.parseString(json);
     Assert.assertNotNull("Serialized result is missing an expected field", jsonObject.get(Result.HUMAN_READABLE));
     Assert.assertNotNull("Serialized result is missing an expected field", jsonObject.get(Result.FLAT_LINEUP));

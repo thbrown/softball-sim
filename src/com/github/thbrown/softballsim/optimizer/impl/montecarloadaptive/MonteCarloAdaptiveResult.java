@@ -15,24 +15,38 @@ public class MonteCarloAdaptiveResult extends Result {
 
   private final Set<Long> candidateLineups;
   private long simulationsRequired;
+  private long comparisonsThatReachedSimLimit;
 
   public MonteCarloAdaptiveResult(BattingLineup lineup, double lineupScore, long countTotal, long countCompleted,
-      long elapsedTimeMs, Set<Long> candidateLineups, long simulationsRequired, ResultStatusEnum status) {
+      long elapsedTimeMs, Set<Long> candidateLineups, ResultStatusEnum status, long simulationsRequired,
+      long comparisonsThatReachedSimLimit) {
     super(OptimizerEnum.MONTE_CARLO_ADAPTIVE, lineup, lineupScore, countTotal, countCompleted, elapsedTimeMs, status);
     this.candidateLineups = candidateLineups;
     this.simulationsRequired = simulationsRequired;
+    this.comparisonsThatReachedSimLimit = comparisonsThatReachedSimLimit;
   }
 
   public Set<Long> getCandidateLineups() {
     return candidateLineups;
   }
 
+  public Long getSimulationsRequired() {
+    return this.simulationsRequired;
+  }
+
+  public Long getComparisonsThatReachedSimLimit() {
+    return this.comparisonsThatReachedSimLimit;
+  }
+
   @Override
   public String getHumanReadableDetails() {
     StringBuilder sb = new StringBuilder(super.getHumanReadableDetails());
+    sb.append("Avg simulations run per lineup: ");
+    sb.append(StringUtils.formatDecimal(((double) this.simulationsRequired / (double) super.getCountCompleted()), 2));
     sb.append("\n");
-    sb.append(" Avg simulations per lineup: ");
-    sb.append(StringUtils.formatDecimal(((double) simulationsRequired / (double) super.getCountCompleted()), 2));
+    sb.append("% of indeterminant comparisons: ");
+    sb.append(StringUtils
+        .formatDecimal(((double) this.comparisonsThatReachedSimLimit / (double) super.getCountCompleted() * 100), 3));
     return sb.toString();
   }
 }

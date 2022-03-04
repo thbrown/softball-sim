@@ -30,6 +30,7 @@ public class TTestTask implements Callable<TTestTaskResult> {
   private final boolean lowest;
 
   private long simulationsRequired = 0;
+  private long comparisonsThatReachedSimLimit = 0;
 
   private SummaryStatisticsTransform transform;
 
@@ -94,7 +95,8 @@ public class TTestTask implements Callable<TTestTaskResult> {
 
         // Check if we've exceeded the maximum number of allowed samples
         if (statsA.getN() >= MAX_ITERATIONS && statsB.getN() >= MAX_ITERATIONS) {
-          Logger.log("WARN: Reached simulation limit " + statsA.getMean() + " " + statsB.getMean() + " " + pValue);
+          comparisonsThatReachedSimLimit++;
+          Logger.log("WARN: Reached simulation limit " + statsA.getMean() + " " + statsB.getMean() + " " + pValue); // PIZZA
           break;
         }
 
@@ -129,7 +131,7 @@ public class TTestTask implements Callable<TTestTaskResult> {
       }
     }
 
-    return new TTestTaskResult(bestSoFar, eliminatedLineups, simulationsRequired);
+    return new TTestTaskResult(bestSoFar, eliminatedLineups, simulationsRequired, comparisonsThatReachedSimLimit);
   }
 
   private List<Double> simulateGames(int numberOfGamesToSimulate, int inningsPerGame, LineupComposite composite) {

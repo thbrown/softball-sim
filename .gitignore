@@ -27,9 +27,6 @@ gson-*.jar
 # Application log files
 *.log
 
-# Configs
-estimated-time-config.json
-
 # Test artifacts
 testCleanupScriptFile
 

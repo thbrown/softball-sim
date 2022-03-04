@@ -8,12 +8,14 @@ public class TTestTaskResult {
   private LineupComposite bestLineupComposite;
   private Set<LineupComposite> eliminatedLineupComposites;
   private long simulationsRequired;
+  private long comparisonsThatReachedSimLimit;
 
   public TTestTaskResult(LineupComposite bestLineupComposite, Set<LineupComposite> eliminatedLineupComposites,
-      long simulationsRequired) {
+      long simulationsRequired, long comparisonsThatReachedSimLimit) {
     this.bestLineupComposite = bestLineupComposite;
     this.eliminatedLineupComposites = eliminatedLineupComposites;
     this.simulationsRequired = simulationsRequired;
+    this.comparisonsThatReachedSimLimit = comparisonsThatReachedSimLimit;
   }
 
   public LineupComposite getBestLineupComposite() {
@@ -29,7 +31,11 @@ public class TTestTaskResult {
    *         lineup.
    */
   public long getSimulationsRequired() {
-    return simulationsRequired;
+    return this.simulationsRequired;
+  }
+
+  public long getComparisonsThatReachedSimLimit() {
+    return this.comparisonsThatReachedSimLimit;
   }
 
   @Override

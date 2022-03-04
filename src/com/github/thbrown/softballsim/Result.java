@@ -98,6 +98,7 @@ public abstract class Result {
     Gson g = GsonAccessor.getInstance().getCustomWithStatsLookup(lookup);
 
     // Perform the copy and alter status and status message
+    // Logger.log("Type " + this.getClass() + " " + newStatus);
     JsonObject obj = (JsonObject) g.toJsonTree(this);
     obj.addProperty(Result.STATUS_VARIABLE_NAME, newStatus.name());
     obj.addProperty(Result.STATUS_MESSAGE_VARIABLE_NAME, newStatusMessage);

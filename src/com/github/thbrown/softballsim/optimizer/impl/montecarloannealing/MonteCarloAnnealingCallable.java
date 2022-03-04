@@ -12,7 +12,6 @@ import com.github.thbrown.softballsim.ResultStatusEnum;
 import com.github.thbrown.softballsim.datasource.ProgressTracker;
 import com.github.thbrown.softballsim.lineup.BattingLineup;
 import com.github.thbrown.softballsim.lineupindexer.BattingLineupIndexer;
-import com.github.thbrown.softballsim.optimizer.OptimizerEnum;
 import com.github.thbrown.softballsim.optimizer.impl.montecarloadaptive.LineupComposite;
 import com.github.thbrown.softballsim.optimizer.impl.montecarloadaptive.TTestTask;
 import com.github.thbrown.softballsim.optimizer.impl.montecarloadaptive.TTestTaskResult;

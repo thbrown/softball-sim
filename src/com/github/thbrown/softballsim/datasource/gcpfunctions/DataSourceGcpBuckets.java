@@ -69,9 +69,11 @@ public class DataSourceGcpBuckets implements DataSource {
   @Override
   public void onComplete(CommandLine cmd, DataStats stats, Result finalResult) {
     Logger.log(finalResult);
-    CloudUtils.upsertBlob(gson.toJson(finalResult), cmd.getOptionValue(ID), CACHED_RESULTS_BUCKET);
-    CloudUtils.deleteBlob(cmd.getOptionValue(ID), STATS_DATA_BUCKET);
-    CloudUtils.deleteBlob(cmd.getOptionValue(ID), CONTROL_FLAGS_BUCKET);
+    if (!cmd.hasOption(CommandLineOptions.ESTIMATE_ONLY)) {
+      CloudUtils.upsertBlob(gson.toJson(finalResult), cmd.getOptionValue(ID), CACHED_RESULTS_BUCKET);
+      CloudUtils.deleteBlob(cmd.getOptionValue(ID), STATS_DATA_BUCKET);
+      CloudUtils.deleteBlob(cmd.getOptionValue(ID), CONTROL_FLAGS_BUCKET);
+    }
   }
 
   @Override

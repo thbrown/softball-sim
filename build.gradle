@@ -1,3 +1,13 @@
+buildscript {
+    repositories {
+      google()
+      mavenCentral()
+    }
+    dependencies {
+        classpath 'com.guardsquare:proguard-gradle:7.0.1'
+    }
+}
+
 plugins {
   id 'java'
   id 'application'
@@ -103,6 +113,28 @@ task generateGalleryHtml(type: Test) {
   }
 }
 
+def outputJar = "${buildDir}/libs/${rootProject.name}.jar"
+task proguard(type: proguard.gradle.ProGuardTask) {
+   //configuration 'proguard.conf'
+   injars "${outputJar}"
+   outjars "${buildDir}/libs/${rootProject.name}_proguard.jar"
+   // As of Java 9, the runtime classes are packaged in modular jmod files.
+   libraryjars "${System.getProperty('java.home')}/jmods/java.base.jmod", jarfilter: '!**.jar', filter: '!module-info.class'
+   dontwarn
+   verbose
+   keepattributes 'SourceFile,LineNumberTable'
+   target "11"
+   keep "class com.github.thbrown.** { * ; }"
+   optimizations "!library/gson" // https://github.com/Guardsquare/proguard/issues/47
+   dontobfuscate // Messes up casting and serialization
+   doLast {
+      delete("${outputJar}")
+      def file = new File("${buildDir}/libs/${rootProject.name}_proguard.jar")
+      def newFile = new File("${buildDir}/libs/${rootProject.name}.jar")
+      file.renameTo(newFile)
+    }
+ }
+
 /*
  * This used to be more valuable when needed to make requests to load json from the webserver, now just opening
  * the .html file in the browser works just as well. But it's still usefull for testing iframe integraton.
@@ -122,6 +154,9 @@ task serve {
 
 // Generate the gallery html as part of the build process
 assemble.finalizedBy generateGalleryHtml
+
+// Optimize the jar
+assemble.finalizedBy proguard
 
 // Print the message after nuild is complete
 assemble.finalizedBy message

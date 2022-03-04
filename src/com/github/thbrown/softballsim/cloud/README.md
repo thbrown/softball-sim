@@ -16,7 +16,7 @@ Behind the scenes the job initially starts on a Google Compute Function. From he
 
 2. If the job can not complete before the timeout, the job is transferred to a GCP compute instance.
 
-The job saves it's progress to a GCP storage bucket at a set interval (every 5 seconds by default).
+The job saves its progress to a GCP storage bucket at a set interval (every 5 seconds by default).
 
 If the compute instance is interrupted at any point while executing the job, a shutdown script on the interrupted instance will re-start the job on a new compute instance using the most recent result persisted to the GCP bucket.
 

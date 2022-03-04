@@ -10,10 +10,10 @@ import com.google.auth.oauth2.GoogleCredentials;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 
-public class GCPComputeClientHelper {
+public class GcpComputeClientHelper {
   private static Compute compute = null;
 
-  protected GCPComputeClientHelper() {
+  protected GcpComputeClientHelper() {
     // Exists only to defeat instantiation
   }
 

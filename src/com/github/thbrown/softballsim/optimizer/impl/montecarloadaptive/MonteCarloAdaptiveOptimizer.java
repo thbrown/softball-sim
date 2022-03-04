@@ -32,7 +32,7 @@ import com.github.thbrown.softballsim.util.Logger;
 
 public class MonteCarloAdaptiveOptimizer implements Optimizer<MonteCarloAdaptiveResult> {
 
-  private static final int TASK_MAX_LINEUP_COUNT = 10;
+  private static final int TASK_MAX_LINEUP_COUNT = 2;
   private static final int TASK_MIN_LINEUP_COUNT = 1;
 
   // Maximum number of tasks that should be queued up at once.
@@ -48,7 +48,7 @@ public class MonteCarloAdaptiveOptimizer implements Optimizer<MonteCarloAdaptive
     // Start the timer
     long startTimestamp = System.currentTimeMillis();
 
-    // Check that the batting data we have is sufficient to run this optmizer
+    // Check that the batting data we have is sufficient to run this optimizer
     validateData(battingData, playersInLineup);
 
     // Get the arguments as their expected types
@@ -99,10 +99,11 @@ public class MonteCarloAdaptiveOptimizer implements Optimizer<MonteCarloAdaptive
     List<DataPlayer> someLineup = indexer.getLineup(0).asList();
     HitGenerator hitGenerator = new HitGenerator(someLineup);
 
-    // This section involves setting up variables used by the simulation including
-    // restoring a paused
+    // This section involves setting up variables used by the simulation including restoring a paused
     // simulation
-    long simulationsRun = Optional.ofNullable(existingResult).map(v -> v.getCountCompleted()).orElse(0L);
+    long simulationsRun = Optional.ofNullable(existingResult).map(v -> v.getSimulationsRequired()).orElse(0L);
+    long comparisonsThatReachedSimLimit =
+        Optional.ofNullable(existingResult).map(v -> v.getComparisonsThatReachedSimLimit()).orElse(0L);
 
     BattingLineup startingLineup = Optional.ofNullable(existingResult).map(MonteCarloAdaptiveResult::getLineup)
         // The serialized result does not save the players stats
@@ -115,14 +116,12 @@ public class MonteCarloAdaptiveOptimizer implements Optimizer<MonteCarloAdaptive
     SynchronizedLineupCompositeWrapper bestLineupComposite = new SynchronizedLineupCompositeWrapper(
         startingLineupComposite);
 
-    // This is where the best lineups for each task wait to be added to a new task.
+    // This is where the best lineups from older tasks wait to be added to a new task.
     Queue<LineupComposite> winnersPool = new LinkedList<>();
 
-    // Candidate list contains all lineups before the 'lineupIndex' that have not
-    // yet been eliminated,
-    // they may been in the winners pool
-    // waiting to be added to a task, or they may have already been assigned to a
-    // task
+    // Candidate list contains all lineups before the 'lineupIndex' that have not yet been eliminated,
+    // they may been in the winners pool waiting to be added to a task, or they may have already been
+    // assigned to a task
     Set<LineupComposite> candidateLineups = new LinkedHashSet<>();
 
     Set<Long> savedCandidateLineupIndexes = Optional.ofNullable(existingResult)
@@ -133,8 +132,7 @@ public class MonteCarloAdaptiveOptimizer implements Optimizer<MonteCarloAdaptive
       winnersPool.add(composite);
     }
 
-    // Queue up a few tasks to process (number of tasks is capped by
-    // TASK_BUFFER_SIZE)
+    // Queue up a few tasks to process (number of tasks is capped by TASK_BUFFER_SIZE)
     long startIndex = Optional.ofNullable(existingResult).map(v -> v.getCountCompleted()).orElse(1L); // 0th lineup will
                                                                                                       // already be
                                                                                                       // added
@@ -152,8 +150,7 @@ public class MonteCarloAdaptiveOptimizer implements Optimizer<MonteCarloAdaptive
       }
     }
 
-    // Process results, in order of submission, as soon as the earliest submitted
-    // task finishes
+    // Process results, in order of submission, as soon as the earliest submitted task finishes
     // executing
     long progressCounter = startIndex;
     while (!results.isEmpty()) {
@@ -174,9 +171,8 @@ public class MonteCarloAdaptiveOptimizer implements Optimizer<MonteCarloAdaptive
         boolean wasReplaced = bestLineupComposite.replaceIfCurrentIsInCollection(result.getBestLineupComposite(),
             result.getEliminatedLineupComposites());
         if (!wasReplaced) {
-          // Result lineup hasn't yet be compared to the current bestLineup (this should
-          // only happen in
-          // multithreaded use cases). Enqueue it for further evaluation.
+          // Result lineup hasn't yet be compared to the current bestLineup (this should only happen in
+          // multi-threaded use cases). Enqueue it for further evaluation.
           winnersPool.add(result.getBestLineupComposite());
         }
       }
@@ -189,6 +185,10 @@ public class MonteCarloAdaptiveOptimizer implements Optimizer<MonteCarloAdaptive
 
       // Keep track of the number of simulations run so far
       simulationsRun += result.getSimulationsRequired();
+
+      // Keep track of lineup pairs for which we couldn't find a statistically significant difference in
+      // score
+      comparisonsThatReachedSimLimit += result.getComparisonsThatReachedSimLimit();
 
       // Update the progress tracker
       LineupComposite bestLineupCopy = bestLineupComposite.getCopyOfBestLineupComposite();
@@ -206,7 +206,7 @@ public class MonteCarloAdaptiveOptimizer implements Optimizer<MonteCarloAdaptive
 
       MonteCarloAdaptiveResult partialResult = new MonteCarloAdaptiveResult(bestLineupCopy.getLineup(),
           bestLineupCopy.getStats().getMean(), indexer.size(), progressCounter - candidateLineups.size(), elapsedTime,
-          candidateLineupIndexes, simulationsRun, ResultStatusEnum.IN_PROGRESS);
+          candidateLineupIndexes, ResultStatusEnum.IN_PROGRESS, simulationsRun, comparisonsThatReachedSimLimit);
 
       progressTracker.updateProgress(partialResult);
 
@@ -226,7 +226,7 @@ public class MonteCarloAdaptiveOptimizer implements Optimizer<MonteCarloAdaptive
       ThreadPoolExecutor ex = (ThreadPoolExecutor) executor;
       if (ex.getQueue().size() < parsedArguments.getThreads()
           && (indexer.size() - lineupIndex) > parsedArguments.getThreads()) {
-        Logger.log("WARNING: Task buffer is low and this may affect multithreaded performance. TaskSize "
+        Logger.log("WARNING: Task buffer is low and this may affect multi-threaded performance. TaskSize "
             + ex.getQueue().size() + " " + (indexer.size() - lineupIndex));
       }
 
@@ -240,11 +240,9 @@ public class MonteCarloAdaptiveOptimizer implements Optimizer<MonteCarloAdaptive
      * "There should no lineups remaining, but there were " + candidateLineupsGlobal.size()); }
      */
 
-    // Make sure we've run at least MAX_ITERATIONS games on our final result so the
-    // expected score is
+    // Make sure we've run at least MAX_ITERATIONS games on our final result so the expected score is
     // accurate.
-    // This is especially important when using a cached result. Since stats objects
-    // can't be serialized
+    // This is especially important when using a cached result. Since stats objects can't be serialized
     // and cached, a final result will have a score of NaN
     if (bestLineupCopy.getStats().getN() < TTestTask.MAX_ITERATIONS) {
       Logger.log("Top up iterations: " + (TTestTask.MAX_ITERATIONS - bestLineupCopy.getStats().getN()));
@@ -260,7 +258,11 @@ public class MonteCarloAdaptiveOptimizer implements Optimizer<MonteCarloAdaptive
         + Optional.ofNullable(existingResult).map(v -> v.getElapsedTimeMs()).orElse(0l);
     MonteCarloAdaptiveResult finalResult = new MonteCarloAdaptiveResult(bestLineupCopy.getLineup(),
         bestLineupCopy.getStats().getMean(), indexer.size(), indexer.size(), elapsedTime, candidateLineupIndexes,
-        simulationsRun, ResultStatusEnum.COMPLETE);
+        ResultStatusEnum.COMPLETE, simulationsRun, comparisonsThatReachedSimLimit);
+
+    Logger.log(
+        "FINAL RESULT " + finalResult.getSimulationsRequired() + " " + finalResult.getComparisonsThatReachedSimLimit());
+
 
     progressTracker.updateProgress(finalResult);
     return finalResult;

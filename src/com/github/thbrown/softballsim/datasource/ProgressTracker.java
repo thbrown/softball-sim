@@ -57,15 +57,15 @@ public final class ProgressTracker {
     if (initialResult == null) {
       initialResult = new Result(optimizer, null, 0, 0, 0, 0, ResultStatusEnum.NOT_STARTED) {};
     }
-    updateResults(initialResult, true);
+    updateResults(initialResult);
   }
 
   // This method is called from other threads
   public void updateProgress(Result updatedResult) {
-    updateResults(updatedResult, false);
+    updateResults(updatedResult);
   }
 
-  private void updateResults(Result updatedResult, boolean initialUpdate) {
+  private void updateResults(Result updatedResult) {
     Result oldResult;
     synchronized (this) {
       oldResult = results.earliest();
@@ -117,40 +117,54 @@ public final class ProgressTracker {
   public Result run() {
     // The parent thread interrupts this progress updater thread when the progress
     // updater is no longer needed
-    while (!Thread.interrupted()) {
-      try {
-        Thread.sleep(updateInterval);
-      } catch (InterruptedException e) {
-        break;
-      }
-      dataSource.onUpdate(cmd, stats, this);
+    try {
+      while (!Thread.interrupted()) {
+        try {
+          Thread.sleep(updateInterval);
+        } catch (InterruptedException e) {
+          break;
+        }
+        dataSource.onUpdate(cmd, stats, this);
 
-      // Exit this thread if this is an estimate only run (since we've waited for
-      // one updateInterval)
-      boolean estimateOnly = cmd.hasOption(CommandLineOptions.ESTIMATE_ONLY);
-      if (estimateOnly) {
-        // Make sure onUpdate will use the result with the ESTIMATE status
-        synchronized (this) {
-          this.updateProgress(this.getCurrentResult().copyWithNewStatus(ResultStatusEnum.ESTIMATE, null));
-          dataSource.onUpdate(cmd, stats, this);
-          Logger.log(getCurrentResult().toString());
-          Logger.log("Exiting, estimate only");
-          return getCurrentResult();
+        // Exit this thread if this is an estimate only run (since we've waited for
+        // one updateInterval)
+        boolean estimateOnly = cmd.hasOption(CommandLineOptions.ESTIMATE_ONLY);
+        if (estimateOnly) {
+          // Make sure onUpdate will use the result with the ESTIMATE status
+          synchronized (this) {
+            // If the result has no update, try increasing the -u
+            if (this.getCurrentResult().getStatus() == ResultStatusEnum.NOT_STARTED) {
+              throw new RuntimeException(
+                  "The optimizer did not report its progress before the end of the estimation window. Try again with a longer update-interval (-u)");
+            }
+
+            this.updateProgress(this.getCurrentResult().copyWithNewStatus(ResultStatusEnum.ESTIMATE, null));
+            dataSource.onComplete(cmd, stats, this.getCurrentResult());
+            Logger.log(getCurrentResult().toString());
+            Logger.log("Exiting, estimate only");
+            return getCurrentResult();
+          }
+        }
+
+        // Exit this thread if the halt flag is set
+        String control = dataSource.getControlFlag(cmd, stats);
+        if (control != null && control.equals("HALT")) {
+          // Make sure onUpdate will use the result with the PAUSED status
+          synchronized (this) {
+            // TODO: what if this is still the initial result? (this can happen if a pause occures quicly after
+            // starting)
+            this.updateProgress(this.getCurrentResult().copyWithNewStatus(ResultStatusEnum.PAUSED, null));
+            dataSource.onUpdate(cmd, stats, this);
+            Logger.log(getCurrentResult().toString());
+            Logger.log("Exiting, halt flag detected");
+            return getCurrentResult();
+          }
         }
       }
-
-      // Exit this thread if the halt flag is set
-      String control = dataSource.getControlFlag(cmd, stats);
-      if (control != null && control.equals("HALT")) {
-        // Make sure onUpdate will use the result with the PAUSED status
-        synchronized (this) {
-          this.updateProgress(this.getCurrentResult().copyWithNewStatus(ResultStatusEnum.PAUSED, null));
-          dataSource.onUpdate(cmd, stats, this);
-          Logger.log(getCurrentResult().toString());
-          Logger.log("Exiting, halt flag detected");
-          return getCurrentResult();
-        }
-      }
+    } catch (Exception e) {
+      Logger.log("An unhandled exception occurred in the ProgressTracker, halting program");
+      Logger.log(e);
+      System.exit(1);
     }
     Logger.log("Exiting, optimization ended");
     return getCurrentResult();

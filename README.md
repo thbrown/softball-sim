@@ -5,13 +5,14 @@ Lineup optimization tool for making sure you choose the best batting order for y
 ### Build (requires Java 11\*, in the instructions below replace `./gradlew` with `./gradlew.bat` for windows machines):
 
 ```
-# Build (Note: this runs tests and formats code)
+# Production Build (Note: this runs tests, formats code, optimizes jar)
 ./gradlew build
 
-# Or build without running tests
-./gradlew build -x test
+# Developement Build without running tests (skips test and jar optimizations)
+./gradlew build -x test -x proguard
 
 ```
+This will generate a runnable JAR named softball-sim.jar in ./build/libs
 
 ### Run
 

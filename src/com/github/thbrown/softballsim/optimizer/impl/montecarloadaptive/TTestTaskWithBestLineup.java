@@ -1,7 +1,6 @@
 package com.github.thbrown.softballsim.optimizer.impl.montecarloadaptive;
 
 import java.util.List;
-import java.util.Set;
 
 public class TTestTaskWithBestLineup extends TTestTask {
 
@@ -34,7 +33,7 @@ public class TTestTaskWithBestLineup extends TTestTask {
     // indicate no change is required
     if (wasUpdated) {
       return new TTestTaskResultWithNewLineups(null, result.getEliminatedLineupComposites(),
-          result.getSimulationsRequired(), this.newLineupsAdded);
+          result.getSimulationsRequired(), result.getComparisonsThatReachedSimLimit(), this.newLineupsAdded);
     }
 
     if (bestLineupBeforeSimulations.equals(result.getBestLineupComposite())) {
@@ -44,13 +43,13 @@ public class TTestTaskWithBestLineup extends TTestTask {
       // of the lineups in this task can be the best
       // lineup.
       return new TTestTaskResultWithNewLineups(null, result.getEliminatedLineupComposites(),
-          result.getSimulationsRequired(), this.newLineupsAdded);
+          result.getSimulationsRequired(), result.getComparisonsThatReachedSimLimit(), this.newLineupsAdded);
     } else {
       // Our ttest found a lineup which was better than bestLineupBeforeSimulations! Return this result so
       // either the overallBestLineup will be updated, or
       // the result lineup will continue to be evaluated against the current overallBestLineup.
       return new TTestTaskResultWithNewLineups(result.getBestLineupComposite(), result.getEliminatedLineupComposites(),
-          result.getSimulationsRequired(), this.newLineupsAdded);
+          result.getSimulationsRequired(), result.getComparisonsThatReachedSimLimit(), this.newLineupsAdded);
     }
 
   }

@@ -196,7 +196,7 @@ public class SoftballSim {
 
   /**
    * Validates the players list: No duplicate players specified, All players have at least one
-   * offensive data point
+   * offensive plate appearance
    */
   private static void validatePlayersList(List<String> players, DataStats stats) {
 
