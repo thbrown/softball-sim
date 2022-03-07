@@ -8,7 +8,6 @@ import com.github.thbrown.softballsim.optimizer.OptimizerEnum;
 import com.github.thbrown.softballsim.util.StringUtils;
 
 /**
- * 
  * SummaryStatistics are not serializable (https://bugs.openjdk.java.net/browse/JDK-8043747)
  */
 public class MonteCarloAdaptiveResult extends Result {
@@ -24,6 +23,14 @@ public class MonteCarloAdaptiveResult extends Result {
     this.candidateLineups = candidateLineups;
     this.simulationsRequired = simulationsRequired;
     this.comparisonsThatReachedSimLimit = comparisonsThatReachedSimLimit;
+  }
+
+  public MonteCarloAdaptiveResult(long estimatedCompletionTimeMs) {
+    super(OptimizerEnum.MONTE_CARLO_ADAPTIVE, null, 0, 0, 0, 0, ResultStatusEnum.ESTIMATE, null,
+        estimatedCompletionTimeMs);
+    this.candidateLineups = null;
+    this.simulationsRequired = 0;
+    this.comparisonsThatReachedSimLimit = 0;
   }
 
   public Set<Long> getCandidateLineups() {

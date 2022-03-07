@@ -60,11 +60,12 @@ jar {
   }
 }
 
-/*
+
 test {
-  testLogging.showStandardStreams = true
+	exclude '**/tools/**'
+    //testLogging.showStandardStreams = true // Show logging during test runs
 }
- */
+ 
  
 sourceSets {
   main {

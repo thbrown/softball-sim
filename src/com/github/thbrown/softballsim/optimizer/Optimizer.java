@@ -2,6 +2,7 @@ package com.github.thbrown.softballsim.optimizer;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import com.github.thbrown.softballsim.Result;
 import com.github.thbrown.softballsim.data.gson.DataStats;
 import com.github.thbrown.softballsim.datasource.ProgressTracker;
@@ -26,16 +27,17 @@ public interface Optimizer<R extends Result> {
    *        over. Null if no previous result was saved.
    */
   public Result optimize(List<String> playersInLineup, LineupTypeEnum lineupType, DataStats battingData,
-      Map<String, String> arguments, ProgressTracker progressTracker, R existingResult);
-  
+      Map<String, String> arguments, ProgressTracker progressTracker, R existingResult) throws Exception;
+
   /**
    * Returns an estimate for the amount of time it will take your optimization to run.
    */
   public Result estimate(List<String> playersInLineup, LineupTypeEnum lineupType, DataStats battingData,
-      Map<String, String> arguments, ProgressTracker progressTracker, R existingResult);
+      Map<String, String> arguments, R existingResult) throws Exception;
 
   /**
-   * Just return the class of that result generic (Result.class if you are not using your own subclass of result).
+   * Just return the class of that result generic (Result.class if you are not using your own subclass
+   * of result).
    * 
    * This is currently required to serialize/de-serialize partial results.
    * 

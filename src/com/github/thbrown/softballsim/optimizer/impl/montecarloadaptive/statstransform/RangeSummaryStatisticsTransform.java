@@ -8,7 +8,7 @@ import org.apache.commons.math3.util.Pair;
  * Pushes the distributions of two SummaryStatistics away from each other by some range.
  * 
  * This is useful for performing tTests that determine if some mean is within some range of another
- * mean. Larger ranges require fewer sample points to reach the significants value.
+ * mean. Larger ranges require fewer sample points to reach a statistically significant results.
  */
 public class RangeSummaryStatisticsTransform implements SummaryStatisticsTransform {
 

@@ -11,6 +11,10 @@ public class MonteCarloAnnealingResult extends Result {
       long countCompleted, long elapsedTimeMs, ResultStatusEnum status) {
     super(OptimizerEnum.MONTE_CARLO_ANNEALING, lineup, lineupScore, countTotal, countCompleted, elapsedTimeMs, status);
     // No additional behavior for now
+  }
 
+  public MonteCarloAnnealingResult(long duration) {
+    super(OptimizerEnum.MONTE_CARLO_EXHAUSTIVE, null, 0, 0, 0, 0, ResultStatusEnum.ESTIMATE, null,
+        duration);
   }
 }

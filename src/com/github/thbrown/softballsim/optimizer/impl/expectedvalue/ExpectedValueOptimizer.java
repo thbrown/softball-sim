@@ -197,4 +197,11 @@ public class ExpectedValueOptimizer implements Optimizer<MonteCarloExhaustiveRes
   public Class<? extends Result> getResultClass() {
     return MonteCarloExhaustiveResult.class;
   }
+
+  @Override
+  public Result estimate(List<String> playersInLineup, LineupTypeEnum lineupType, DataStats battingData,
+      Map<String, String> arguments, MonteCarloExhaustiveResult existingResult) throws Exception {
+    // TODO Auto-generated method stub
+    return null;
+  }
 }

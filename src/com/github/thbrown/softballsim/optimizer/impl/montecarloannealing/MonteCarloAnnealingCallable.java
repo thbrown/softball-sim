@@ -20,6 +20,7 @@ import com.github.thbrown.softballsim.optimizer.impl.montecarloadaptive.statstra
 import com.github.thbrown.softballsim.optimizer.impl.montecarloexhaustive.HitGenerator;
 import com.github.thbrown.softballsim.optimizer.impl.montecarloexhaustive.MonteCarloGameSimulation;
 import com.github.thbrown.softballsim.util.Logger;
+import com.github.thbrown.softballsim.util.MiscUtils;
 import java.util.concurrent.Callable;
 
 public class MonteCarloAnnealingCallable implements Callable<Result> {
@@ -62,20 +63,10 @@ public class MonteCarloAnnealingCallable implements Callable<Result> {
     // Calc next progress repor time
     long nextUpdateTime = startTimestamp + 1000 * ThreadLocalRandom.current().nextInt(0, THREADS * 2);
 
-    // Determine some statistical information about the data, we use this to inform
-    // our annealing parameters
-    SummaryStatistics dataStats = new SummaryStatistics();
-    for (int i = 0; i < PRELIMINARY_DATA_SAMPLE_SIZE; i++) {
-      long randomIndex = ThreadLocalRandom.current().nextLong(0, indexer.size());
-      BattingLineup randomLineup = indexer.getLineup(randomIndex);
-      HitGenerator hitGenerator = new HitGenerator(randomLineup.asList());
-      SummaryStatistics lineupSummaryStatistics = new SummaryStatistics();
-      for (int j = 0; j < PRELIMINARY_DATA_GAME_SIMULATIONS; j++) {
-        double score = MonteCarloGameSimulation.simulateGame(randomLineup, INNINGS, hitGenerator);
-        lineupSummaryStatistics.addValue(score);
-      }
-      dataStats.addValue(lineupSummaryStatistics.getMean());
-    }
+    // Use summary statistics about a sampling of all possible lineups to determine out annealing
+    // parameters
+    SummaryStatistics dataStats = MiscUtils.getSummaryStatisticsForIndexer(indexer, PRELIMINARY_DATA_SAMPLE_SIZE,
+        PRELIMINARY_DATA_GAME_SIMULATIONS, INNINGS);
     double maxTemperature = dataStats.getStandardDeviation() * 3;
 
     // Choose a random lineup

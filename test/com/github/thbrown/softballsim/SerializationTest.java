@@ -12,7 +12,7 @@ import com.google.gson.JsonParser;
 public class SerializationTest {
 
   @Test
-  public void serializeResult() throws IOException, MissingArgumentException {
+  public void serializeResult() throws Exception {
     final int INNINGS = 7;
     final int DURATION = 5;
     final int LINEUP_TYPE = 0;
@@ -32,7 +32,7 @@ public class SerializationTest {
   }
 
   @Test
-  public void serializeResultSubclass() throws IOException, MissingArgumentException {
+  public void serializeResultSubclass() throws Exception {
     final int INNINGS = 7;
     final int LINEUP_TYPE = 0;
     final int GAMES = 1;

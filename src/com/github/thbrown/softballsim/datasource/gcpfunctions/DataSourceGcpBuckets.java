@@ -56,7 +56,8 @@ public class DataSourceGcpBuckets implements DataSource {
     DataSource.super.onUpdate(cmd, stats, tracker);
 
     Result latestResult = tracker.getCurrentResult();
-    if (!cmd.hasOption(CommandLineOptions.ESTIMATE_ONLY)) {
+    if (!cmd.hasOption(CommandLineOptions.ESTIMATE_ONLY)) { // This may no longer be necessary as estimations don't us
+                                                            // progressTracker
       try {
         CloudUtils.upsertBlob(gson.toJson(latestResult), cmd.getOptionValue(ID), CACHED_RESULTS_BUCKET);
       } catch (Exception e) {
@@ -69,11 +70,11 @@ public class DataSourceGcpBuckets implements DataSource {
   @Override
   public void onComplete(CommandLine cmd, DataStats stats, Result finalResult) {
     Logger.log(finalResult);
-    if (!cmd.hasOption(CommandLineOptions.ESTIMATE_ONLY)) {
-      CloudUtils.upsertBlob(gson.toJson(finalResult), cmd.getOptionValue(ID), CACHED_RESULTS_BUCKET);
-      CloudUtils.deleteBlob(cmd.getOptionValue(ID), STATS_DATA_BUCKET);
-      CloudUtils.deleteBlob(cmd.getOptionValue(ID), CONTROL_FLAGS_BUCKET);
-    }
+    // if (!cmd.hasOption(CommandLineOptions.ESTIMATE_ONLY)) {
+    CloudUtils.upsertBlob(gson.toJson(finalResult), cmd.getOptionValue(ID), CACHED_RESULTS_BUCKET);
+    CloudUtils.deleteBlob(cmd.getOptionValue(ID), STATS_DATA_BUCKET);
+    CloudUtils.deleteBlob(cmd.getOptionValue(ID), CONTROL_FLAGS_BUCKET);
+    // }
   }
 
   @Override

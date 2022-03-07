@@ -35,6 +35,17 @@ public class MonteCarloExhaustiveResult extends Result {
     this.oppositeOfOptimalScore = oppositeOfOptimalScore;
   }
 
+  /**
+   * Estimation only run constructor
+   */
+  public MonteCarloExhaustiveResult(long estimatedCompletionTimeMs) {
+    super(OptimizerEnum.MONTE_CARLO_EXHAUSTIVE, null, 0, 0, 0, 0, ResultStatusEnum.ESTIMATE, null,
+        estimatedCompletionTimeMs);
+    this.histogram = null;
+    this.oppositeOfOptimalLineup = null;
+    this.oppositeOfOptimalScore = 0;
+  }
+
   public Map<Long, Long> getHistogram() {
     return histogram;
   }
@@ -52,20 +63,22 @@ public class MonteCarloExhaustiveResult extends Result {
     final int INDENT = 1;
     StringBuilder sb = new StringBuilder(super.getHumanReadableDetails());
 
-    sb.append("Histogram:\n");
-    sb.append(StringUtils.padLeft("", INDENT) + "Runs | # Lineups | Histogram" + System.lineSeparator());
-    Map<String, Long> formattedHistogram = new LinkedHashMap<>();
-    List<Long> sortedKeys = new ArrayList<>(histogram.keySet());
-    Collections.sort(sortedKeys);
-    for (Long key : sortedKeys) {
-      String keyString = key.toString();
-      formattedHistogram.put(
-          keyString.substring(0, keyString.length() - 1) + "." + keyString.substring(keyString.length() - 1),
-          histogram.get(key));
+    if (histogram != null) {
+      sb.append("Histogram:\n");
+      sb.append(StringUtils.padLeft("", INDENT) + "Runs | # Lineups | Histogram" + System.lineSeparator());
+      Map<String, Long> formattedHistogram = new LinkedHashMap<>();
+      List<Long> sortedKeys = new ArrayList<>(histogram.keySet());
+      Collections.sort(sortedKeys);
+      for (Long key : sortedKeys) {
+        String keyString = key.toString();
+        formattedHistogram.put(
+            keyString.substring(0, keyString.length() - 1) + "." + keyString.substring(keyString.length() - 1),
+            histogram.get(key));
+      }
+      sb.append(StringUtils.indent(HistogramUtils.buildHistogram(formattedHistogram, 18, "█"), INDENT));
+      sb.append("\n");
+      sb.append("\n");
     }
-    sb.append(StringUtils.indent(HistogramUtils.buildHistogram(formattedHistogram, 18, "█"), INDENT));
-    sb.append("\n");
-    sb.append("\n");
 
     if (this.oppositeOfOptimalLineup != null) {
       String worstOrBest = this.oppositeOfOptimalScore > this.getLineupScore() ? "Best" : "Worst";

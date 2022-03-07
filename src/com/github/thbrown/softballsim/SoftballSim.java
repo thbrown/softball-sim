@@ -43,11 +43,11 @@ public class SoftballSim {
   }
 
   // Currently just a convenience method for tests :(
-  public static Result mainInternal(String[] args) throws MissingArgumentException {
+  public static Result mainInternal(String[] args) throws Exception {
     return mainInternal(args, null);
   }
 
-  public static Result mainInternal(String[] args, Runnable cleanup) throws MissingArgumentException {
+  public static Result mainInternal(String[] args, Runnable cleanup) throws Exception {
     // The valid command line flags change based on which optimizer and data source
     // are supplied.
     CommandLineOptions commandLineOptions = CommandLineOptions.getInstance();
@@ -123,7 +123,7 @@ public class SoftballSim {
     Map<String, String> arguments = optimizer.getArgumentsAndValuesAsMap(allCmd);
 
     // We accept both ids and names for this argument, but the optimizers expects
-    // ids only. This resolves any names to ids.
+    // ids only. This converts any names into ids.
     checkForBlanks(players, stats);
     final List<String> playersIdsOnly = stats.convertPlayersListToIds(players);
     validatePlayersList(playersIdsOnly, stats);
@@ -134,6 +134,20 @@ public class SoftballSim {
       existingResult = dataSource.getCachedResult(allCmd, stats);
     } else {
       existingResult = null;
+    }
+
+    // If we are just estimating the completion time, we don't need to start a progress tracker or a new
+    // thread
+    final boolean estimateOnly = commonCmd.hasOption(CommandLineOptions.ESTIMATE_ONLY);
+    if (estimateOnly) {
+      Result result = optimizer.estimate(playersIdsOnly, lineupType, stats, arguments, null);
+      dataSource.onComplete(allCmd, stats, result);
+
+      // Almost done, just run the cleanup procedure supplied on invocation (if any)
+      if (cleanup != null) {
+        cleanup.run();
+      }
+      return result;
     }
 
     // Prep the progress tracker class so we can pass a reference to the optimizer thread

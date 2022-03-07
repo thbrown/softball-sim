@@ -32,8 +32,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
-
 
 public class MonteCarloAnnealingOptimizer implements Optimizer<Result> {
 
@@ -96,6 +94,18 @@ public class MonteCarloAnnealingOptimizer implements Optimizer<Result> {
   @Override
   public Class<? extends Result> getResultClass() {
     return Result.class;
+  }
+
+
+  @Override
+  public Result estimate(List<String> playersInLineup, LineupTypeEnum lineupType, DataStats battingData,
+      Map<String, String> arguments, Result existingResult) throws Exception {
+    // Check that the batting data we have is sufficient to run this optimizer
+    validateData(battingData, playersInLineup);
+    MonteCarloAnnealingArgumentParser parsedArguments = new MonteCarloAnnealingArgumentParser(arguments);
+
+    // This is a time-constrained optimization, to estimating the completion time is easy
+    return new MonteCarloAnnealingResult(parsedArguments.getDuration() * 1000);
   }
 
 }

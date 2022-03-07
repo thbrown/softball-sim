@@ -14,8 +14,11 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import com.github.thbrown.softballsim.Msg;
 import com.github.thbrown.softballsim.Result;
 import com.github.thbrown.softballsim.ResultStatusEnum;
@@ -26,9 +29,13 @@ import com.github.thbrown.softballsim.lineup.BattingLineup;
 import com.github.thbrown.softballsim.lineupindexer.BattingLineupIndexer;
 import com.github.thbrown.softballsim.lineupindexer.LineupTypeEnum;
 import com.github.thbrown.softballsim.optimizer.Optimizer;
+import com.github.thbrown.softballsim.optimizer.impl.montecarloadaptive.statstransform.RangeSummaryStatisticsTransform;
+import com.github.thbrown.softballsim.optimizer.impl.montecarloadaptive.statstransform.SummaryStatisticsTransform;
 import com.github.thbrown.softballsim.optimizer.impl.montecarloexhaustive.HitGenerator;
+import com.github.thbrown.softballsim.optimizer.impl.montecarloexhaustive.MonteCarloExhaustiveResult;
 import com.github.thbrown.softballsim.optimizer.impl.montecarloexhaustive.MonteCarloGameSimulation;
 import com.github.thbrown.softballsim.util.Logger;
+import com.github.thbrown.softballsim.util.MiscUtils;
 
 public class MonteCarloAdaptiveOptimizer implements Optimizer<MonteCarloAdaptiveResult> {
 
@@ -171,7 +178,7 @@ public class MonteCarloAdaptiveOptimizer implements Optimizer<MonteCarloAdaptive
         boolean wasReplaced = bestLineupComposite.replaceIfCurrentIsInCollection(result.getBestLineupComposite(),
             result.getEliminatedLineupComposites());
         if (!wasReplaced) {
-          // Result lineup hasn't yet be compared to the current bestLineup (this should only happen in
+          // Result lineup hasn't yet been compared to the current bestLineup (this should only happen in
           // multi-threaded use cases). Enqueue it for further evaluation.
           winnersPool.add(result.getBestLineupComposite());
         }
@@ -263,7 +270,6 @@ public class MonteCarloAdaptiveOptimizer implements Optimizer<MonteCarloAdaptive
     Logger.log(
         "FINAL RESULT " + finalResult.getSimulationsRequired() + " " + finalResult.getComparisonsThatReachedSimLimit());
 
-
     progressTracker.updateProgress(finalResult);
     return finalResult;
   }
@@ -274,11 +280,9 @@ public class MonteCarloAdaptiveOptimizer implements Optimizer<MonteCarloAdaptive
                                                               // to add elements to the beginning of the list
     for (int j = 0; j < taskSize; j++) {
 
-      // First, add the best lineup we have so far to the task list. Make a copy so
-      // other threads can
+      // First, add the best lineup we have so far to the task list. Make a copy so other threads can
       // modify it.
-      // Having a good lineup in each task reduces the runtime because we don't waste
-      // much time comparing
+      // Having a good lineup in each task reduces the runtime because we don't waste much time comparing
       // bad lineups to other bad lineups.
       // lineupsToTest.add(new LineupComposite(bestLineup));
 
@@ -329,6 +333,99 @@ public class MonteCarloAdaptiveOptimizer implements Optimizer<MonteCarloAdaptive
   @Override
   public Class<? extends Result> getResultClass() {
     return MonteCarloAdaptiveResult.class;
+  }
+
+  @Override
+  public Result estimate(List<String> playersInLineup, LineupTypeEnum lineupType, DataStats battingData,
+      Map<String, String> arguments, MonteCarloAdaptiveResult existingResult) throws Exception {
+    validateData(battingData, playersInLineup);
+    MonteCarloAdaptiveArgumentParser parsedArguments = new MonteCarloAdaptiveArgumentParser(arguments);
+    BattingLineupIndexer indexer = lineupType.getLineupIndexer(battingData, playersInLineup);
+
+    List<DataPlayer> someLineup = indexer.getLineup(0).asList();
+    HitGenerator hitGenerator = new HitGenerator(someLineup);
+
+    // Configurable params
+    final double NUM_STD_DEVIATIONS = .8; // (set higher for shorter estimation times and vice versa)
+    final int LINEUPS_TO_TEST = 100;
+
+    SummaryStatistics dataStats = MiscUtils.getSummaryStatisticsForIndexer(indexer, 100, 10000, 7);
+    SummaryStatisticsTransform transform =
+        new RangeSummaryStatisticsTransform(dataStats.getStandardDeviation() * NUM_STD_DEVIATIONS);
+
+    // Warmup
+    // Test random lineups are within NUM_STD_DEVIATIONS of each other
+    Queue<Future<TTestTaskResult>> results = new LinkedList<>();
+    ExecutorService executor = Executors.newFixedThreadPool(parsedArguments.getThreads());
+    for (int i = 0; i < LINEUPS_TO_TEST; i++) {
+      long randomIndexA = ThreadLocalRandom.current().nextLong(0, indexer.size());
+      long randomIndexB = ThreadLocalRandom.current().nextLong(0, indexer.size());
+
+      BattingLineup randomLineupA = indexer.getLineup(randomIndexA);
+      BattingLineup randomLineupB = indexer.getLineup(randomIndexB);
+
+      List<LineupComposite> list = new ArrayList<>(2);
+      list.add(new LineupComposite(randomLineupA, hitGenerator, randomIndexA));
+      list.add(new LineupComposite(randomLineupB, hitGenerator, randomIndexB));
+
+      TTestTask task = new TTestTask(list, parsedArguments.getInnings(), parsedArguments.getAlpha(), transform, false);
+      results.add(executor.submit(task));
+    }
+
+    // Wait for the results to finish
+    while (!results.isEmpty()) {
+      Future<TTestTaskResult> future = results.poll();
+      if (future != null) {
+        future.get();
+      }
+    }
+
+    // Actual
+    long startTimeNanos = System.nanoTime();
+
+    // Test random lineups are within NUM_STD_DEVIATIONS of each other
+    for (int i = 0; i < LINEUPS_TO_TEST; i++) {
+      long randomIndexA = ThreadLocalRandom.current().nextLong(0, indexer.size());
+      long randomIndexB = ThreadLocalRandom.current().nextLong(0, indexer.size());
+
+      BattingLineup randomLineupA = indexer.getLineup(randomIndexA);
+      BattingLineup randomLineupB = indexer.getLineup(randomIndexB);
+
+      List<LineupComposite> list = new ArrayList<>(2);
+      list.add(new LineupComposite(randomLineupA, hitGenerator, randomIndexA));
+      list.add(new LineupComposite(randomLineupB, hitGenerator, randomIndexB));
+
+      TTestTask task = new TTestTask(list, parsedArguments.getInnings(), parsedArguments.getAlpha(), transform, false);
+      results.add(executor.submit(task));
+    }
+
+    // Wait for the results to finish
+    while (!results.isEmpty()) {
+      Future<TTestTaskResult> future = results.poll();
+      if (future != null) {
+        future.get();
+      }
+    }
+
+    executor.shutdown();
+
+    long elapsedTimeNanos = System.nanoTime() - startTimeNanos;
+
+    // Do some extrapolation math
+    long estimationTimeNanos = (long) ((double) elapsedTimeNanos / LINEUPS_TO_TEST * indexer.size());
+    long estimationTimeMs = TimeUnit.MILLISECONDS.convert(estimationTimeNanos, TimeUnit.NANOSECONDS);
+
+    // Adjustments based on data points from my laptop, not sure if they hold across computers
+    if (lineupType == LineupTypeEnum.STANDARD) {
+      estimationTimeMs = (long) (Math.pow(estimationTimeMs, .7) * 45);
+    } else if (lineupType == LineupTypeEnum.ALTERNATING_GENDER) {
+      estimationTimeMs = (long) (Math.pow(estimationTimeMs, .85) * 18);
+    } else if (lineupType == LineupTypeEnum.NO_CONSECUTIVE_FEMALES) {
+      estimationTimeMs = (long) (Math.pow(estimationTimeMs, .45) * 600);
+    }
+
+    return new MonteCarloAdaptiveResult(estimationTimeMs);
+
   }
 
 }

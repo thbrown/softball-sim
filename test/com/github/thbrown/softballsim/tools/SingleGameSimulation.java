@@ -1,4 +1,4 @@
-package com.github.thbrown.softballsim;
+package com.github.thbrown.softballsim.tools;
 
 import java.io.File;
 import java.io.IOException;
@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import com.github.thbrown.softballsim.Msg;
 import com.github.thbrown.softballsim.data.gson.DataPlayer;
 import com.github.thbrown.softballsim.data.gson.DataStats;
 import com.github.thbrown.softballsim.lineup.BattingLineup;
@@ -19,7 +20,7 @@ import com.github.thbrown.softballsim.util.GsonAccessor;
 import com.github.thbrown.softballsim.util.Logger;
 import org.junit.Test;
 
-public class SingleGameSimulationTest {
+public class SingleGameSimulation {
 
   @Test
   public void simulateSingleGame() {

@@ -58,6 +58,11 @@ public abstract class Result {
 
   public Result(OptimizerEnum optimizer, BattingLineup lineup, double lineupScore, long countTotal, long countCompleted,
       long elapsedTimeMs, ResultStatusEnum status, String statusMessage) {
+    this(optimizer, lineup, lineupScore, countTotal, countCompleted, elapsedTimeMs, status, statusMessage, null);
+  }
+
+  public Result(OptimizerEnum optimizer, BattingLineup lineup, double lineupScore, long countTotal, long countCompleted,
+      long elapsedTimeMs, ResultStatusEnum status, String statusMessage, Long estimatedTimeRemainingMs) {
     this.optimizer = optimizer;
     this.lineup = lineup;
     this.lineupScore = lineupScore;
@@ -66,7 +71,7 @@ public abstract class Result {
     this.elapsedTimeMs = elapsedTimeMs;
     this.status = status;
     this.statusMessage = statusMessage;
-    this.estimatedTimeRemainingMs = null;
+    this.estimatedTimeRemainingMs = estimatedTimeRemainingMs;
   }
 
   /**

@@ -101,7 +101,7 @@ public enum OptimizerEnum {
    */
   @SuppressWarnings("unchecked")
   public <T extends Result> Result optimize(List<String> players, LineupTypeEnum lineupType, DataStats data,
-      Map<String, String> arguments, ProgressTracker progressTracker, T existingResult) {
+      Map<String, String> arguments, ProgressTracker progressTracker, T existingResult) throws Exception {
 
     // Cast the optimizer to itself, this gets us a reference to an Optimizer that
     // uses a particular generic (Optimizer<T>) rather than a reference with a
@@ -122,6 +122,14 @@ public enum OptimizerEnum {
 
     return optimizer.optimize(players, lineupType, data, arguments, progressTracker, existingResult);
   }
+
+  @SuppressWarnings("unchecked")
+  public <T extends Result> Result estimate(List<String> players, LineupTypeEnum lineupType, DataStats stats,
+      Map<String, String> arguments, T existingResult) throws Exception {
+    Optimizer<T> optimizer = this.optimizerImplementation.getClass().cast(this.optimizerImplementation);
+    return optimizer.estimate(players, lineupType, stats, arguments, existingResult);
+  }
+
 
   /**
    * Gets the enum with the given name. Returns null if there is no enum with that name.
@@ -195,5 +203,6 @@ public enum OptimizerEnum {
   public Type getResultClass() {
     return this.optimizerImplementation.getResultClass();
   }
+
 
 }

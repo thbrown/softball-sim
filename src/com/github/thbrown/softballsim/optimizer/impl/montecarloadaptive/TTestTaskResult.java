@@ -3,6 +3,9 @@ package com.github.thbrown.softballsim.optimizer.impl.montecarloadaptive;
 import java.util.Optional;
 import java.util.Set;
 
+/**
+ * The output of a TTestTask
+ */
 public class TTestTaskResult {
 
   private LineupComposite bestLineupComposite;

@@ -67,7 +67,8 @@ public class DataSourceFileSystem implements DataSource {
     Result currentResult = tracker.getCurrentResult();
 
     String result = gson.toJson(currentResult);
-    if (!cmd.hasOption(CommandLineOptions.ESTIMATE_ONLY)) {
+    if (!cmd.hasOption(CommandLineOptions.ESTIMATE_ONLY)) { // This may no longer be necessary as estimations don't us
+                                                            // progressTracker
       String statsFileLocation = cmd.getOptionValue(CACHE_PATH, CACHED_RESULTS_FILE_PATH);
       String fileName = getFileName(cmd, gson.toJson(stats));
       File cacheFile = getFilePath(statsFileLocation, fileName);
