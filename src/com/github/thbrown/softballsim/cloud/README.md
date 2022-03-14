@@ -28,7 +28,7 @@ The `softball-sim-compute` function is invoked internally by both the `softball-
 
 ### Deployment
 
-First, do a gradle build.
+First, do a gradle build, GCP functions does not yet play nicely with proguard, so you'll want to do skip the proguard step of the build (e.g. "./gradlew build -x proguard")
 
 Then, from the project root directory, run these commands to deploy each function:
 
@@ -44,7 +44,7 @@ Then, from the project root directory, run these commands to deploy each functio
 
 Unlike running the the application from the command line, which uses the hash of the arguments and data to create an identifier for optimization run. The function requires that you supply your own identifier. `zsjdklasaskfjaskfdjs` is id used in the example.
 
-You will need to replace `<your_pwd>` with your own password and `<your_pwd_hash>` with the shaw256 of your password. Don't forget the entry in exampleGcpFunctionsParams.json.
+You will need to replace `<your_pwd>` with your own password and `<your_pwd_hash>` with the sha256 of your password. Don't forget the entry in exampleGcpFunctionsParams.json.
 
 Default parameters are set in `./stats/exampleGcpFunctionsParams.json`
 

@@ -7,7 +7,7 @@ import java.util.Arrays;
 import java.util.Optional;
 import com.github.thbrown.softballsim.Result;
 import com.github.thbrown.softballsim.ResultStatusEnum;
-import com.github.thbrown.softballsim.datasource.gcpfunctions.DataSourceGcpBuckets;
+import com.github.thbrown.softballsim.datasource.gcpbuckets.DataSourceGcpBuckets;
 import com.github.thbrown.softballsim.util.GsonAccessor;
 import com.github.thbrown.softballsim.util.Logger;
 import com.github.thbrown.softballsim.util.StringUtils;
@@ -108,8 +108,12 @@ public class GcpFunctionsEntryPointCompute implements HttpFunction {
       String nextZone = zones[0];
       String[] futureZones = Arrays.copyOfRange(zones, 1, zones.length);
 
+      // Must start with a lower case letter, adding id and remaining zones so we can see some basic info
+      // about the instance at a glance
+      final String intanceName = "o-" + id + "-" + futureZones.length;
+
       // TODO: retry on failure?
-      Operation operation = makeInstance(id, nextZone, PROJECT, MACHINE_TYPE, id + "-" + futureZones.length,
+      Operation operation = makeInstance(id, nextZone, PROJECT, MACHINE_TYPE, intanceName,
           HOME_DIRECTORY, SNAPSHOT_NAME, args, futureZones, pwd);
       Logger.log(id + " operation: " + operation.getSelfLink());
 

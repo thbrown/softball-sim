@@ -85,7 +85,6 @@ public class MonteCarloAnnealingOptimizer implements Optimizer<Result> {
 
   }
 
-
   private void validateData(DataStats battingData, List<String> playersInLineup) {
     // TODO Auto-generated method stub
 
@@ -95,7 +94,6 @@ public class MonteCarloAnnealingOptimizer implements Optimizer<Result> {
   public Class<? extends Result> getResultClass() {
     return Result.class;
   }
-
 
   @Override
   public Result estimate(List<String> playersInLineup, LineupTypeEnum lineupType, DataStats battingData,

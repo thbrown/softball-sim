@@ -11,7 +11,7 @@ import com.github.thbrown.softballsim.CommandLineOptions;
 import com.github.thbrown.softballsim.Result;
 import com.github.thbrown.softballsim.SoftballSim;
 import com.github.thbrown.softballsim.datasource.DataSourceEnum;
-import com.github.thbrown.softballsim.datasource.gcpfunctions.DataSourceGcpBuckets;
+import com.github.thbrown.softballsim.datasource.gcpbuckets.DataSourceGcpBuckets;
 import com.github.thbrown.softballsim.util.GsonAccessor;
 import com.github.thbrown.softballsim.util.Logger;
 import com.github.thbrown.softballsim.util.StringUtils;
@@ -35,15 +35,11 @@ import com.google.gson.JsonPrimitive;
  */
 public class GcpFunctionsEntryPointStart implements HttpFunction {
 
-  // The '/tmp' directory is the only writable directory for gcp functions
-  private static final String DATA_FILE_LOCATION = "/tmp/data.json";
-
   // Allow the function to run for TIMEOUT_IN_MILLIS before transitioning to
   // preemptible compute instances
   private static final int TIMEOUT_IN_MILLIS = 15 * 1000;// 500 * 1000;
-  // private static final String ZONES =
-  // "us-central1-a,us-central1-b,us-central1-c,us-central1-f";
-  private static final String ZONES = "us-central1-a,us-central1-b";
+  private static final String ZONES =
+      "us-central1-a,us-central1-b,us-central1-c,us-central1-f";
 
   private static final String DATA_KEY = "data";
   private static final String ID_KEY = "-" + DataSourceGcpBuckets.ID;
@@ -150,7 +146,7 @@ public class GcpFunctionsEntryPointStart implements HttpFunction {
           // If this is an estimate only, we couldn't get an estimate in time, return null
           if (map.get(ESTIMATE_ONLY_KEY) != null && !map.get(ESTIMATE_ONLY_KEY).equalsIgnoreCase("false")) {
             Logger.log(id + " estimate could not be determined");
-            CloudUtils.send400Error(response, "interval too long for estimate to complete");
+            CloudUtils.send400Error(response, "application timeout too long for estimate to complete");
             return;
           }
 
@@ -212,6 +208,7 @@ public class GcpFunctionsEntryPointStart implements HttpFunction {
       StringWriter sw = new StringWriter();
       PrintWriter pw = new PrintWriter(sw);
       e.printStackTrace(pw);
+      Logger.log("Exception encountered during processing " + e.toString());
       Logger.log(sw.toString());
 
       // Send exceptions

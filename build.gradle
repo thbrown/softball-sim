@@ -126,6 +126,10 @@ task proguard(type: proguard.gradle.ProGuardTask) {
    keepattributes 'SourceFile,LineNumberTable'
    target "11"
    keep "class com.github.thbrown.** { * ; }"
+   // GCP looks for this interface on functions deploy (and fails if it's not there), it also requires keeping some enum functionalyt
+   // Dispite these changes, the proguard altered jar still doesn't work in gcp functions (current issue is 404 when upserting a blob)
+   keep "public interface com.google.cloud.functions.HttpFunction"
+   keepclassmembers "enum * { public static **[] values(); public static ** valueOf(java.lang.String);}"
    optimizations "!library/gson" // https://github.com/Guardsquare/proguard/issues/47
    dontobfuscate // Messes up casting and serialization
    doLast {

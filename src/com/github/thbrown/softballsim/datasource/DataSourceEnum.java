@@ -7,8 +7,8 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import com.github.thbrown.softballsim.Result;
 import com.github.thbrown.softballsim.data.gson.DataStats;
-import com.github.thbrown.softballsim.datasource.gcpfunctions.DataSourceGcpBuckets;
-import com.github.thbrown.softballsim.datasource.local.DataSourceFileSystem;
+import com.github.thbrown.softballsim.datasource.filesystem.DataSourceFileSystem;
+import com.github.thbrown.softballsim.datasource.gcpbuckets.DataSourceGcpBuckets;
 import com.github.thbrown.softballsim.util.StringUtils;
 
 public enum DataSourceEnum implements DataSource {

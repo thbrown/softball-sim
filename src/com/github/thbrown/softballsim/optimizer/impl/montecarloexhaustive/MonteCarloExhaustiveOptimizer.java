@@ -11,6 +11,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import com.github.thbrown.softballsim.Msg;
 import com.github.thbrown.softballsim.Result;
@@ -203,58 +204,70 @@ public class MonteCarloExhaustiveOptimizer implements Optimizer<MonteCarloExhaus
     validateData(battingData, playersInLineup);
     MonteCarloExhaustiveArgumentParser parsedArguments = new MonteCarloExhaustiveArgumentParser(arguments);
     BattingLineupIndexer indexer = lineupType.getLineupIndexer(battingData, playersInLineup);
-
-    // Try to make sure all estimations run in a few seconds (about as long as a 10000k games at 7
-    // innings a piece) but run at least 10
-    long NUM_ITERATIONS = (long) (10000d / parsedArguments.getGames() * 7d / parsedArguments.getInnings() * 500);
-    NUM_ITERATIONS = Math.max(10, NUM_ITERATIONS);
-
-    // Parrellelizable
-    ExecutorService executor = Executors.newFixedThreadPool(parsedArguments.getThreads());
-    Queue<Future<TaskResult>> results = new LinkedList<>();
-
+    
     List<DataPlayer> someLineup = indexer.getLineup(0).asList();
     HitGenerator hitGenerator = new HitGenerator(someLineup);
 
-    // Queue up a few tasks to process, this will serve as a warmup
-    final long WARM_UP_ITERATIONS = Math.min(indexer.size(), NUM_ITERATIONS / 2);
-    for (long l = 0; l < WARM_UP_ITERATIONS; l++) {
-      MonteCarloMultiGameSimulationTask task = new MonteCarloMultiGameSimulationTask(indexer.getLineup(l),
-          parsedArguments.getGames(), parsedArguments.getInnings(), hitGenerator);
-      results.add(executor.submit(task));
+    // Warmup
+    for (int i = 0; i < 10000; i++) {
+      long randomIndex = ThreadLocalRandom.current().nextLong(indexer.size());
+      BattingLineup randomLineup = indexer.getLineup(randomIndex);
+      MonteCarloGameSimulation.simulateGame(randomLineup, parsedArguments.getInnings(), hitGenerator);
     }
 
-    // Wait for all the results to finish
-    while (!results.isEmpty()) {
-      Future<TaskResult> future = results.poll();
-      if (future != null) {
-        future.get();
-      }
-    }
-
-    // Queue up a few tasks to process, we'll measure the elapsed time and extrapolate this to determine
-    // the optimization's execution time
-    final long ESTIMATION_ITERATIONS = Math.min(indexer.size(), NUM_ITERATIONS / 2);
+    // Test, how many games can we simulate in 5 seconds;
     long startTime = System.nanoTime();
-    for (long l = 0; l < ESTIMATION_ITERATIONS; l++) {
-      MonteCarloMultiGameSimulationTask task = new MonteCarloMultiGameSimulationTask(indexer.getLineup(l),
-          parsedArguments.getGames(), parsedArguments.getInnings(), hitGenerator);
-      results.add(executor.submit(task));
+    long startTimeMillis = System.currentTimeMillis();
+    long counter = 0;
+
+    while ((System.currentTimeMillis() - startTimeMillis) < TimeUnit.MILLISECONDS.convert(5, TimeUnit.SECONDS)) {
+      long randomIndex = ThreadLocalRandom.current().nextLong(indexer.size());
+      BattingLineup randomLineup = indexer.getLineup(randomIndex);
+      MonteCarloGameSimulation.simulateGame(randomLineup, parsedArguments.getInnings(), hitGenerator);
+      counter++;
     }
 
-    // Wait for all the results to finish
-    while (!results.isEmpty()) {
-      Future<TaskResult> future = results.poll();
-      if (future != null) {
-        future.get();
-      }
-    }
     long elapsedTimeNanos = System.nanoTime() - startTime;
 
-    // TODO: Account for partial results??
+    long nanosPerGame = (long) ((double) elapsedTimeNanos / (counter));
+    long totalGamesRequired = indexer.size() * parsedArguments.getGames();
+    long nanosToTestAllGames = totalGamesRequired * nanosPerGame;
+
+    // Concurrent calc speedup (assuming perfect concurrency)
+    long estimationTimeNanos = (long) ((double) nanosToTestAllGames
+        / Math.min(parsedArguments.getThreads(), Runtime.getRuntime().availableProcessors()));
+
+    /*
+     * // Parrellelizable ExecutorService executor =
+     * Executors.newFixedThreadPool(parsedArguments.getThreads()); Queue<Future<TaskResult>> results =
+     * new LinkedList<>();
+     * 
+     * List<DataPlayer> someLineup = indexer.getLineup(0).asList(); HitGenerator hitGenerator = new
+     * HitGenerator(someLineup);
+     * 
+     * // Queue up a few tasks to process, this will serve as a warmup final long WARM_UP_ITERATIONS =
+     * Math.min(indexer.size(), NUM_ITERATIONS / 2); for (long l = 0; l < WARM_UP_ITERATIONS; l++) {
+     * MonteCarloMultiGameSimulationTask task = new
+     * MonteCarloMultiGameSimulationTask(indexer.getLineup(l), parsedArguments.getGames(),
+     * parsedArguments.getInnings(), hitGenerator); results.add(executor.submit(task)); }
+     * 
+     * // Wait for all the results to finish while (!results.isEmpty()) { Future<TaskResult> future =
+     * results.poll(); if (future != null) { future.get(); } }
+     * 
+     * // Queue up a few tasks to process, we'll measure the elapsed time and extrapolate this to
+     * determine // the optimization's execution time final long ESTIMATION_ITERATIONS =
+     * Math.min(indexer.size(), NUM_ITERATIONS / 2); long startTime = System.nanoTime(); for (long l =
+     * 0; l < ESTIMATION_ITERATIONS; l++) { MonteCarloMultiGameSimulationTask task = new
+     * MonteCarloMultiGameSimulationTask(indexer.getLineup(l), parsedArguments.getGames(),
+     * parsedArguments.getInnings(), hitGenerator); results.add(executor.submit(task)); }
+     * 
+     * // Wait for all the results to finish while (!results.isEmpty()) { Future<TaskResult> future =
+     * results.poll(); if (future != null) { future.get(); } }
+     * 
+     * // TODO: Account for partial results??
+     */
 
     // Do some extrapolation math
-    long estimationTimeNanos = (long) ((double) elapsedTimeNanos / ESTIMATION_ITERATIONS * indexer.size());
     long estimationTimeMs = TimeUnit.MILLISECONDS.convert(estimationTimeNanos, TimeUnit.NANOSECONDS);
     return new MonteCarloExhaustiveResult(estimationTimeMs);
   }

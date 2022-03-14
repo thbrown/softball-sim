@@ -1,4 +1,4 @@
-package com.github.thbrown.softballsim.datasource.gcpfunctions;
+package com.github.thbrown.softballsim.datasource.gcpbuckets;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -69,12 +69,14 @@ public class DataSourceGcpBuckets implements DataSource {
 
   @Override
   public void onComplete(CommandLine cmd, DataStats stats, Result finalResult) {
-    Logger.log(finalResult);
-    // if (!cmd.hasOption(CommandLineOptions.ESTIMATE_ONLY)) {
-    CloudUtils.upsertBlob(gson.toJson(finalResult), cmd.getOptionValue(ID), CACHED_RESULTS_BUCKET);
-    CloudUtils.deleteBlob(cmd.getOptionValue(ID), STATS_DATA_BUCKET);
-    CloudUtils.deleteBlob(cmd.getOptionValue(ID), CONTROL_FLAGS_BUCKET);
-    // }
+    // In the GCP function we can return the result of the estimation directly instead of reading it
+    // from the bucket, skip the write
+    if (!cmd.hasOption(CommandLineOptions.ESTIMATE_ONLY)) {
+      Logger.log(finalResult);
+      CloudUtils.upsertBlob(gson.toJson(finalResult), cmd.getOptionValue(ID), CACHED_RESULTS_BUCKET);
+      CloudUtils.deleteBlob(cmd.getOptionValue(ID), STATS_DATA_BUCKET);
+      CloudUtils.deleteBlob(cmd.getOptionValue(ID), CONTROL_FLAGS_BUCKET);
+    }
   }
 
   @Override

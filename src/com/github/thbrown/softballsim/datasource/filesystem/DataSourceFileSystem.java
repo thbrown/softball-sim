@@ -1,4 +1,4 @@
-package com.github.thbrown.softballsim.datasource.local;
+package com.github.thbrown.softballsim.datasource.filesystem;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -67,7 +67,7 @@ public class DataSourceFileSystem implements DataSource {
     Result currentResult = tracker.getCurrentResult();
 
     String result = gson.toJson(currentResult);
-    if (!cmd.hasOption(CommandLineOptions.ESTIMATE_ONLY)) { // This may no longer be necessary as estimations don't us
+    if (!cmd.hasOption(CommandLineOptions.ESTIMATE_ONLY)) { // This may no longer be necessary as estimations don't use
                                                             // progressTracker
       String statsFileLocation = cmd.getOptionValue(CACHE_PATH, CACHED_RESULTS_FILE_PATH);
       String fileName = getFileName(cmd, gson.toJson(stats));
