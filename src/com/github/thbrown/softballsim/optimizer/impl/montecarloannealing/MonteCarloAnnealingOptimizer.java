@@ -92,7 +92,7 @@ public class MonteCarloAnnealingOptimizer implements Optimizer<Result> {
 
   @Override
   public Class<? extends Result> getResultClass() {
-    return Result.class;
+    return MonteCarloAnnealingResult.class;
   }
 
   @Override

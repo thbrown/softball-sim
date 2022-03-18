@@ -227,4 +227,10 @@ public class StringUtils {
     return input.replaceAll("\r?\n", System.lineSeparator() + StringUtils.padLeft("", amount)).replaceAll("^",
         StringUtils.padLeft("", amount));
   }
+
+  public static void printBinary(byte[] input) {
+    for (byte b : input) {
+      System.out.println(Integer.toBinaryString(b & 255 | 256).substring(1));
+    }
+  }
 }

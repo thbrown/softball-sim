@@ -204,7 +204,7 @@ public class MonteCarloExhaustiveOptimizer implements Optimizer<MonteCarloExhaus
     validateData(battingData, playersInLineup);
     MonteCarloExhaustiveArgumentParser parsedArguments = new MonteCarloExhaustiveArgumentParser(arguments);
     BattingLineupIndexer indexer = lineupType.getLineupIndexer(battingData, playersInLineup);
-    
+
     List<DataPlayer> someLineup = indexer.getLineup(0).asList();
     HitGenerator hitGenerator = new HitGenerator(someLineup);
 

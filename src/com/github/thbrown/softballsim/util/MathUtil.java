@@ -22,4 +22,5 @@ public class MathUtil {
     nf.setMaximumFractionDigits(3);
     return nf.format(Math.abs(A - B) / ((A + B) / 2) * 100);
   }
+
 }

@@ -20,6 +20,7 @@ import com.google.gson.JsonPrimitive;
 import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.model.*;
 import com.google.common.collect.ImmutableList;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 
 /**
  * A GCP function for starting up a preemptible compute instance. Unlike the other functions in this
@@ -57,7 +58,7 @@ public class GcpFunctionsEntryPointCompute implements HttpFunction {
       // Password checking
       String pwd = Optional.ofNullable(map.get(GcpFunctionsEntryPointStart.PASSWORD_KEY)).orElseThrow(() -> {
         try {
-          Thread.sleep(3000); // Delay to prevent excessive guessing
+          Thread.sleep(1000); // Delay to prevent excessive guessing
         } catch (InterruptedException e) {
         }
         return new RuntimeException("Missing Password");
@@ -84,7 +85,7 @@ public class GcpFunctionsEntryPointCompute implements HttpFunction {
       // COMPLETE, PAUSED, etc...)
       String resultJson = CloudUtils.readBlob(id, DataSourceGcpBuckets.CACHED_RESULTS_BUCKET);
       Result result = gson.fromJson(resultJson, Result.class);
-      if (result.getStatus().isTerminal()) {
+      if (result != null && result.getStatus().isTerminal()) {
         Logger.log("Not starting compute instance, ");
         response.setContentType("application/json");
         response.setStatusCode(200);
@@ -110,7 +111,7 @@ public class GcpFunctionsEntryPointCompute implements HttpFunction {
 
       // Must start with a lower case letter, adding id and remaining zones so we can see some basic info
       // about the instance at a glance
-      final String intanceName = "o-" + id + "-" + futureZones.length;
+      final String intanceName = "optimization-" + id + "-" + futureZones.length;
 
       // TODO: retry on failure?
       Operation operation = makeInstance(id, nextZone, PROJECT, MACHINE_TYPE, intanceName,
@@ -207,7 +208,11 @@ public class GcpFunctionsEntryPointCompute implements HttpFunction {
     // @formatter:on
 
     // Send the request to create the instance
-    Compute compute = GcpComputeClientHelper.getComputeInstance();
-    return compute.instances().insert(project, zone, instance).execute();
+    try {
+      Compute compute = GcpComputeClientHelper.getComputeInstance();
+      return compute.instances().insert(project, zone, instance).execute();
+    } catch (GoogleJsonResponseException e) {
+      throw e;
+    }
   }
 }

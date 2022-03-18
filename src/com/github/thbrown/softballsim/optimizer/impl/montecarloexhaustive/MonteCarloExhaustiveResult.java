@@ -10,7 +10,6 @@ import com.github.thbrown.softballsim.ResultStatusEnum;
 import com.github.thbrown.softballsim.lineup.BattingLineup;
 import com.github.thbrown.softballsim.optimizer.OptimizerEnum;
 import com.github.thbrown.softballsim.util.HistogramUtils;
-import com.github.thbrown.softballsim.util.Logger;
 import com.github.thbrown.softballsim.util.StringUtils;
 
 public class MonteCarloExhaustiveResult extends Result {
@@ -18,6 +17,8 @@ public class MonteCarloExhaustiveResult extends Result {
   private final Map<Long, Long> histogram;
   private final BattingLineup oppositeOfOptimalLineup;
   private final double oppositeOfOptimalScore;
+
+  private final static String HISTOGRAM_CHAR = "\u2588"; // Unicode block
 
   public MonteCarloExhaustiveResult(BattingLineup lineup, double lineupScore, long countTotal, long countCompleted,
       long elapsedTimeMs, Map<Long, Long> histogram, ResultStatusEnum status, BattingLineup oppositeOfOptimalLineup,
@@ -75,7 +76,7 @@ public class MonteCarloExhaustiveResult extends Result {
             keyString.substring(0, keyString.length() - 1) + "." + keyString.substring(keyString.length() - 1),
             histogram.get(key));
       }
-      sb.append(StringUtils.indent(HistogramUtils.buildHistogram(formattedHistogram, 18, "█"), INDENT));
+      sb.append(StringUtils.indent(HistogramUtils.buildHistogram(formattedHistogram, 18, HISTOGRAM_CHAR), INDENT));
       sb.append("\n");
       sb.append("\n");
     }

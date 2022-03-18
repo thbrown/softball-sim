@@ -34,8 +34,8 @@ public class ResultDeserializer implements JsonDeserializer<Result> {
     JsonObject data = jsonObject.getAsJsonObject();
     Type targetClass = type.getResultClass();
 
-    // Avoid stack overflow caused by recursion: use the default deserializer if the
-    // optimizer is using the base result class
+    // We'll get a StackOverflow exception here if targetClass == Result.class, we should always be
+    // deserialising a subclass of Result
     return context.deserialize(data, targetClass);
   }
 

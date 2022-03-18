@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Optional;
 import com.github.thbrown.softballsim.CommandLineOptions;
 import com.github.thbrown.softballsim.Result;
+import com.github.thbrown.softballsim.ResultStatusEnum;
 import com.github.thbrown.softballsim.SoftballSim;
 import com.github.thbrown.softballsim.datasource.DataSourceEnum;
 import com.github.thbrown.softballsim.datasource.gcpbuckets.DataSourceGcpBuckets;
@@ -29,15 +30,14 @@ import com.google.gson.JsonPrimitive;
 /**
  * This class enables the ability for optimizers to be run via a GCP function.
  * 
- * Flags and data are supplied via the post body. Results (final and intermediate) are written to a
- * cloud storage bucket. This function will create compute instances to continue the work if this
- * function is unable to complete the job within it's configured timeout.
+ * Flags and data are supplied via the post body. Estimations are run synchronously, normal runs are
+ * run async and Results (final and intermediate) are written to a cloud storage bucket.
  */
 public class GcpFunctionsEntryPointStart implements HttpFunction {
 
   // Allow the function to run for TIMEOUT_IN_MILLIS before transitioning to
   // preemptible compute instances
-  private static final int TIMEOUT_IN_MILLIS = 15 * 1000;// 500 * 1000;
+  private static final int TIMEOUT_IN_MILLIS = 10 * 1000;// 500 * 1000;
   private static final String ZONES =
       "us-central1-a,us-central1-b,us-central1-c,us-central1-f";
 
@@ -70,7 +70,7 @@ public class GcpFunctionsEntryPointStart implements HttpFunction {
       // Password checking
       String pwd = Optional.ofNullable(map.get(PASSWORD_KEY)).orElseThrow(() -> {
         try {
-          Thread.sleep(3000); // Delay to prevent excessive guessing
+          Thread.sleep(500); // Delay to prevent excessive guessing
         } catch (InterruptedException e) {
         }
         return new RuntimeException("Missing Password");
@@ -129,79 +129,58 @@ public class GcpFunctionsEntryPointStart implements HttpFunction {
         }
       }
 
-      // Establish an application level timeout (before function infrastructure
-      // timeout) So we have time to transition to GCP compute to finish the job, if
-      // it hasn't completed by the time the timeout is hit
-      new Thread(() -> {
-        try {
-          Thread.sleep(TIMEOUT_IN_MILLIS);
+      // We don't want the optimization starting from scratch on compute engine
+      MapWrapper shallowCopy = new MapWrapper(map);
+      shallowCopy.remove("-" + CommandLineOptions.FORCE);
 
-          // We don't want the optimization starting from scratch on compute engine
-          MapWrapper shallowCopy = new MapWrapper(map);
-          shallowCopy.remove("-" + CommandLineOptions.FORCE);
+      // Get flags/values as string so we can pass it to the compute function
+      String stringArguments = argMapToShellString(shallowCopy);
 
-          // Get flags/values as string so we can pass it to the compute function
-          String stringArguments = argMapToShellString(shallowCopy);
+      // If this is an estimate only, run the optimization synchronously
+      if (map.get(ESTIMATE_ONLY_KEY) != null && !map.get(ESTIMATE_ONLY_KEY).equalsIgnoreCase("false")) {
+        // Run optimization with those command line arguments
+        Logger.log(id + " arguments: " + args.toString());
+        Result result = SoftballSim.mainInternal(args.toArray(new String[args.size()]));
+        Logger.log(id + " run complete " + result);
 
-          // If this is an estimate only, we couldn't get an estimate in time, return null
-          if (map.get(ESTIMATE_ONLY_KEY) != null && !map.get(ESTIMATE_ONLY_KEY).equalsIgnoreCase("false")) {
-            Logger.log(id + " estimate could not be determined");
-            CloudUtils.send400Error(response, "application timeout too long for estimate to complete");
-            return;
-          }
+        // Return the result
+        Logger.log(id + " returning");
+        response.setContentType("application/json");
+        response.setStatusCode(200);
+        response.getOutputStream().write(gson.toJson(result).getBytes());
+        response.getOutputStream().flush();
+        return;
+      }
 
-          // Start the job on a compute instance
-          JsonObject jsonObject = new JsonObject();
-          jsonObject.add(GcpFunctionsEntryPointCompute.ARGS_KEY, new JsonPrimitive(stringArguments));
-          jsonObject.add(GcpFunctionsEntryPointCompute.ID_KEY, new JsonPrimitive(map.get(ID_KEY)));
-          jsonObject.add(GcpFunctionsEntryPointCompute.ZONES_KEY, new JsonPrimitive(ZONES));
-          jsonObject.add(PASSWORD_KEY, new JsonPrimitive(pwd));
-          String jsonPayload = gson.toJson(jsonObject);
+      // Change the status to IN_PROGRESS if it's not already (This can happen if the opt was paused or it
+      // error'ed out)
+      String resultString = CloudUtils.readBlob(id, DataSourceGcpBuckets.CACHED_RESULTS_BUCKET);
+      Result result = GsonAccessor.getInstance().getCustom().fromJson(resultString, Result.class);
+      if (result != null && result.getStatus() != ResultStatusEnum.IN_PROGRESS) {
+        Logger.log("Changing status from " + result.getStatus() + " to IN_PROGRESS");
+        Result updatedResult = result.copyWithNewStatus(ResultStatusEnum.IN_PROGRESS, null);
+        String updatedResultString = GsonAccessor.getInstance().getCustom().toJson(updatedResult);
+        CloudUtils.upsertBlob(updatedResultString, id, DataSourceGcpBuckets.CACHED_RESULTS_BUCKET);
+      }
 
-          // TODO: can't we just invoke this directly?
-          Logger.log(id + " timeout exceeded, sending compute request " + jsonPayload);
-          int status = this.sendPost(COMPUTE_FUNCTION_ENDPOINT, jsonPayload);
-          Logger.log(id + " compute request status: " + status);
+      // Otherwise, start the job on a compute instance
+      JsonObject jsonObject = new JsonObject();
+      jsonObject.add(GcpFunctionsEntryPointCompute.ARGS_KEY, new JsonPrimitive(stringArguments));
+      jsonObject.add(GcpFunctionsEntryPointCompute.ID_KEY, new JsonPrimitive(map.get(ID_KEY)));
+      jsonObject.add(GcpFunctionsEntryPointCompute.ZONES_KEY, new JsonPrimitive(ZONES));
+      jsonObject.add(PASSWORD_KEY, new JsonPrimitive(pwd));
+      String jsonPayload = gson.toJson(jsonObject);
 
-          // Send success message as json
-          String jsonPayloadTwo = CloudUtils.getResponseJson("SUCCESS", "job transferred to compute");
-          response.setContentType("application/json");
-          response.setStatusCode(200);
-          response.getOutputStream().write(jsonPayloadTwo.getBytes());
-          response.getOutputStream().flush();
-        } catch (Exception e) {
-          Logger.log(id + " forcing function exit 3 " + e.toString());
-          try {
-            CloudUtils.send400Error(response, e.toString());
-          } catch (IOException e1) {
-            Logger.log(id + " problem sending 400 " + e1);
-          }
+      // TODO: can't we just invoke this directly?
+      Logger.log(id + " sending compute request " + jsonPayload);
+      int status = this.sendPost(COMPUTE_FUNCTION_ENDPOINT, jsonPayload);
+      Logger.log(id + " compute request status: " + status);
 
-          // Log stack
-          StringWriter sw = new StringWriter();
-          PrintWriter pw = new PrintWriter(sw);
-          e.printStackTrace(pw);
-          Logger.log(sw.toString());
-
-          // Exit the whole program, not just this thread
-          System.exit(1);
-        } finally {
-          // End this function's execution
-          Logger.log(id + " forcing function exit");
-          System.exit(0);
-        }
-      }).start();
-
-      // Run optimization with those command line arguments
-      Logger.log(id + " arguments: " + args.toString());
-      Result result = SoftballSim.mainInternal(args.toArray(new String[args.size()]));
-      Logger.log(id + " run complete " + result);
-
-      // Return the result
-      Logger.log(id + " returning");
+      // Send success message as json
+      String jsonPayloadTwo = CloudUtils.getResponseJson("SUCCESS", "job transferred to compute");
       response.setContentType("application/json");
       response.setStatusCode(200);
-      response.getOutputStream().write(gson.toJson(result).getBytes());
+      response.getOutputStream().write(jsonPayloadTwo.getBytes());
       response.getOutputStream().flush();
     } catch (Exception e) {
       // Log stack

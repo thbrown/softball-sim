@@ -40,6 +40,13 @@ Then, from the project root directory, run these commands to deploy each functio
 
 `gcloud functions deploy softball-sim-pause --entry-point=com.github.thbrown.softballsim.cloud.GcpFunctionsEntryPointPause --timeout=20 --memory=256 --runtime=java11 --trigger-http --source=build/libs --allow-unauthenticated --max-instances=10 --set-env-vars=PASSWORD_HASH=<your_pwd_hash>`
 
+### Other Setup
+
+The softball-sim-compute function above defers to a new cloud compute instance after a short time. This requires setting up a snapshot to serve as a disk image for newly created compute instances. The snapshot should be named whatever the value of GcpFunctionsEntryPointCompute.SNAPSHOT_NAME is (currently "optimization-base-2"). The snapshot should contain softball-sim.jar in the home directory and the jar should have execution permissions:
+
+> wget https://github.com/thbrown/softball-sim/releases/download/v1.0/softball-sim.jar
+> chmod +x softball-sim.jar
+
 ### Testing
 
 Unlike running the the application from the command line, which uses the hash of the arguments and data to create an identifier for optimization run. The function requires that you supply your own identifier. `zsjdklasaskfjaskfdjs` is id used in the example.

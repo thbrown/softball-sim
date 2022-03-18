@@ -7,6 +7,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import com.github.thbrown.softballsim.util.GsonAccessor;
 import com.github.thbrown.softballsim.util.Logger;
+import com.github.thbrown.softballsim.util.StringUtils;
 import com.google.cloud.functions.HttpResponse;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
@@ -99,4 +100,5 @@ public class CloudUtils {
     jsonObject.add("message", new JsonPrimitive(message));
     return GsonAccessor.getInstance().getDefault().toJson(jsonObject);
   }
+
 }

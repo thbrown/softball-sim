@@ -1,6 +1,7 @@
 package com.github.thbrown.softballsim;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -11,7 +12,9 @@ import com.github.thbrown.softballsim.data.gson.DataPlateAppearance;
 import com.github.thbrown.softballsim.data.gson.DataPlayer;
 import com.github.thbrown.softballsim.data.gson.DataStats;
 import com.github.thbrown.softballsim.data.gson.DataTeam;
+import com.github.thbrown.softballsim.optimizer.OptimizerEnum;
 import com.github.thbrown.softballsim.optimizer.gson.OptimizerDefinition;
+import com.github.thbrown.softballsim.optimizer.impl.montecarloannealing.MonteCarloAnnealingResult;
 import com.github.thbrown.softballsim.util.GsonAccessor;
 import com.github.thbrown.softballsim.util.Logger;
 
@@ -57,6 +60,23 @@ public class DeserializationTest {
     String json = new String(Files.readAllBytes(Paths.get("./stats/exampleData.json")));
 
     Map<String, String> targetObject = GsonAccessor.getInstance().getCustom().fromJson(json, Map.class);
+  }
+
+  /**
+   * This test fails if an optimizer returns the abstract class "Result.class" from it's
+   * "getResultClass()" method.
+   * 
+   * The Result class can not be deserialized and will result in a StackOverflow exception when using
+   * cached results.
+   * 
+   * Optimizations must provide their own subclass of Result here even if it's behavior is no
+   * different (See MonteCarloAnnealingResult as an axample)
+   */
+  @Test
+  public void optimizersMustReturnResultSubtype() throws IOException {
+    for (OptimizerEnum opt : OptimizerEnum.values()) {
+      assertNotEquals(opt.getResultClass(), Result.class);
+    }
   }
 
 }

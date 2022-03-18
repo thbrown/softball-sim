@@ -51,7 +51,7 @@ public class MonteCarloAdaptiveResult extends Result {
     sb.append("Avg simulations run per lineup: ");
     sb.append(StringUtils.formatDecimal(((double) this.simulationsRequired / (double) super.getCountCompleted()), 2));
     sb.append("\n");
-    sb.append("% of indeterminant comparisons: ");
+    sb.append("% of indeterminate comparisons: ");
     sb.append(StringUtils
         .formatDecimal(((double) this.comparisonsThatReachedSimLimit / (double) super.getCountCompleted() * 100), 3));
     return sb.toString();
