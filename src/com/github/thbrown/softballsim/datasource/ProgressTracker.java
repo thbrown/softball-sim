@@ -7,6 +7,7 @@ import com.github.thbrown.softballsim.ResultStatusEnum;
 import com.github.thbrown.softballsim.data.gson.DataStats;
 import com.github.thbrown.softballsim.util.CircularArray;
 import com.github.thbrown.softballsim.util.Logger;
+import com.github.thbrown.softballsim.optimizer.EmptyResult;
 import com.github.thbrown.softballsim.optimizer.OptimizerEnum;
 
 /**
@@ -55,7 +56,7 @@ public final class ProgressTracker {
     this.updateInterval = Long.parseLong(updateIntervalString);
 
     if (initialResult == null) {
-      initialResult = new Result(optimizer, null, 0, 0, 0, 0, ResultStatusEnum.NOT_STARTED) {};
+      initialResult = new EmptyResult(optimizer, ResultStatusEnum.NOT_STARTED);
     }
     updateResults(initialResult);
   }
@@ -128,6 +129,8 @@ public final class ProgressTracker {
 
         // Exit this thread if this is an estimate only run (since we've waited for
         // one updateInterval)
+        // TODO: I don't think this can happen anymore with changes to softball-sim, estimations don't use
+        // ProgressTracker, remove this section?
         boolean estimateOnly = cmd.hasOption(CommandLineOptions.ESTIMATE_ONLY);
         if (estimateOnly) {
           // Make sure onUpdate will use the result with the ESTIMATE status

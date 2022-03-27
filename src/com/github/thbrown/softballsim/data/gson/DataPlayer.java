@@ -153,10 +153,11 @@ public class DataPlayer {
     }
 
     // Remember these results so we don't have to calculate them again
-    this.directOutCount = zeroIfNull(results.get("Out"));
+    this.directOutCount =
+        zeroIfNull(results.get("Out")) + zeroIfNull(results.get("DP")) + zeroIfNull(results.get("TP"));
     this.errorCount = zeroIfNull(results.get("E"));
     this.fcCount = zeroIfNull(results.get("FC"));
-    this.strikeoutCount = zeroIfNull(results.get("K"));
+    this.strikeoutCount = zeroIfNull(results.get("K")) + zeroIfNull(results.get("Ʞ"));
     this.sacCount = zeroIfNull(results.get("SAC"));
     this.walkCount = zeroIfNull(results.get("BB"));
     this.singleCount = zeroIfNull(results.get("1B"));

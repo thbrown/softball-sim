@@ -61,9 +61,7 @@ public class GcpFunctionsEntryPointQuery implements HttpFunction {
       }
 
       String contentString = CloudUtils.readBlob(id, DataSourceGcpBuckets.CACHED_RESULTS_BUCKET);
-      response.setContentType("application/json");
-      response.setStatusCode(200);
-      response.getOutputStream().write(contentString.getBytes());
+      CloudUtils.send200Success(response, contentString);
     } catch (Exception e) {
       // Log stack
       StringWriter sw = new StringWriter();

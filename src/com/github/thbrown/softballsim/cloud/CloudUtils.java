@@ -86,6 +86,22 @@ public class CloudUtils {
     }
   }
 
+  public static void send200Success(HttpResponse response, String message) throws IOException {
+    String jsonPayloadTwo = CloudUtils.getResponseJson("SUCCESS", message);
+    response.setContentType("application/json");
+    response.setStatusCode(200);
+    response.getOutputStream().write(jsonPayloadTwo.getBytes());
+    response.getOutputStream().flush();
+  }
+
+  public static void send200Warning(HttpResponse response, String message) throws IOException {
+    String jsonPayloadTwo = CloudUtils.getResponseJson("WARNING", message);
+    response.setContentType("application/json");
+    response.setStatusCode(200);
+    response.getOutputStream().write(jsonPayloadTwo.getBytes());
+    response.getOutputStream().flush();
+  }
+
   public static void send400Error(HttpResponse response, String message) throws IOException {
     response.setContentType("application/json");
     response.setStatusCode(400);

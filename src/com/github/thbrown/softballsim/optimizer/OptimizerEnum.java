@@ -146,7 +146,7 @@ public enum OptimizerEnum {
     return getEnumFromId(String.valueOf(id));
   }
 
-  private static OptimizerEnum getEnumFromId(String id) {
+  public static OptimizerEnum getEnumFromId(String id) {
     return ENUM_ID_MAP.get(id);
   }
 

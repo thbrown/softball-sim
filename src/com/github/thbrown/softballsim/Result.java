@@ -13,6 +13,7 @@ import com.github.thbrown.softballsim.util.GsonAccessor;
 import com.github.thbrown.softballsim.util.StringUtils;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.github.thbrown.softballsim.util.Logger;
 
 
@@ -108,6 +109,18 @@ public abstract class Result {
     obj.addProperty(Result.STATUS_VARIABLE_NAME, newStatus.name());
     obj.addProperty(Result.STATUS_MESSAGE_VARIABLE_NAME, newStatusMessage);
     return g.fromJson(obj, this.getClass());
+  }
+
+  /**
+   * Copy an existing Result but provide an updated status and statusMessages. This is a static method
+   * that works on a result JSON string only, it never becomes a Result Java object.
+   */
+  public static String copyWithNewStatusStringOnly(String jsonResult, ResultStatusEnum newStatus,
+      String newStatusMessage) {
+    JsonObject obj = JsonParser.parseString(jsonResult).getAsJsonObject();
+    obj.addProperty(Result.STATUS_VARIABLE_NAME, newStatus.name());
+    obj.addProperty(Result.STATUS_MESSAGE_VARIABLE_NAME, newStatusMessage);
+    return GsonAccessor.getInstance().getDefault().toJson(obj);
   }
 
   /**

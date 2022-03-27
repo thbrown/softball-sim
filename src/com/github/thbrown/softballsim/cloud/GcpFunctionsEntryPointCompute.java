@@ -81,17 +81,14 @@ public class GcpFunctionsEntryPointCompute implements HttpFunction {
       Logger.log("Id: " + id);
       Logger.log("Zones: " + Arrays.toString(zones) + " " + zones.length);
 
-      // Don't start a new compute instance if the result in a terminal state (e.g.
+      // Don't start a new compute instance if the result is in a terminal state (e.g.
       // COMPLETE, PAUSED, etc...)
       String resultJson = CloudUtils.readBlob(id, DataSourceGcpBuckets.CACHED_RESULTS_BUCKET);
       Result result = gson.fromJson(resultJson, Result.class);
       if (result != null && result.getStatus().isTerminal()) {
         Logger.log("Not starting compute instance, ");
-        response.setContentType("application/json");
-        response.setStatusCode(200);
-        String payload = CloudUtils.getResponseJson("SUCCESS",
+        CloudUtils.send200Success(response,
             "Success - no new compute instance needed, result is in state " + result.getStatus());
-        response.getOutputStream().write(payload.getBytes());
         return;
       }
 
@@ -99,10 +96,9 @@ public class GcpFunctionsEntryPointCompute implements HttpFunction {
       if (zones.length == 0) {
         Logger.log("ERROR - Zones exhausted");
         String resultJsonOriginal = CloudUtils.readBlob(id, DataSourceGcpBuckets.CACHED_RESULTS_BUCKET);
-        Result resultOriginal = gson.fromJson(resultJsonOriginal, Result.class);
-        Result updatedResult = resultOriginal.copyWithNewStatus(ResultStatusEnum.ERROR,
+        String updatedResult = Result.copyWithNewStatusStringOnly(resultJsonOriginal, ResultStatusEnum.ERROR,
             "Cloud resources unavailable, try again later");
-        CloudUtils.upsertBlob(gson.toJson(updatedResult), id, DataSourceGcpBuckets.CACHED_RESULTS_BUCKET);
+        CloudUtils.upsertBlob(updatedResult, id, DataSourceGcpBuckets.CACHED_RESULTS_BUCKET);
         throw new RuntimeException("Zones Exhausted");
       }
 
@@ -119,10 +115,7 @@ public class GcpFunctionsEntryPointCompute implements HttpFunction {
       Logger.log(id + " operation: " + operation.getSelfLink());
 
       // Send the response
-      response.setContentType("application/json");
-      response.setStatusCode(200);
-      String payload = CloudUtils.getResponseJson("SUCCESS", "Success - sent compute request start command.");
-      response.getOutputStream().write(payload.getBytes());
+      CloudUtils.send200Success(response, "Success - sent compute request start command.");
     } catch (Exception e) {
       Logger.log(e);
       CloudUtils.send400Error(response, e.toString());
@@ -208,11 +201,8 @@ public class GcpFunctionsEntryPointCompute implements HttpFunction {
     // @formatter:on
 
     // Send the request to create the instance
-    try {
-      Compute compute = GcpComputeClientHelper.getComputeInstance();
-      return compute.instances().insert(project, zone, instance).execute();
-    } catch (GoogleJsonResponseException e) {
-      throw e;
-    }
+    Compute compute = GcpComputeClientHelper.getComputeInstance();
+    return compute.instances().insert(project, zone, instance).execute();
+
   }
 }

@@ -61,11 +61,8 @@ public class GcpFunctionsEntryPointPause implements HttpFunction {
       // optimization should stop
       CloudUtils.upsertBlob("HALT", id, DataSourceGcpBuckets.CONTROL_FLAGS_BUCKET);
 
-      // Success, but no response needed
-      response.setContentType("application/json");
-      response.setStatusCode(200);
-      String payload = CloudUtils.getResponseJson("SUCCESS", "Successfully sent pause request");
-      response.getOutputStream().write(payload.getBytes());
+      // Return success
+      CloudUtils.send200Success(response, "Successfully sent pause request");
     } catch (Exception e) {
       // Log stack
       StringWriter sw = new StringWriter();
