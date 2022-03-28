@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import com.github.thbrown.softballsim.util.Logger;
 import com.github.thbrown.softballsim.util.StringUtils;
 
 public class DataPlayer {
@@ -152,12 +153,17 @@ public class DataPlayer {
       }
     }
 
+    Logger.log(results);
+
     // Remember these results so we don't have to calculate them again
     this.directOutCount =
         zeroIfNull(results.get("Out")) + zeroIfNull(results.get("DP")) + zeroIfNull(results.get("TP"));
     this.errorCount = zeroIfNull(results.get("E"));
     this.fcCount = zeroIfNull(results.get("FC"));
-    this.strikeoutCount = zeroIfNull(results.get("K")) + zeroIfNull(results.get("Ʞ"));
+
+    // "êž°" and "\u2588" are both different encodings for the backward K unicode character
+    this.strikeoutCount =
+        zeroIfNull(results.get("K")) + zeroIfNull(results.get("Ʞ")) + zeroIfNull(results.get("\uA7B0"));
     this.sacCount = zeroIfNull(results.get("SAC"));
     this.walkCount = zeroIfNull(results.get("BB"));
     this.singleCount = zeroIfNull(results.get("1B"));
