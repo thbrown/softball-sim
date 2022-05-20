@@ -79,11 +79,11 @@ Out,1B,2B,SAC,E,HRo,3B,1B,1B,Out,Out,2B,1B,Out,Out</p>
 <p>Instead, it employs <a href="https://en.wikipedia.org/wiki/Simulated_annealing">simulated annealing</a>, a global optimization technique inspired by heating and controlled cooling of a material to alter its physical properties, to seaerch only a subset of possible lineups.</p>
 <p>If you have 11 or more batters in your lineup, this is most likely the optimizer you&#39;ll want to use.</p>
 <h2>Overview</h2>
-<p>Dispite this optimizer&#39;s much smaller rutime, it&#39;s results are quite good.</p>
-<p>In tests on &#34;STANDARD&#34;, &#34;ALTERNATING_GENDER&#34;, &#34;NO_CONSECUTIVE_FEMALES&#34; lineup types, the optimizer genrally obtains the theoritically optimal lineup when run for at least 30 seconds.</p>
+<p>Despite this optimizer&#39;s much smaller rutime, it&#39;s results are quite good.</p>
+<p>In tests on &#34;STANDARD&#34;, &#34;ALTERNATING_GENDER&#34;, &#34;NO_CONSECUTIVE_FEMALES&#34; lineup types, the optimizer generally obtains the theoretically optimal lineup when run for at least 30 seconds.</p>
 <p>That&#39;s a high quality answer in a fraction of the time. It&#39;s also currently the only viable optimizer for larger lineups (11&#43; batters).</p>
-<p>Because simulated annealing is a stocastic process (relies on random numbers) you may get different results with each run, particularly if your selected time durations are low.</p>
-<p>This optimizer is also multi-threaded. It will run several instances of iteself simultaniously and, after each instance has completed, it will select the highest scoring lineup.</p>
+<p>Because simulated annealing is a stochastic process (relies on random numbers) you may get different results with each run, particularly if your selected time durations are low.</p>
+<p>This optimizer is also multi-threaded. It will run several instances of itself simultaneously and, after each instance has completed, it will select the highest scoring lineup.</p>
 <h2>Related Optimizers</h2>
 <p>This optimizer uses multiple game simulations (see Monte Carlo Exhaustive) and statistical t-tests (see Monte Carlo Adaptive) to determine whether a particular lineup is better or worse than another.</p>
 </div><div class="gallery-fade"></div><div id="button- 2" class="gallery-tile-add-button  add-button  hidden" onClick="selectToggleClick(&quot;2&quot;,event)">+ Add</div></div></div></div><div id="optimizer-modal" class="modal"><div class="modal-content"><span class="close">&times;</span><div id="modal-body"><div class="loader"></div></div></div></div></main></body><script type="text/javascript" src="js/script.js"></script></html>

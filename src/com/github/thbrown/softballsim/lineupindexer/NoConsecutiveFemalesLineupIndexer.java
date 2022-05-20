@@ -333,9 +333,9 @@ public class NoConsecutiveFemalesLineupIndexer implements BattingLineupIndexer<S
       }
     }
 
-    // Get the indexes of the order the males and females seperately
+    // Get the indexes of the order the males and females separately
     int[] menOrder = CombinatoricsUtil.getOrdering(this.men, men);
-    long menPermiutationIndex = CombinatoricsUtil.getPermutationIndex(menOrder);
+    long menPermutationIndex = CombinatoricsUtil.getPermutationIndex(menOrder);
 
     int[] womenOrder = CombinatoricsUtil.getOrdering(this.women, women);
     long womenPermutationIndex = CombinatoricsUtil.getPermutationIndex(womenOrder);
@@ -354,12 +354,12 @@ public class NoConsecutiveFemalesLineupIndexer implements BattingLineupIndexer<S
       womenSlotsTrimmed = Arrays.stream(womenSlotsTrimmed).map(i -> i - 1).toArray();
       long womenCombinationIndex = CombinatoricsUtil.getCombinationIndex(womenSlotsTrimmed);
       return womenCombinationIndex * this.femalePermutationCount * this.malePermutationCount
-          + womenPermutationIndex * this.malePermutationCount + menPermiutationIndex;
+          + womenPermutationIndex * this.malePermutationCount + menPermutationIndex;
     } else {
       // After the cutoff - a women is never batting last
       long womenCombinationIndex = CombinatoricsUtil.getCombinationIndex(womenSlots);
       return (cutoff + womenCombinationIndex) * this.femalePermutationCount * this.malePermutationCount
-          + womenPermutationIndex * this.malePermutationCount + menPermiutationIndex;
+          + womenPermutationIndex * this.malePermutationCount + menPermutationIndex;
     }
 
   }

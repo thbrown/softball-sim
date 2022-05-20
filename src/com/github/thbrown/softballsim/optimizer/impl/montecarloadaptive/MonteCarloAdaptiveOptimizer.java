@@ -423,6 +423,7 @@ public class MonteCarloAdaptiveOptimizer implements Optimizer<MonteCarloAdaptive
     } else if (lineupType == LineupTypeEnum.NO_CONSECUTIVE_FEMALES) {
       estimationTimeMs = (long) (Math.pow(estimationTimeMs, .45) * 600);
     }
+    // TODO: NO_CONSECUTIVE_FEMALES_AND_NO_THREE_CONSECUTIVE_MALES
 
     return new MonteCarloAdaptiveResult(estimationTimeMs);
 

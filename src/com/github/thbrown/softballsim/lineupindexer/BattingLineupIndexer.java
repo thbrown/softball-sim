@@ -21,7 +21,6 @@ public interface BattingLineupIndexer<T extends BattingLineup> {
    */
   public T getLineup(long index);
 
-
   /**
    * Given a lineup, this method returns its index.
    */
@@ -36,9 +35,9 @@ public interface BattingLineupIndexer<T extends BattingLineup> {
    * 
    * 1) Neighbors should have an estimated 'runs scored' value that is more alike than non-neighbors.
    * 
-   * 2) It should be possible to reach the optimial lineup from any other lineup by successive calls
-   * to getRandomNeighbor(...). The fewer steps required, the better the implementation. Because of
-   * this, a single lineup typically has lots of neighbors.
+   * 2) It should be possible to reach the optimal lineup from any other lineup by successive calls to
+   * getRandomNeighbor(...). The fewer steps required, the better the implementation. Because of this,
+   * a single lineup typically has lots of neighbors.
    */
   public Pair<Long, T> getRandomNeighbor(long index);
 

@@ -27,6 +27,51 @@ import org.apache.commons.math3.util.Pair;
 
 public class LineupIndexerTest {
 
+  // @Test
+  public void lineupsAreUnique() throws IOException, InterruptedException {
+    // Get data from file system
+    CommandLineOptions commandLineOptions = CommandLineOptions.getInstance();
+    Options commonOptions = commandLineOptions.getOptionsForFlags(DataSourceEnum.FILE_SYSTEM, null);
+    CommandLine commonCmd = commandLineOptions.parse(commonOptions, new String[0], true);
+    DataStats stats = DataSourceEnum.FILE_SYSTEM.getData(commonCmd);
+
+    List<String> players = new ArrayList<>();
+    players.add("Dora"); // F
+    players.add("Tina"); // F
+    players.add("Brianna"); // F
+    players.add("Alexa"); // F
+
+    players.add("Keenan"); // M
+    players.add("Nelly"); // M
+    players.add("Paul"); // M
+    players.add("Ivan"); // M
+    players.add("Tim"); // M
+    players.add("Aaron"); // M
+
+    players = stats.convertPlayersListToIds(players);
+
+    BattingLineupIndexer indexer =
+        LineupTypeEnum.NO_CONSECUTIVE_FEMALES_AND_NO_THREE_CONSECUTIVE_MALES.getLineupIndexer(stats, players);
+    Logger.log(LineupTypeEnum.NO_CONSECUTIVE_FEMALES_AND_NO_THREE_CONSECUTIVE_MALES + " (" + indexer.size() + ")");
+
+    for (int i = 0; i < indexer.size(); i++) {
+      long index = i;// ThreadLocalRandom.current().nextLong(indexer.size());
+
+      BattingLineup lineup = indexer.getLineup(index);
+
+      // Logger.log(index + " " + lineup);
+
+      long roundTripIndex = indexer.getIndex(lineup);
+
+      BattingLineup lineup2 = indexer.getLineup(roundTripIndex);
+
+      assertEquals("The index before getLineup/getIndex lookup did not match the index after on index " + index, index,
+          roundTripIndex);
+    }
+
+
+  }
+
   @Test
   public void lineupIndexRoundTrip() throws IOException, InterruptedException {
     // Get data from file system
@@ -53,23 +98,22 @@ public class LineupIndexerTest {
       Logger.log(lineupType + " (" + indexer.size() + ")");
 
       for (int i = 0; i < indexer.size(); i++) {
-        // long index = i;// ThreadLocalRandom.current().nextLong(indexer.size());
+        long index = i;// ThreadLocalRandom.current().nextLong(indexer.size());
 
-        // BattingLineup lineup = indexer.getLineup(index);
+        BattingLineup lineup = indexer.getLineup(index);
 
-        // long roundTripIndex = indexer.getIndex(lineup);
+        long roundTripIndex = indexer.getIndex(lineup);
 
-        // BattingLineup lineup2 = indexer.getLineup(roundTripIndex);
+        BattingLineup lineup2 = indexer.getLineup(roundTripIndex);
 
-        // assertEquals("The index before getLineup/getIndex lookup did not match the index after for " +
-        // lineupType
-        // + " on index " + index, index, roundTripIndex);
+        assertEquals("The index before getLineup/getIndex lookup did not match the index after for " + lineupType
+            + " on index " + index, index, roundTripIndex);
       }
     }
   }
 
 
-  @Test
+  // @Test
   public void lineupRandomNeighborTest() throws IOException, InterruptedException {
     // Get data from file system
     CommandLineOptions commandLineOptions = CommandLineOptions.getInstance();

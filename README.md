@@ -61,7 +61,7 @@ Flags (more command line flags will be available based on which optimizer and da
                                 file. Default: ./stats
  -t,--lineup-type <arg>         Type of lineup to be simulated. You may specify the name or the id.
                                 Options are [STANDARD - 0, ALTERNATING_GENDER - 1,
-                                NO_CONSECUTIVE_FEMALES - 2]. Default: STANDARD
+                                NO_CONSECUTIVE_FEMALES - 2, NO_CONSECUTIVE_FEMALES_AND_NO_THREE_CONSECUTIVE_MALES - 3]. Default: STANDARD
  -v,--verbose                   In development. If present, print debuging details on error.
 ```
 

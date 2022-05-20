@@ -7,7 +7,8 @@
   "supportedLineupTypes": [
     "STANDARD",
     "ALTERNATING_GENDER",
-    "NO_CONSECUTIVE_FEMALES"
+    "NO_CONSECUTIVE_FEMALES",
+    "NO_CONSECUTIVE_FEMALES_AND_NO_THREE_CONSECUTIVE_MALES"
   ],
   "pauseable": true,
   "options": [

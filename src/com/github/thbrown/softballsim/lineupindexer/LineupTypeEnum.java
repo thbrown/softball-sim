@@ -14,7 +14,10 @@ public enum LineupTypeEnum implements LineupIndexerFactory {
   // Register batting lineup indexers here
   STANDARD(0, (stats, players) -> new StandardBattingLineupIndexer(stats, players)),
   ALTERNATING_GENDER(1, (stats, players) -> new AlternatingGenderLineupIndexer(stats, players)),
-  NO_CONSECUTIVE_FEMALES(2, (stats, players) -> new NoConsecutiveFemalesLineupIndexer(stats, players));
+  NO_CONSECUTIVE_FEMALES(2, (stats, players) -> new NoConsecutiveFemalesLineupIndexer(stats, players)),
+  NO_CONSECUTIVE_FEMALES_AND_NO_THREE_CONSECUTIVE_MALES(
+      3,
+      (stats, players) -> new NCS_NTCM_LineupIndexer(stats, players));
 
   private static final Map<String, LineupTypeEnum> ENUM_NAME_MAP;
   private static final Map<String, LineupTypeEnum> ENUM_ID_MAP;

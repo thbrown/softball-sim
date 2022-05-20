@@ -8,7 +8,7 @@ This document describes the format of the definition files. Unit tests will vali
 - **img** - String. Url to the image to use in the gallery for this optimizer.
 - **shortDescription** - String. A brief description of your optimizer, how it works, and what makes it unique from other optimizers. There is currently no hard length limit for this but try to keep it succinct.
 - **longDescriptionFile** - String. The name of the file which serves as a README for the optimzer. In this file you can get into all the dirty details about how your optimizer works. The actual file should be added inside the ../descriptions directory.
-- **supportedLineupTypes** - Array of Strings. The lineup types that this optimizer supports, optimizers don't have to support all lineup types, but you must support at least one! Valid values `NORMAL`, `ALTERNATING_GENDER`, and `NO_CONSECUTIVE_FEMALES`
+- **supportedLineupTypes** - Array of Strings. The lineup types that this optimizer supports, optimizers don't have to support all lineup types, but you must support at least one! Valid values `NORMAL`, `ALTERNATING_GENDER`, `NO_CONSECUTIVE_FEMALES`, and `NO_CONSECUTIVE_FEMALES_AND_NO_THREE_CONSECUTIVE_MALES`
 - **options** - Array of Objects. these are the arguments that the optimizer consumes. If the optimizer has no options, set this to an empty array.
 - **uiVisibility** - Enum. Defines whether or not this optimizer should appear in the optimizer gallery web page. The gallery HTML is generated as part of the build process. Choices are `STANDARD` or `HIDDEN`. Defaults to `STANDARD`.
 
