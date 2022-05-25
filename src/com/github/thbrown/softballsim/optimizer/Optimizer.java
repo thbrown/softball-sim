@@ -2,7 +2,6 @@ package com.github.thbrown.softballsim.optimizer;
 
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import com.github.thbrown.softballsim.Result;
 import com.github.thbrown.softballsim.data.gson.DataStats;
 import com.github.thbrown.softballsim.datasource.ProgressTracker;

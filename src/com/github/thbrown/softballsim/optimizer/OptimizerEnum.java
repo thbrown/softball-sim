@@ -23,6 +23,7 @@ import com.github.thbrown.softballsim.datasource.ProgressTracker;
 import com.github.thbrown.softballsim.lineupindexer.LineupTypeEnum;
 import com.github.thbrown.softballsim.optimizer.gson.OptimizerDefinition;
 import com.github.thbrown.softballsim.optimizer.impl.montecarloexhaustive.MonteCarloExhaustiveOptimizer;
+import com.github.thbrown.softballsim.optimizer.impl.sortbyaverage.SortByAverageOptimizer;
 import com.github.thbrown.softballsim.optimizer.impl.montecarloadaptive.MonteCarloAdaptiveOptimizer;
 import com.github.thbrown.softballsim.optimizer.impl.montecarloannealing.MonteCarloAnnealingOptimizer;
 import com.github.thbrown.softballsim.optimizer.impl.expectedvalue.ExpectedValueOptimizer;
@@ -40,7 +41,8 @@ public enum OptimizerEnum {
   MONTE_CARLO_EXHAUSTIVE(0, new MonteCarloExhaustiveOptimizer()),
   MONTE_CARLO_ADAPTIVE(1, new MonteCarloAdaptiveOptimizer()),
   MONTE_CARLO_ANNEALING(2, new MonteCarloAnnealingOptimizer()),
-  EXPECTED_VALUE(3, new ExpectedValueOptimizer());
+  EXPECTED_VALUE(3, new ExpectedValueOptimizer()),
+  SORT_BY_AVERAGE(4, new SortByAverageOptimizer());
 
   private final int id;
   private final Optimizer<? extends Result> optimizerImplementation;

@@ -25,25 +25,31 @@ function optimizerClick(id, nameId, imgUrlId, descriptionId) {
   let name = document.getElementById(nameId).innerHTML;
   let img = document.getElementById(imgUrlId).innerHTML;
   let description = document.getElementById(descriptionId).innerHTML;
-  
+
   // Set all the add button text based on whether or not the button is selected (TODO: DRY)
   let addButtonHtml = "";
-  let numericId = parseInt(id)
-  console.log(numericId, optimizerSelection, optimizerSelection.has(numericId), optimizerSelection && optimizerSelection.has(numericId));
-  if(optimizerSelection && optimizerSelection.has(numericId)) {
-  	addButtonHtml = `<div class="add-button" onclick="selectToggleClick('${id}',event)">- Remove</div>`
-  } else if(optimizerSelection) {
-  	addButtonHtml = `<div class="add-button" onclick="selectToggleClick('${id}',event)">+ Add</div>`
+  let numericId = parseInt(id);
+  console.log(
+    numericId,
+    optimizerSelection,
+    optimizerSelection.has(numericId),
+    optimizerSelection && optimizerSelection.has(numericId)
+  );
+  if (optimizerSelection && optimizerSelection.has(numericId)) {
+    addButtonHtml = `<div class="add-button" onclick="selectToggleClick('${id}',event)">- Remove</div>`;
+  } else if (optimizerSelection) {
+    addButtonHtml = `<div class="add-button" onclick="selectToggleClick('${id}',event)">+ Add</div>`;
   }
 
   let modalHtml =
-    '<div class="modal-img"> <img src=' +
+    '<div"> <img src=' +
     img +
-    ' width="100%" height=auto></div> <div class="modal-name">' +
+    ' class="modal-img" width="100%" height=auto></div> <div class="modal-name">' +
     name +
     '</div> <div class="modal-description markdown-body"">' +
     description +
-    '</div>' + addButtonHtml;
+    "</div>" +
+    addButtonHtml;
   modalBody.innerHTML = modalHtml;
   modal.classList.remove("hidden");
 }
@@ -68,42 +74,52 @@ function inIframe() {
   }
 }
 
-let optimizerSelection = new Set(); 
+let optimizerSelection = new Set();
 function onReceivedMessage(evt) {
-  optimizerSelection = new Set(evt.data); 
-  
+  optimizerSelection = new Set(evt.data);
+
   let buttons = document.getElementsByClassName("add-button");
-  for(let i = 0; i < buttons.length; i++) {
-  	  let numericId = parseInt(buttons[i].id.split("-")[1])
-  	  
-  	  // Set all the add button text based on whether or not the button is selected (TODO: DRY)
-      if(optimizerSelection.has(numericId)) {
-	  	buttons[i].textContent = "- Remove";
-	  	console.log("rem", optimizerSelection, numericId, optimizerSelection.has(numericId));
-	  } else {
-	    buttons[i].textContent = "+ Add";
-	    console.log("add", optimizerSelection, numericId, optimizerSelection.has(numericId));
-	  }
-	  
-	  // Un-hide all buttons
-	  buttons[i].classList.remove("hidden");
+  for (let i = 0; i < buttons.length; i++) {
+    let numericId = parseInt(buttons[i].id.split("-")[1]);
+
+    // Set all the add button text based on whether or not the button is selected (TODO: DRY)
+    if (optimizerSelection.has(numericId)) {
+      buttons[i].textContent = "- Remove";
+      console.log(
+        "rem",
+        optimizerSelection,
+        numericId,
+        optimizerSelection.has(numericId)
+      );
+    } else {
+      buttons[i].textContent = "+ Add";
+      console.log(
+        "add",
+        optimizerSelection,
+        numericId,
+        optimizerSelection.has(numericId)
+      );
+    }
+
+    // Un-hide all buttons
+    buttons[i].classList.remove("hidden");
   }
 }
 
 function selectToggleClick(id, event) {
   event.stopPropagation();
   console.log("Posting message from iframe", id);
-  
+
   // Toggle the optimizer
   let numericId = parseInt(id);
-  if(optimizerSelection.has(numericId)) {
-  	optimizerSelection.delete(numericId);
-  	event.target.textContent = "+ Add";
+  if (optimizerSelection.has(numericId)) {
+    optimizerSelection.delete(numericId);
+    event.target.textContent = "+ Add";
   } else {
     optimizerSelection.add(numericId);
     event.target.textContent = "- Remove";
   }
-  
+
   parent.postMessage(Array.from(optimizerSelection), "*");
 }
 

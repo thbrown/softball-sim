@@ -3,10 +3,8 @@ package com.github.thbrown.softballsim.lineup;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import com.github.thbrown.softballsim.data.gson.DataPlayer;
-import com.github.thbrown.softballsim.data.gson.DataStats;
 import com.github.thbrown.softballsim.data.gson.helpers.DataPlayerLookup;
 import com.github.thbrown.softballsim.util.StringUtils;
 

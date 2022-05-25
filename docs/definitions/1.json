@@ -35,7 +35,7 @@
       "type": "Boolean",
       "shortLabel": "L",
       "longLabel": "Lowest",
-      "description": "If this field is true, the optimizer will attempt to provide the lowest scoring lineup instead of the highest"
+      "description": "If this field is true, the optimizer will attempt to provide the lowest scoring lineup instead of the highest."
     },
     {
       "type": "Number",

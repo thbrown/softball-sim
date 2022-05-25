@@ -8,7 +8,7 @@ Lineup optimization tool for making sure you choose the best batting order for y
 # Production Build (Note: this runs tests, formats code, optimizes jar)
 ./gradlew build
 
-# Developement Build without running tests (skips test and jar optimizations)
+# Development Build without running tests (skips test and jar optimizations)
 ./gradlew build -x test -x proguard
 
 ```

@@ -75,6 +75,10 @@ public abstract class Result {
     this.estimatedTimeRemainingMs = estimatedTimeRemainingMs;
   }
 
+  public Result(OptimizerEnum optimizer, long duration) {
+    this(optimizer, null, 0, 0, 0, 0, ResultStatusEnum.ESTIMATE, null, duration);
+  }
+
   /**
    * Copy an existing Result but provide timeRemainingMs. This uses Gson serialization/deserialization
    * to maintain subclass status (i.e. If you call this on a MonteCarloExaustiveResult, you will get

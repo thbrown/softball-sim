@@ -1,50 +1,49 @@
 {
-  "id": "3",
-  "name": "Expected Value",
-  "img": "https://cdn.pixabay.com/photo/2020/03/07/19/16/swiss-francs-4910665_1280.jpg",
+  "id": "4",
+  "name": "Dummy Test",
+  "img": "https://upload.wikimedia.org/wikipedia/commons/3/33/CEP1710-58.jpg",
   "shortDescription": "Calculates the expected runs scored mathematically up to a specified max number of batters. The number of batters is limited because there there are an infinite number of possibilities i.e. many teams could theoretical bat forever.",
   "longDescriptionFile": "expected-value.md",
   "uiVisibility": "HIDDEN",
   "supportedLineupTypes": [
     "STANDARD",
-    "ALTERNATING_GENDER",
     "NO_CONSECUTIVE_FEMALES",
     "NO_CONSECUTIVE_FEMALES_AND_NO_THREE_CONSECUTIVE_MALES"
   ],
-  "pausable": false,
+  "pauseable": false,
   "options": [
     {
       "type": "Number",
       "shortLabel": "B",
-      "longLabel": "Batters",
+      "longLabel": "Number",
       "description": "Maximum number of batters that should be considered in a single game.",
       "defaultValue": "100",
       "min": "1",
-      "step": "1"
+      "step": "1",
+      "max": "100"
     },
     {
-      "type": "Number",
+      "type": "String",
       "shortLabel": "I",
-      "longLabel": "Innings",
+      "longLabel": "String",
       "description": "Number of innings to be played in each simulated game. More innings will increase the estimated completion time.",
       "defaultValue": "7",
-      "min": "0",
-      "step": "1"
+      "pattern": "^[1-9]\\d*$"
     },
     {
       "type": "Boolean",
       "shortLabel": "L",
-      "longLabel": "Lowest",
+      "longLabel": "Boolean",
       "description": "IN_DEVELOPMENT: this field is true, the optimizer will attempt to provide the lowest scoring lineup instead of the highest."
     },
     {
-      "type": "Number",
-      "shortLabel": "T",
-      "longLabel": "Threads",
+      "type": "Enumeration",
+      "shortLabel": "E",
+      "longLabel": "Enumeration",
       "description": "Number of threads that will be used to run the simulation. For best performance, this should = the number of logical cores (which is the default). You can lower this if you don't want the optimization hoggin' all your CPU cores.",
-      "uiVisibility": "HIDDEN",
-      "min": "0",
-      "step": "1"
+      "uiVisibility": "STANDARD",
+      "defaultValue": "HOTDOGOS",
+      "values": ["NACHOS", "TACOS", "BURRITOS", "HOTDOGOS"]
     }
   ]
 }

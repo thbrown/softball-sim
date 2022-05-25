@@ -1,17 +1,21 @@
 package com.github.thbrown.softballsim;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
+import java.util.stream.Collectors;
 import org.junit.Test;
 import org.owasp.html.PolicyFactory;
 import org.owasp.html.Sanitizers;
 import com.github.thbrown.softballsim.optimizer.OptimizerDefinitionComposite;
 import com.github.thbrown.softballsim.optimizer.gson.OptimizerDefinition;
+import com.github.thbrown.softballsim.optimizer.gson.OptimizerDefinitionOption;
 import com.github.thbrown.softballsim.optimizer.gson.VisibilityEnum;
 import com.github.thbrown.softballsim.util.GsonAccessor;
 import j2html.tags.ContainerTag;
@@ -45,6 +49,26 @@ public class GenerateGalleryHtml {
       }
     }
 
+    // Get optimizer performance data from the file system
+    List<OptimizerPerf> optimizerPerfData = new ArrayList<>();
+    Scorer scorer = new Scorer();
+    try {
+      File myObj = new File("optimizers.tsv");
+      Scanner myReader = new Scanner(myObj);
+      while (myReader.hasNextLine()) {
+        String data = myReader.nextLine();
+        optimizerPerfData.add(new OptimizerPerf(data, scorer));
+      }
+      myReader.close();
+    } catch (FileNotFoundException e) {
+      System.out.println("An error occurred.");
+      e.printStackTrace();
+    }
+
+    for (OptimizerPerf op : optimizerPerfData) {
+      System.out.println(op);
+    }
+
     // Render the remainder of the html
     ContainerTag htmlElement = html(
         head(title("Softball.app Lineup Optimizer Gallery"),
@@ -54,7 +78,6 @@ public class GenerateGalleryHtml {
                     "stylesheet")
                 .withHref("https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css"),
             link().withRel("icon").withHref("https://softball.app/server/assets/icons/favicon.ico"),
-
             link().withRel("stylesheet").withHref(
                 "https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/3.0.1/github-markdown.min.css"),
             script().withType("text/javascript").attr("defer")
@@ -66,7 +89,10 @@ public class GenerateGalleryHtml {
                 div(attrs(".gallery-header .inner"), h1("Softball.app Lineup Optimizer Gallery"))),
             div(attrs("#gallery .inner"), definitions.stream()
                 .map(d -> getGalleryTile(d.getDefinition().getId(), d.getDefinition().getImageUrl(),
-                    d.getDefinition().getName(), readLongDescriptionFile(d.getDefinition().getLongDescriptionFile())))
+                    d.getDefinition().getName(), readLongDescriptionFile(d.getDefinition().getLongDescriptionFile()),
+                    d.getDefinition().getOptions(),
+                    d.getDefinition().getShortDescription(),
+                    optimizerPerfData))
                 .toArray(ContainerTag[]::new)),
             div(attrs("#optimizer-modal .modal"),
                 div(attrs(".modal-content"), span(attrs(".close"), rawHtml("&times;")),
@@ -91,7 +117,9 @@ public class GenerateGalleryHtml {
     return policy.sanitize(input);
   }
 
-  private Tag<?> getGalleryTile(String id, String imgLink, String name, String description) {
+  private Tag<?> getGalleryTile(String id, String imgLink, String name, String description,
+      List<OptimizerDefinitionOption> options, String shortDescription,
+      List<OptimizerPerf> optimizerPerfData) {
     // This system to get the appropriate data to the modal is not great, but I
     // don't like the
     // alternatives with either:
@@ -107,6 +135,44 @@ public class GenerateGalleryHtml {
     // Alternative 3: Render a hidden modal for each optimizer, instead of one that
     // gets it's inner html
     // set.
+
+    // Performance numbers HTML
+    List<OptimizerPerf> filtered =
+        optimizerPerfData.stream().filter(v -> v.getOptimizerId() == Integer.parseInt(id)).collect(Collectors.toList());
+
+    for (OptimizerPerf p : filtered) {
+      // System.out.println(p.getOptimizer());
+    }
+
+    double avgQualityScore = filtered.stream().mapToDouble(v -> v.getQualityScore()).average().orElse(0);
+    double avgSpeedScore = filtered.stream().mapToDouble(v -> v.getSpeedScore()).average().orElse(0);
+
+    String qualityScoreHtml =
+        "<div><div>Quality:</div><progress id=\"file\" max=\"100\" value=\"" + avgQualityScore * 100 + "70\"> "
+            + avgQualityScore
+            + " </progress></div>";
+    String speedScoreHtml =
+        "<div><div>Speed:</div><progress id=\"file\" max=\"100\" value=\"" + avgSpeedScore * 100 + "70\"> "
+            + avgSpeedScore
+            + " </progress></div>";
+
+    // Options HTML
+    String optionsHTML = "<h2>Options:</h2><div>";
+    for (OptimizerDefinitionOption option : options) {
+      // System.out.println(p.getOptimizer());
+      if (option.getUiVisibility() != VisibilityEnum.HIDDEN) {
+        optionsHTML += "<div><b>"
+            + sanitizeHtml(option.getLongLabel()) + " (" + sanitizeHtml(option.getShortLabel()) + ")</b> - "
+            + sanitizeHtml(option.getDescription())
+            + "</div>";
+      }
+    }
+    // TODO: filter hiddens
+    if (options.size() == 0) {
+      optionsHTML += "<i>There are no options for this optimizer</i>";
+    }
+    optionsHTML += "</div>";
+
     String prefixName = "optimizer-name-";
     String prefixImg = "optimizer-img-";
     String prefixDescription = "optimizer-description-";
@@ -117,6 +183,11 @@ public class GenerateGalleryHtml {
                 (rawHtml(sanitizeHtml(imgLink)))),
             div(attrs("#" + prefixName + id + ".gallery-tile-name"), (rawHtml(sanitizeHtml(name)))),
             div(attrs("#" + prefixDescription + id + ".gallery-tile-body"),
+                rawHtml(speedScoreHtml),
+                rawHtml(qualityScoreHtml),
+                rawHtml(sanitizeHtml(shortDescription)),
+                rawHtml(optionsHTML),
+                rawHtml("<h2>Description:</h2>"),
                 rawHtml(markdown.markdownify(description))),
             div(attrs(".gallery-fade")),
             div(attrs("#button- " + id + " .gallery-tile-add-button .add-button .hidden"), text("+ Add")).attr(
