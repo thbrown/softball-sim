@@ -10,7 +10,7 @@ public class DataTeam {
 
   private transient DataGame team;
   private transient Set<DataPlayer> players;
-  private transient Set<DataPlateAppearance> plateApperances;
+  private transient Set<DataPlateAppearance> plateAppearances;
 
   public List<DataGame> getGames() {
     return games;
@@ -32,12 +32,12 @@ public class DataTeam {
     this.team = team;
   }
 
-  public Set<DataPlateAppearance> getPlateApperances() {
-    return plateApperances;
+  public Set<DataPlateAppearance> getPlateAppearances() {
+    return plateAppearances;
   }
 
-  public void setPlateApperances(Set<DataPlateAppearance> plateApperances) {
-    this.plateApperances = plateApperances;
+  public void setPlateAppearances(Set<DataPlateAppearance> plateAppearances) {
+    this.plateAppearances = plateAppearances;
   }
 
   public Set<DataPlayer> getPlayers() {

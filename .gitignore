@@ -32,3 +32,6 @@ testCleanupScriptFile
 
 # Log file
 java.log
+
+# Java dumps
+*.hprof

@@ -17,7 +17,7 @@ import com.google.gson.JsonParseException;
  * A custom deserializer for stats data that populates fields from json and creates references
  * between classes w/ relationships.
  * 
- * @author thomasbrown
+ * @author thbrown
  */
 public class DataStatsDeserializer implements JsonDeserializer<DataStats> {
 
@@ -30,7 +30,8 @@ public class DataStatsDeserializer implements JsonDeserializer<DataStats> {
 
     // Then, create references for the relationships between objects
 
-    // To make these references, we'll need to build a lookup table for players by id
+    // To make these references, we'll need to build a lookup table for players by
+    // id
     Map<String, DataPlayer> playerLookup = new HashMap<>();
     for (DataPlayer player : stats.getPlayers()) {
       playerLookup.put(player.getId(), player);
@@ -45,7 +46,7 @@ public class DataStatsDeserializer implements JsonDeserializer<DataStats> {
       for (DataGame game : games) {
         for (DataPlateAppearance plateAppearance : game.getPlateAppearances()) {
           // Set up player's relationships
-          DataPlayer player = playerLookup.get(plateAppearance.getPlayer_id());
+          DataPlayer player = playerLookup.get(plateAppearance.getPlayerId());
           player.addGame(game);
           player.addTeam(team);
           player.addPlateAppearences(plateAppearance);
@@ -57,7 +58,7 @@ public class DataStatsDeserializer implements JsonDeserializer<DataStats> {
 
           // Populate lists we need for later to setup team relationships
           plateAppearancesForTeam.add(plateAppearance);
-          playerIdsForTeam.add(plateAppearance.getPlayer_id());
+          playerIdsForTeam.add(plateAppearance.getPlayerId());
         }
 
         // Setup game relationships
@@ -67,7 +68,7 @@ public class DataStatsDeserializer implements JsonDeserializer<DataStats> {
       }
 
       // Setup team relationships
-      team.setPlateApperances(plateAppearancesForTeam);
+      team.setPlateAppearances(plateAppearancesForTeam);
       Set<DataPlayer> playersForTeam = getPlayerDataFromIds(playerIdsForTeam, playerLookup);
       team.setPlayers(playersForTeam);
     }
@@ -83,5 +84,3 @@ public class DataStatsDeserializer implements JsonDeserializer<DataStats> {
   }
 
 }
-
-

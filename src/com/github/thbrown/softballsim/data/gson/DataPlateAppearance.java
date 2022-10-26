@@ -1,8 +1,10 @@
 package com.github.thbrown.softballsim.data.gson;
 
+import java.lang.reflect.Field;
+
 public class DataPlateAppearance {
   private String id;
-  private String player_id;
+  private String playerId;
   private String result;
   private DataLocation location;
 
@@ -11,19 +13,19 @@ public class DataPlateAppearance {
   private transient DataPlayer player;
 
   public String getId() {
-    return id;
+    return this.id;
   }
 
-  public String getPlayer_id() {
-    return player_id;
+  public String getPlayerId() {
+    return this.playerId;
   }
 
   public String getResult() {
-    return result;
+    return this.result;
   }
 
   public DataLocation getLocation() {
-    return location;
+    return this.location;
   }
 
   public void setGame(DataGame game) {

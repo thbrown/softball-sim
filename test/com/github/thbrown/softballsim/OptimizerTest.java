@@ -31,9 +31,16 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import org.apache.commons.math3.util.Pair;
 
+/**
+ * This test is intended to evaluate the performance of optimizers for comparison.
+ * 
+ * This test generates a file named optimizers.tsv w/ optimizer info.
+ * 
+ * It takes a long time to run so it's @test annotation is commented out by default.
+ */
 public class OptimizerTest {
 
-  @Test
+  // @Test
   public void generateOptimizerFile() throws Exception {
     // Get data from file system
     CommandLineOptions commandLineOptions = CommandLineOptions.getInstance();
@@ -65,7 +72,8 @@ public class OptimizerTest {
           Result result = SoftballSim.mainInternal(args);
           Logger.log("\t\t\t" + result.getElapsedTimeMs());
 
-          // Run the lineup through monte carlo for 1M iterations so we have fair comparison
+          // Run the lineup through monte carlo for 1M iterations so we have fair
+          // comparison
           HitGenerator hitGenerator = new HitGenerator(result.getLineup().asList());
           final double COUNT = 1000000;
           double sum = 0;

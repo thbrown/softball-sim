@@ -33,7 +33,7 @@ public class DeserializationTest {
 
     DataTeam someTeam = targetObject.getTeams().get(0);
     assertEquals(28, someTeam.getGames().size());
-    assertEquals(1032, someTeam.getPlateApperances().size());
+    assertEquals(1032, someTeam.getPlateAppearances().size());
     assertEquals(38, someTeam.getPlayers().size());
 
     DataGame someGame = targetObject.getTeams().get(0).getGames().get(0);
