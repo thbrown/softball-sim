@@ -16,13 +16,12 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.github.thbrown.softballsim.util.Logger;
 
-
 /**
  * This class contains the output of an optimization. It's used for reporting to the end user as
  * well as for the resumption of a partially complete optimization. It may be a final result or it
  * may contain a partial result for an incomplete optimization.
  * 
- * Instance of this class are shared between threads by
+ * Instances of this class are shared between threads by
  * {@link com.github.thbrown.softballsim.datasource.ProgressTracker}
  * 
  * Optimizer implementations can store additional result information in the instance variable of the
@@ -45,9 +44,11 @@ public abstract class Result {
   private final ResultStatusEnum status;
   private final String statusMessage;
   private final Long estimatedTimeRemainingMs;
+  private final long timestamp;
 
   // Make sure these match the actual variable name used above!
-  // TODO: test these are valid in unit test with this.getClass().getDeclaredFields()
+  // TODO: test these are valid in unit test with
+  // this.getClass().getDeclaredFields()
   private final static String ESTIMATED_TIME_VARIABLE_NAME = "estimatedTimeRemainingMs";
   private final static String STATUS_VARIABLE_NAME = "status";
   private final static String STATUS_MESSAGE_VARIABLE_NAME = "statusMessage";
@@ -73,6 +74,7 @@ public abstract class Result {
     this.status = status;
     this.statusMessage = statusMessage;
     this.estimatedTimeRemainingMs = estimatedTimeRemainingMs;
+    this.timestamp = System.currentTimeMillis();
   }
 
   public Result(OptimizerEnum optimizer, long duration) {

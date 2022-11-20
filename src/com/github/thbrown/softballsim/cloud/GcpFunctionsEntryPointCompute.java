@@ -10,6 +10,7 @@ import com.github.thbrown.softballsim.ResultStatusEnum;
 import com.github.thbrown.softballsim.datasource.gcpbuckets.DataSourceGcpBuckets;
 import com.github.thbrown.softballsim.util.GsonAccessor;
 import com.github.thbrown.softballsim.util.Logger;
+import com.github.thbrown.softballsim.util.MiscUtils;
 import com.github.thbrown.softballsim.util.StringUtils;
 import com.google.cloud.functions.HttpFunction;
 import com.google.cloud.functions.HttpRequest;
@@ -105,9 +106,12 @@ public class GcpFunctionsEntryPointCompute implements HttpFunction {
       String nextZone = zones[0];
       String[] futureZones = Arrays.copyOfRange(zones, 1, zones.length);
 
-      // Must start with a lower case letter, adding id and remaining zones so we can see some basic info
-      // about the instance at a glance
-      final String intanceName = "optimization-" + id + "-" + futureZones.length;
+      // Name consists of:
+      // 1) lowercased optimization id
+      // 2) a random string so unpauses don't fail before the shutdown
+      // 3) remaining zones so we can see some basic info about the instance
+      final String intanceName = "opt-" + id.toLowerCase() + "-" + MiscUtils.getRandomString(10) + "-"
+          + futureZones.length;
 
       // TODO: retry on failure?
       Operation operation = makeInstance(id, nextZone, PROJECT, MACHINE_TYPE, intanceName,
@@ -146,9 +150,12 @@ public class GcpFunctionsEntryPointCompute implements HttpFunction {
       .append("cd $HOME_DIRECTORY\n")
       .append("echo java -jar softball-sim.jar " + applicationArguments + "\n")
       .append("java -jar softball-sim.jar " + applicationArguments + "\n")
+      //.append("gcloud logging write my-test-log \"$(tail java.log)\" --severity=NOTICE") // Log for helpful debug info in case of failure
       .append("echo deleting self" + "\n")
       .append("gcloud --quiet compute instances delete " + instanceName + " --zone=" + zone + "\n") // Delete the instance after job completes
       .toString();
+
+      Logger.log("Startup script: " + startupScript);
 
       JsonObject jsonObject = new JsonObject();
       jsonObject.add(GcpFunctionsEntryPointCompute.ARGS_KEY, new JsonPrimitive(applicationArguments));
@@ -205,4 +212,5 @@ public class GcpFunctionsEntryPointCompute implements HttpFunction {
     return compute.instances().insert(project, zone, instance).execute();
 
   }
+
 }

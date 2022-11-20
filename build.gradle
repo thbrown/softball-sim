@@ -4,14 +4,14 @@ buildscript {
       mavenCentral()
     }
     dependencies {
-        classpath 'com.guardsquare:proguard-gradle:7.0.1'
+        classpath 'com.guardsquare:proguard-gradle:7.1.0'
     }
 }
 
 plugins {
   id 'java'
   id 'application'
-  id 'com.diffplug.gradle.spotless' version '3.25.0'
+  id 'com.diffplug.spotless' version '6.11.0'
   id "com.github.gradle-lean" version "0.1.2"
 }
 
@@ -27,18 +27,18 @@ repositories {
 }
 
 dependencies {
-  testCompile group: 'junit', name: 'junit', version: '4.12'
-  testCompile group: 'com.j2html', name: 'j2html', version: '1.4.0'
-  testCompile group: 'com.vladsch.flexmark', name: 'flexmark', version: '0.50.50'
-  testCompile group: 'com.vladsch.flexmark', name: 'flexmark-all', version: '0.50.50'
-  testCompile group: 'com.googlecode.owasp-java-html-sanitizer', name: 'owasp-java-html-sanitizer', version: 'r136'
+  testImplementation group: 'junit', name: 'junit', version: '4.12'
+  testImplementation group: 'com.j2html', name: 'j2html', version: '1.4.0'
+  testImplementation group: 'com.vladsch.flexmark', name: 'flexmark', version: '0.50.50'
+  testImplementation group: 'com.vladsch.flexmark', name: 'flexmark-all', version: '0.50.50'
+  testImplementation group: 'com.googlecode.owasp-java-html-sanitizer', name: 'owasp-java-html-sanitizer', version: 'r136'
   
-  compile group: 'com.google.code.gson', name: 'gson', version: '2.8.5'
-  compile group: 'org.apache.commons', name: 'commons-math3', version: '3.6'
-  compile group: 'commons-cli', name: 'commons-cli', version: '1.4'
-  compile group: 'com.google.cloud.functions', name: 'functions-framework-api', version: '1.0.2'
-  compile group: 'com.google.cloud', name: 'google-cloud-storage', version: '1.113.4'
-  compile group: 'com.google.apis', name: 'google-api-services-compute', version: 'v1-rev20210907-1.32.1'
+  implementation  group: 'com.google.code.gson', name: 'gson', version: '2.8.5'
+  implementation  group: 'org.apache.commons', name: 'commons-math3', version: '3.6'
+  implementation  group: 'commons-cli', name: 'commons-cli', version: '1.4'
+  implementation  group: 'com.google.cloud.functions', name: 'functions-framework-api', version: '1.0.2'
+  implementation  group: 'com.google.cloud', name: 'google-cloud-storage', version: '1.113.4'
+  implementation  group: 'com.google.apis', name: 'google-api-services-compute', version: 'v1-rev20210907-1.32.1'
 }
 
 run {
@@ -56,7 +56,7 @@ jar {
   }
  
   from {
-    configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
   }
 }
 
@@ -85,9 +85,13 @@ sourceSets {
   	java {
       srcDirs = ['gallery']
   	}
-  	compileClasspath += sourceSets.main.output + configurations.testCompile
-    runtimeClasspath += output + compileClasspath + configurations.testRuntime
+  	compileClasspath += sourceSets.main.output + configurations.testRuntimeClasspath 
+    runtimeClasspath += output + compileClasspath + configurations.runtimeClasspath
   }
+}
+
+tasks.withType(Jar) {
+   duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
 spotless {
@@ -139,23 +143,6 @@ task proguard(type: proguard.gradle.ProGuardTask) {
       file.renameTo(newFile)
     }
  }
-
-/*
- * This used to be more valuable when needed to make requests to load json from the webserver, now just opening
- * the .html file in the browser works just as well. But it's still usefull for testing iframe integraton.
- */
-task serve {
-  doLast {
-    int port = 8085;
-    SimpleHttpFileServerFactory factory = new SimpleHttpFileServerFactory();
-    String path = System.getProperty("user.dir") + File.separator + "docs";
-    println("Serving " + path);
-    HttpFileServer server = factory.start(new File(path), port)
-    println("Running on port " + port + " See gallery on http://localhost:" + port + "/index.html ");
-    println("Stop server with ctrl+c (this doesn't work sometimes on windows, in which case you'll have to stop the process in Task Manager OR 'netstat -ano | findstr :port:' then 'tskill :pid:') ");
-    java.lang.Thread.sleep(Long.MAX_VALUE);
-  }
-}
 
 // Generate the gallery html as part of the build process
 assemble.finalizedBy generateGalleryHtml

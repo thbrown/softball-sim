@@ -103,7 +103,7 @@ public class CommandLineOptions {
             "Prints the available flags. Help output will change depending on the optimizer and dataSource specified.")
         .hasArg(false).required(false).build());
     commonOptions.add(Option.builder(VERBOSE).longOpt("verbose")
-        .desc("In development. If present, print debuging details on error.").hasArg(false).required(false).build());
+        .desc("In development. If present, print debugging details on error.").hasArg(false).required(false).build());
     commonOptions.add(Option.builder(UPDATE_INTERVAL).longOpt("update-interval").desc(
         "Time period, in milliseconds, that the application should report results. Default: " + UPDATE_INTERVAL_DEFAULT)
         .hasArg(true).required(false).build());
