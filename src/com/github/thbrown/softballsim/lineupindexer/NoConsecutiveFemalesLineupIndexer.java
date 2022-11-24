@@ -3,17 +3,12 @@ package com.github.thbrown.softballsim.lineupindexer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Arrays;
-import java.util.stream.Collectors;
 import java.util.concurrent.ThreadLocalRandom;
 import org.apache.commons.math3.util.Pair;
 import com.github.thbrown.softballsim.data.gson.DataPlayer;
 import com.github.thbrown.softballsim.data.gson.DataStats;
-import com.github.thbrown.softballsim.lineup.BattingLineup;
 import com.github.thbrown.softballsim.lineup.StandardBattingLineup;
 import com.github.thbrown.softballsim.util.CombinatoricsUtil;
-import com.github.thbrown.softballsim.util.Logger;
-import org.apache.commons.math3.util.Pair;
-
 
 public class NoConsecutiveFemalesLineupIndexer implements BattingLineupIndexer<StandardBattingLineup> {
 
@@ -74,10 +69,11 @@ public class NoConsecutiveFemalesLineupIndexer implements BattingLineupIndexer<S
     this.malePermutationCount = CombinatoricsUtil.factorial(maleCount);
     this.femalePermutationCount = CombinatoricsUtil.factorial(femaleCount);
 
-    this.slotCombinations =
-        CombinatoricsUtil.binomial(maleCount, femaleCount) + CombinatoricsUtil.binomial(maleCount - 1, femaleCount - 1);
+    this.slotCombinations = CombinatoricsUtil.binomial(maleCount, femaleCount)
+        + CombinatoricsUtil.binomial(maleCount - 1, femaleCount - 1);
 
-    // Cutoff indicates the point at which the slotCombination goes from female last to no female last
+    // Cutoff indicates the point at which the slotCombination goes from female last
+    // to no female last
     this.cutoff = CombinatoricsUtil.binomial(maleCount - 1, femaleCount - 1);
 
     this.size = malePermutationCount * femalePermutationCount * this.slotCombinations;
@@ -111,8 +107,8 @@ public class NoConsecutiveFemalesLineupIndexer implements BattingLineupIndexer<S
     // Derive the indexes for each permutation/combination from the main index
     long malePermutationIndex = index % CombinatoricsUtil.factorial(males);
     long cumulativeSize1 = CombinatoricsUtil.factorial(males);
-    long femalePermutationIndex =
-        (cumulativeSize1 == 0 ? 0 : (long) Math.floor(index / cumulativeSize1) % CombinatoricsUtil.factorial(females));
+    long femalePermutationIndex = (cumulativeSize1 == 0 ? 0
+        : (long) Math.floor(index / cumulativeSize1) % CombinatoricsUtil.factorial(females));
     long cumulativeSize2 = CombinatoricsUtil.factorial(males) * CombinatoricsUtil.factorial(females);
     long femaleCombinationIndex = (cumulativeSize2 == 0 ? 0 : (long) Math.floor(index / cumulativeSize2) /*
                                                                                                           * no need for
@@ -133,12 +129,16 @@ public class NoConsecutiveFemalesLineupIndexer implements BattingLineupIndexer<S
 
     int[] femalePositions = null;
     if (femaleCombinationIndex < this.cutoff) {
-      // Female positions before the cutoff indicate which spots between the males the females should
-      // occupy, excluding the first and last lineup slots (because we'll force a female batter last).
-      // Here we'll find places for all females, except the last one (who will be added to the end).
+      // Female positions before the cutoff indicate which spots between the males the
+      // females should
+      // occupy, excluding the first and last lineup slots (because we'll force a
+      // female batter last).
+      // Here we'll find places for all females, except the last one (who will be
+      // added to the end).
       femalePositions = CombinatoricsUtil.getIthCombination(females - 1, femaleCombinationIndex);
 
-      // Add one to each, since this is before the cutoff we are excluding the first slot
+      // Add one to each, since this is before the cutoff we are excluding the first
+      // slot
       femalePositions = Arrays.stream(femalePositions).map(i -> i + 1).toArray();
 
       // There is always a female batting last, add her to the end
@@ -148,12 +148,14 @@ public class NoConsecutiveFemalesLineupIndexer implements BattingLineupIndexer<S
       femalePositions = CombinatoricsUtil.getIthCombination(females, femaleCombinationIndex - cutoff);
     }
 
-    // Convert to lineup indexes - add the number of females inserted before them to their value.
+    // Convert to lineup indexes - add the number of females inserted before them to
+    // their value.
     for (int i = 0; i < femalePositions.length; i++) {
       femalePositions[i] = femalePositions[i] + i;
     }
 
-    // These three parameters are all we need to define a noConsecutiveFemale lineup, merge them
+    // These three parameters are all we need to define a noConsecutiveFemale
+    // lineup, merge them
     List<DataPlayer> mergedLineup = buildLineup(maleLineup, femaleLineup, femalePositions);
 
     return new StandardBattingLineup(mergedLineup);
@@ -186,10 +188,11 @@ public class NoConsecutiveFemalesLineupIndexer implements BattingLineupIndexer<S
     int[] currentWomenSlots = getWomenSlots(listLineup);
     int[] newWomenSlots = null;
 
-    long totalNumberOfPossiblePermSwaps =
-        CombinatoricsUtil.binomial(men.size(), 2) + CombinatoricsUtil.binomial(women.size(), 2);
+    long totalNumberOfPossiblePermSwaps = CombinatoricsUtil.binomial(men.size(), 2)
+        + CombinatoricsUtil.binomial(women.size(), 2);
 
-    // The number of combination neighbors is different depending on whether or not a female is batting
+    // The number of combination neighbors is different depending on whether or not
+    // a female is batting
     // in the first or last spot or not
     boolean femaleFirst = false;
     boolean femaleLast = false;
@@ -201,8 +204,8 @@ public class NoConsecutiveFemalesLineupIndexer implements BattingLineupIndexer<S
 
     long totalNumberOfPossibleCombSwaps;
     if (femaleFirst || femaleLast) {
-      totalNumberOfPossibleCombSwaps =
-          (women.size() - 1) * (men.size() - women.size()) + (1) * (men.size() + 1 - women.size());
+      totalNumberOfPossibleCombSwaps = (women.size() - 1) * (men.size() - women.size())
+          + (1) * (men.size() + 1 - women.size());
     } else {
       totalNumberOfPossibleCombSwaps = (women.size()) * (men.size() + 1 - women.size());
     }
@@ -211,7 +214,8 @@ public class NoConsecutiveFemalesLineupIndexer implements BattingLineupIndexer<S
     // totalNumberOfPossibleCombSwaps);
     if (ThreadLocalRandom.current()
         .nextLong(totalNumberOfPossiblePermSwaps + totalNumberOfPossibleCombSwaps) < totalNumberOfPossiblePermSwaps) {
-      // Swap two random elements in either the male list or female list (longer lists are more likely to
+      // Swap two random elements in either the male list or female list (longer lists
+      // are more likely to
       // be swapped)
       if (ThreadLocalRandom.current().nextLong(totalNumberOfPossiblePermSwaps) < CombinatoricsUtil.binomial(men.size(),
           2)) {
@@ -303,13 +307,15 @@ public class NoConsecutiveFemalesLineupIndexer implements BattingLineupIndexer<S
       Arrays.sort(newWomenSlots);
     }
 
-    // Convert to slots to spots - add the number of females inserted before them to their value.
+    // Convert to slots to spots - add the number of females inserted before them to
+    // their value.
     int[] newWomenSpots = new int[newWomenSlots.length];
     for (int i = 0; i < newWomenSpots.length; i++) {
       newWomenSpots[i] = newWomenSlots[i] + i;
     }
 
-    // These three parameters are all we need to define a noConsecutiveFemale lineup, merge them
+    // These three parameters are all we need to define a noConsecutiveFemale
+    // lineup, merge them
     List<DataPlayer> newMenList = CombinatoricsUtil.mapListToArray(this.men, orderA);
     List<DataPlayer> newWomenList = CombinatoricsUtil.mapListToArray(this.women, orderB);
     List<DataPlayer> merged = buildLineup(newMenList, newWomenList, newWomenSpots);
@@ -343,14 +349,17 @@ public class NoConsecutiveFemalesLineupIndexer implements BattingLineupIndexer<S
     // Calculate which slots (spots between the men) the females occupy
     int[] womenSlots = getWomenSlots(listLineup);
 
-    // Is the last batter female or male? This tells us if we are before or after the cutoff
+    // Is the last batter female or male? This tells us if we are before or after
+    // the cutoff
     if (listLineup.get(listLineup.size() - 1).getGender().equals("F")) {
       // Before the cutoff - a women is always batting last
       int[] womenSlotsTrimmed = Arrays.copyOf(womenSlots, womenSlots.length - 1); // A women is always batting in the
                                                                                   // last slot here, so we only care
                                                                                   // about the other slots
-      // Subtract one from every element - Since we can't have a women batting first here, the first
-      // available lineup position is 2nd spot (or index 1). The subtraction reflects this.
+      // Subtract one from every element - Since we can't have a women batting first
+      // here, the first
+      // available lineup position is 2nd spot (or index 1). The subtraction reflects
+      // this.
       womenSlotsTrimmed = Arrays.stream(womenSlotsTrimmed).map(i -> i - 1).toArray();
       long womenCombinationIndex = CombinatoricsUtil.getCombinationIndex(womenSlotsTrimmed);
       return womenCombinationIndex * this.femalePermutationCount * this.malePermutationCount
@@ -438,6 +447,5 @@ public class NoConsecutiveFemalesLineupIndexer implements BattingLineupIndexer<S
     }
     return result;
   }
-
 
 }

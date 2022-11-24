@@ -4,6 +4,8 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
+
+import com.github.thbrown.softballsim.CommandLineOptions;
 import com.github.thbrown.softballsim.datasource.gcpbuckets.DataSourceGcpBuckets;
 import com.github.thbrown.softballsim.util.GsonAccessor;
 import com.github.thbrown.softballsim.util.Logger;
@@ -52,11 +54,11 @@ public class GcpFunctionsEntryPointQuery implements HttpFunction {
       map.remove(GcpFunctionsEntryPointStart.PASSWORD_KEY);
 
       // Some error checking for the id
-      String id = map.get(DataSourceGcpBuckets.ID);
+      String id = map.get(CommandLineOptions.ID);
       Logger.log("ID " + id + " " + map);
 
       if (id == null) {
-        CloudUtils.send400Error(response, "Missing required field '" + DataSourceGcpBuckets.ID + "' (Id)");
+        CloudUtils.send400Error(response, "Missing required field '" + CommandLineOptions.ID + "' (Id)");
         return;
       }
 

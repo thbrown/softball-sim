@@ -4,12 +4,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.HashSet;
-import java.util.ArrayList;
 import java.util.stream.Collectors;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.MissingArgumentException;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import com.github.thbrown.softballsim.data.gson.DataStats;
@@ -21,7 +18,6 @@ import com.github.thbrown.softballsim.optimizer.OptimizerEnum;
 import com.github.thbrown.softballsim.util.Logger;
 import com.github.thbrown.softballsim.util.StringUtils;
 import com.github.thbrown.softballsim.util.CollectionUtils;
-
 
 public class SoftballSim {
 
@@ -136,8 +132,8 @@ public class SoftballSim {
       existingResult = null;
     }
 
-    // If we are just estimating the completion time, we don't need to start a progress tracker or a new
-    // thread
+    // If we are just estimating the completion time, we don't need to start a
+    // progress tracker or a new thread
     final boolean estimateOnly = commonCmd.hasOption(CommandLineOptions.ESTIMATE_ONLY);
     if (estimateOnly) {
       Result result = optimizer.estimate(playersIdsOnly, lineupType, stats, arguments, null);
@@ -150,11 +146,13 @@ public class SoftballSim {
       return result;
     }
 
-    // Prep the progress tracker class so we can pass a reference to the optimizer thread
-    Thread mainThread = Thread.currentThread();
+    // Progress tracker gets it's own thread
     ProgressTracker tracker = new ProgressTracker(existingResult, dataSource, allCmd, stats, optimizer);
+    Thread progressTrackerThread = new Thread(() -> {
+      tracker.run();
+    });
 
-    // Start the optimization in its own thread
+    // Optimizer gets it's own thread
     final boolean verboseFlagEnabled = commonCmd.hasOption(CommandLineOptions.VERBOSE);
     Thread optimizerThread = new Thread(() -> {
       try {
@@ -173,19 +171,24 @@ public class SoftballSim {
         tracker.updateProgress(errorResult); // Last update
         dataSource.onComplete(allCmd, stats, errorResult);
       } finally {
-        mainThread.interrupt();
+        // Stop the progress tracker, optimization is terminal, we don't need it anymore
+        progressTrackerThread.interrupt();
       }
     });
-    optimizerThread.start();
 
-    // Finally, start the progress tracker on the main thread
-    Result finalResult = tracker.run();
+    // Start the threads we just defined
+    optimizerThread.start();
+    progressTrackerThread.start();
+
+    // Wait for those threads to finish running
+    optimizerThread.join();
+    progressTrackerThread.join();
 
     // Almost done, just run the cleanup procedure supplied on invocation (if any)
     if (cleanup != null) {
       cleanup.run();
     }
-    return finalResult;
+    return tracker.getCurrentResult();
   }
 
   /**
@@ -234,7 +237,5 @@ public class SoftballSim {
     }
 
   }
-
-
 
 }

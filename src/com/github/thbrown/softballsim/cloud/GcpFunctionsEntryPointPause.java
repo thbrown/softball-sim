@@ -5,6 +5,8 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
+
+import com.github.thbrown.softballsim.CommandLineOptions;
 import com.github.thbrown.softballsim.datasource.gcpbuckets.DataSourceGcpBuckets;
 import com.github.thbrown.softballsim.util.GsonAccessor;
 import com.github.thbrown.softballsim.util.Logger;
@@ -50,10 +52,10 @@ public class GcpFunctionsEntryPointPause implements HttpFunction {
       map.remove(GcpFunctionsEntryPointStart.PASSWORD_KEY);
 
       // Some error checking for the id
-      String id = map.get(DataSourceGcpBuckets.ID);
+      String id = map.get(CommandLineOptions.ID);
       if (id == null) {
         CloudUtils.send400Error(response,
-            "Required json field " + DataSourceGcpBuckets.ID + " was not specified in the body");
+            "Required json field " + CommandLineOptions.ID + " was not specified in the body");
         return;
       }
 

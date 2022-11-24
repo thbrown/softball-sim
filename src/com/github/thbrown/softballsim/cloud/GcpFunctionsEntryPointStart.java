@@ -37,11 +37,10 @@ import com.google.gson.JsonPrimitive;
  */
 public class GcpFunctionsEntryPointStart implements HttpFunction {
 
-  private static final String ZONES =
-      "us-central1-a,us-central1-b,us-central1-c,us-central1-f";
+  private static final String ZONES = "us-central1-a,us-central1-b,us-central1-c,us-central1-f";
 
   private static final String DATA_KEY = "data";
-  private static final String ID_KEY = "-" + DataSourceGcpBuckets.ID;
+  private static final String ID_KEY = "-" + CommandLineOptions.ID;
   private static final String DATA_SOURCE_KEY = "-" + CommandLineOptions.DATA_SOURCE;
   private static final String ESTIMATE_ONLY_KEY = "-" + CommandLineOptions.ESTIMATE_ONLY;
   private static final String OPTIMIZER_KEY = "-" + CommandLineOptions.OPTIMIZER;
@@ -152,9 +151,11 @@ public class GcpFunctionsEntryPointStart implements HttpFunction {
         return;
       }
 
-      // The results file serves as a lock to prevents multiple instances from running the same
+      // The results file serves as a lock to prevents multiple instances from running
+      // the same
       // optimization
-      // TODO: There is a race condition here between the read and the write, we can solve that with gcp
+      // TODO: There is a race condition here between the read and the write, we can
+      // solve that with gcp
       // "generation" and "pre-conditions"
       String resultString = CloudUtils.readBlob(id, DataSourceGcpBuckets.CACHED_RESULTS_BUCKET);
       Logger.log("Result blob is " + resultString);
@@ -163,18 +164,19 @@ public class GcpFunctionsEntryPointStart implements HttpFunction {
       if (result == null) {
         // This happens if the optimization has never been started before
         Logger.log("No result, persisting empty result");
-        Result emptyResult =
-            new EmptyResult(OptimizerEnum.getEnumFromId(map.get(OPTIMIZER_KEY)), ResultStatusEnum.ALLOCATING_RESOURCES);
+        Result emptyResult = new EmptyResult(OptimizerEnum.getEnumFromId(map.get(OPTIMIZER_KEY)),
+            ResultStatusEnum.ALLOCATING_RESOURCES);
         String emptyResultString = GsonAccessor.getInstance().getCustom().toJson(emptyResult);
         CloudUtils.upsertBlob(emptyResultString, id, DataSourceGcpBuckets.CACHED_RESULTS_BUCKET);
       } else if (!result.getStatus().isActive()) {
         // This happens if the opt was paused or it error'ed out
         Logger.log("Existing result, changing status from " + result.getStatus() + " to ALLOCATING_RESOURCES");
-        String updatedResultString =
-            Result.copyWithNewStatusStringOnly(resultString, ResultStatusEnum.ALLOCATING_RESOURCES, null);
+        String updatedResultString = Result.copyWithNewStatusStringOnly(resultString,
+            ResultStatusEnum.ALLOCATING_RESOURCES, null);
         CloudUtils.upsertBlob(updatedResultString, id, DataSourceGcpBuckets.CACHED_RESULTS_BUCKET);
       } else {
-        // Don't start the optimization if it is already active based on its status (IN_PROGRESS or
+        // Don't start the optimization if it is already active based on its status
+        // (IN_PROGRESS or
         // ALLOCATING_RESOURCES)
         CloudUtils.send200Warning(response, "This optimization is already active. Status: " + result.getStatus());
         return;
@@ -188,7 +190,8 @@ public class GcpFunctionsEntryPointStart implements HttpFunction {
       jsonObject.add(PASSWORD_KEY, new JsonPrimitive(pwd));
       String jsonPayload = gson.toJson(jsonObject);
 
-      // TODO: can't we just invoke this directly via some google cloud api? That might simplify
+      // TODO: can't we just invoke this directly via some google cloud api? That
+      // might simplify
       Logger.log(id + " sending compute request " + jsonPayload);
       int status = this.sendPost(COMPUTE_FUNCTION_ENDPOINT, jsonPayload);
       Logger.log(id + " compute request status: " + status);

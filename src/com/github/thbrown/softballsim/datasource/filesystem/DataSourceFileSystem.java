@@ -60,20 +60,17 @@ public class DataSourceFileSystem implements DataSource {
 
   @Override
   public void onUpdate(CommandLine cmd, DataStats stats, ProgressTracker tracker) {
-    DataSource.super.onUpdate(cmd, stats, tracker);
-
-    // Save the most recent result to the file system so we can start the optimization from this point
+    // Save the most recent result to the file system so we can start the
+    // optimization from this point
     // if it gets interrupted, unless we are doing an estimate only run
     Result currentResult = tracker.getCurrentResult();
-
     String result = gson.toJson(currentResult);
-    if (!cmd.hasOption(CommandLineOptions.ESTIMATE_ONLY)) { // This may no longer be necessary as estimations don't use
-                                                            // progressTracker
-      String statsFileLocation = cmd.getOptionValue(CACHE_PATH, CACHED_RESULTS_FILE_PATH);
-      String fileName = getFileName(cmd, gson.toJson(stats));
-      File cacheFile = getFilePath(statsFileLocation, fileName);
-      writeFile(result, cacheFile);
-    }
+    String statsFileLocation = cmd.getOptionValue(CACHE_PATH, CACHED_RESULTS_FILE_PATH);
+    String fileName = getFileName(cmd, gson.toJson(stats));
+    File cacheFile = getFilePath(statsFileLocation, fileName);
+    writeFile(result, cacheFile);
+
+    DataSource.super.onUpdate(cmd, stats, tracker);
   }
 
   @Override
@@ -84,6 +81,7 @@ public class DataSourceFileSystem implements DataSource {
     String fileName = getFileName(cmd, gson.toJson(stats));
     File cacheFile = getFilePath(statsFileLocation, fileName);
     writeFile(resultString, cacheFile);
+    DataSource.super.onComplete(cmd, stats, finalResult);
   }
 
   private String getFileName(CommandLine allCmd, String data) {

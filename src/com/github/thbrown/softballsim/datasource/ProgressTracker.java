@@ -72,7 +72,8 @@ public final class ProgressTracker {
       oldResult = results.earliest();
     }
 
-    // If we have two or more different results, we can update the estimated completion time
+    // If we have two or more different results, we can update the estimated
+    // completion time
     // TODO: Some kind of non-linear regression to improve estimation times?
     if (oldResult != null && updatedResult != null && !updatedResult.equals(oldResult)) {
 
@@ -116,8 +117,6 @@ public final class ProgressTracker {
   }
 
   public Result run() {
-    // The parent thread interrupts this progress updater thread when the progress
-    // updater is no longer needed
     try {
       while (!Thread.interrupted()) {
         try {
@@ -127,26 +126,11 @@ public final class ProgressTracker {
         }
         dataSource.onUpdate(cmd, stats, this);
 
-        // Exit this thread if this is an estimate only run (since we've waited for
-        // one updateInterval)
-        // TODO: I don't think this can happen anymore with changes to softball-sim, estimations don't use
-        // ProgressTracker, remove this section?
-        boolean estimateOnly = cmd.hasOption(CommandLineOptions.ESTIMATE_ONLY);
-        if (estimateOnly) {
-          // Make sure onUpdate will use the result with the ESTIMATE status
-          synchronized (this) {
-            // If the result has no update, try increasing the -u
-            if (this.getCurrentResult().getStatus() == ResultStatusEnum.NOT_STARTED) {
-              throw new RuntimeException(
-                  "The optimizer did not report its progress before the end of the estimation window. Try again with a longer update-interval (-u)");
-            }
-
-            this.updateProgress(this.getCurrentResult().copyWithNewStatus(ResultStatusEnum.ESTIMATE, null));
-            dataSource.onComplete(cmd, stats, this.getCurrentResult());
-            Logger.log(getCurrentResult().toString());
-            Logger.log("Exiting, estimate only");
-            return getCurrentResult();
-          }
+        // If the optimization is in a terminal state, we don't need ProgressTracker
+        Result recentResult = this.getCurrentResult();
+        if (recentResult != null && recentResult.getStatus().isTerminal()) {
+          Logger.log("Halting progress tracker, optimization in terminal status: " + recentResult.getStatus());
+          break;
         }
 
         // Exit this thread if the halt flag is set
@@ -154,8 +138,8 @@ public final class ProgressTracker {
         if (control != null && control.equals("HALT")) {
           // Make sure onUpdate will use the result with the PAUSED status
           synchronized (this) {
-            // TODO: what if this is still the initial result? (this can happen if a pause occures quicly after
-            // starting)
+            // TODO: what if this is still the initial result? (this can happen if a pause
+            // occurs quickly after starting)
             this.updateProgress(this.getCurrentResult().copyWithNewStatus(ResultStatusEnum.PAUSED, null));
             dataSource.onUpdate(cmd, stats, this);
             Logger.log(getCurrentResult().toString());
@@ -169,7 +153,6 @@ public final class ProgressTracker {
       Logger.log(e);
       System.exit(1);
     }
-    Logger.log("Exiting, optimization ended");
     return getCurrentResult();
   }
 

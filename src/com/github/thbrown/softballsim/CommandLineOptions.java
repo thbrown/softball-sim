@@ -41,6 +41,10 @@ public class CommandLineOptions {
   public final static String FORCE = "f";
   public final static String UPDATE_INTERVAL = "u";
   public final static String ESTIMATE_ONLY = "e";
+  public final static String ID = "i";
+  public final static String UPDATE_URL = "r";
+  public final static String UPDATE_API_KEY = "k";
+  public final static String UPDATE_STUFF = "s";
 
   public final static String DATA_SOURCE_DEFAULT = "FILE_SYSTEM";
   public final static String TYPE_LINEUP_DEFAULT = "STANDARD";
@@ -92,7 +96,8 @@ public class CommandLineOptions {
     commonOptions.add(Option.builder(OPTIMIZER).longOpt("optimizer").desc(
         "Required. The optimizer to be used to optimize the lineup. You may specify the name or the id. Options are "
             + OptimizerEnum.getValuesAsString() + ".")
-        .hasArg(true).required(false) // This is a required field, but we'll enforce it manually (i.e. not using Apache
+        .hasArg(true).required(false) // This is a required field, but we'll enforce it manually (i.e. not using
+                                      // Apache
                                       // cli)
         .build());
     commonOptions.add(Option.builder(LINEUP).longOpt("players-in-lineup").desc(
@@ -110,6 +115,22 @@ public class CommandLineOptions {
     commonOptions.add(Option.builder(ESTIMATE_ONLY).longOpt("estimate-only").desc(
         "If this flag is enabled, the application will only run for UPDATE_INTERVAL milliseconds. The produced result is useful for estimating optimization completion time.")
         .hasArg(false).required(false).build());
+
+    // Options for HTTP post request on update (these should maybe be hidden since
+    // they are confusing if you just want ot run a lineup optimization)
+    commonOptions
+        .add(Option.builder(UPDATE_URL).longOpt("url").desc("URL to make an HTTP POST when an update is available.")
+            .hasArg(true).required(false).build());
+    commonOptions.add(Option.builder(UPDATE_API_KEY).longOpt("api-key")
+        .desc("Api key to include in the body of the HTTP POST when an update is available")
+        .hasArg(true).required(false).build());
+    commonOptions.add(Option.builder(UPDATE_STUFF).longOpt("stuff")
+        .desc("Additional information to be sent in the HTTP POST payload")
+        .hasArg(true).required(false).build());
+    commonOptions.add(Option.builder(ID).longOpt("id").desc(DataSourceEnum.GCP_BUCKETS
+        + ": Required. An arbitrary id associated with this request. The same id can be used to query for intermediate results.")
+        .hasArg(true).required(false).build());
+
     return commonOptions;
   }
 

@@ -196,6 +196,14 @@ Available lineup types:
 - 2 - NO_CONSECUTIVE_FEMALES
 - 3 - NO_CONSECUTIVE_FEMALES_AND_NO_THREE_CONSECUTIVE_MALES
 
+## Send HTTP post on success
+
+To facilitate integration of this command line utility into applications, the tool provides the options of specifying a url when running an optimization. The CLI will make an HTTP POST request to the specified url anytime the tool produces an optimization update (including the final completion update).
+
+Additionally, "apiKey", "id", and a generic "stuff" flags exist for use in passing additional information in the body of this request.
+
+This feature exists primarily to get this working with softball.app and may be removed from the repository in the future.
+
 ## Contributing
 
 See CONTRIBUTING.md
