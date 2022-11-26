@@ -138,7 +138,6 @@ public class SoftballSim {
     if (estimateOnly) {
       Result result = optimizer.estimate(playersIdsOnly, lineupType, stats, arguments, null);
       dataSource.onComplete(allCmd, stats, result);
-
       // Almost done, just run the cleanup procedure supplied on invocation (if any)
       if (cleanup != null) {
         cleanup.run();

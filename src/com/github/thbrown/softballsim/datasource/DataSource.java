@@ -12,11 +12,8 @@ import org.apache.commons.cli.Option;
 import com.github.thbrown.softballsim.CommandLineOptions;
 import com.github.thbrown.softballsim.Result;
 import com.github.thbrown.softballsim.data.gson.DataStats;
-import com.github.thbrown.softballsim.util.GsonAccessor;
 import com.github.thbrown.softballsim.util.Logger;
 import com.github.thbrown.softballsim.util.StringUtils;
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 
 public interface DataSource {
 
@@ -59,9 +56,7 @@ public interface DataSource {
     // Call the update urls if specified
     if (cmd.hasOption(CommandLineOptions.UPDATE_URL)) {
       boolean success = signalUpdate(cmd.getOptionValue(CommandLineOptions.UPDATE_URL),
-          cmd.getOptionValue(CommandLineOptions.ID),
-          cmd.getOptionValue(CommandLineOptions.UPDATE_API_KEY),
-          cmd.getOptionValue(CommandLineOptions.UPDATE_STUFF));
+          cmd.getOptionValue(CommandLineOptions.UPDATE_BODY));
       if (!success) {
         Logger.warn("UPDATE: Call to update url failed");
       }
@@ -72,16 +67,14 @@ public interface DataSource {
    * Called once after an optimizer has completed (whether is ends successfully or in error).
    */
   public default void onComplete(CommandLine cmd, DataStats stats, Result finalResult) {
-    // Call the update url, if specified
-    if (cmd.hasOption(CommandLineOptions.UPDATE_URL)) {
+    // Call the update url, if one was specified and this is not an estimate only
+    if (!cmd.hasOption(CommandLineOptions.ESTIMATE_ONLY) && cmd.hasOption(CommandLineOptions.UPDATE_URL)) {
       int retryCount = 0;
       boolean success = false;
       while (true) {
         success = signalUpdate(
             cmd.getOptionValue(CommandLineOptions.UPDATE_URL),
-            cmd.getOptionValue(CommandLineOptions.ID),
-            cmd.getOptionValue(CommandLineOptions.UPDATE_API_KEY),
-            cmd.getOptionValue(CommandLineOptions.UPDATE_STUFF));
+            cmd.getOptionValue(CommandLineOptions.UPDATE_BODY));
 
         if (success) {
           break;
@@ -116,22 +109,23 @@ public interface DataSource {
    */
   public String getControlFlag(CommandLine cmd, DataStats stats);
 
-  private boolean signalUpdate(String inputUrl, String optimizationId, String apiKey, String stuff) {
+  /**
+   * Send HTTP post to the endpoint indicated by the input parameters. Returns false if API call
+   * failed and can be retried, returns true otherwise.
+   */
+  private boolean signalUpdate(String inputUrl, String body) {
     try {
-      JsonObject jsonObject = new JsonObject();
-      jsonObject.addProperty("optimizationId", optimizationId);
-      jsonObject.addProperty("apiKey", apiKey);
-      jsonObject.addProperty("stuff", stuff);
-      Gson gson = GsonAccessor.getInstance().getCustom();
-      String jsonPayload = gson.toJson(jsonObject);
-      Logger.log("Sending " + jsonPayload + " to " + inputUrl);
-      byte[] out = jsonPayload.getBytes(StandardCharsets.UTF_8);
+      // Send an empty json object if no body is defined
+      if (body == null) {
+        body = "{}";
+      }
+      byte[] out = body.getBytes(StandardCharsets.UTF_8);
       int length = out.length;
 
       URL url = new URL(inputUrl);
       URLConnection con = url.openConnection();
       HttpURLConnection http = (HttpURLConnection) con;
-      http.setRequestMethod("POST"); // PUT is another valid option
+      http.setRequestMethod("POST");
       http.setDoOutput(true);
       http.setFixedLengthStreamingMode(length);
       http.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
@@ -139,23 +133,25 @@ public interface DataSource {
       OutputStream os = http.getOutputStream();
       os.write(out);
       int code = http.getResponseCode();
+      http.disconnect();
 
-      // TODO: don't retry 400 or 403
-      if (code != 204 && code != 200) {
-        Logger.error("Bad response from update URL");
+      if (code == 204 && code == 200) {
+        Logger.log("Update call succeeded");
+        return true;
+      } else if (code == 400 || code != 403) {
+        Logger.log("Update call API error " + code + " not attempting retry");
+        return true;
+      } else {
+        Logger.log("Update call API error " + code + " attempting retry");
         Logger.error(String.valueOf(code));
         Logger.error(http.getResponseMessage());
         return false;
-      } else {
-        Logger.log("Update call succeeded");
       }
-      http.disconnect();
     } catch (Exception e) {
       Logger.error("Failed to call update URL");
       Logger.error(e);
       return false;
     }
-    return true;
   }
 
 }

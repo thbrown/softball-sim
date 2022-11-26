@@ -21,9 +21,8 @@ import com.github.thbrown.softballsim.optimizer.OptimizerEnum;
  * update thread function into separate classes.
  */
 public final class ProgressTracker {
-  // This should be at least as big as the number of threads, more will give
-  // better time estimation at
-  // the expense of a bigger memory footprint
+  // This should be at least as big as the number of threads, a larger value will give a more
+  // accurate time estimation at the expense of a bigger memory footprint
   private final static int RESULTS_BUFFER_SIZE = 512;
 
   // Multiple threads have read/write access to 'results' all use must sync on

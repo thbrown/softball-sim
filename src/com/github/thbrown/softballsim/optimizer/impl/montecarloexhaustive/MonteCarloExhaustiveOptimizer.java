@@ -229,13 +229,22 @@ public class MonteCarloExhaustiveOptimizer implements Optimizer<MonteCarloExhaus
 
     long elapsedTimeNanos = System.nanoTime() - startTime;
 
+    Logger.log("Tested " + counter + " games in "
+        + TimeUnit.MILLISECONDS.convert(elapsedTimeNanos, TimeUnit.NANOSECONDS) + "ms");
+
     long nanosPerGame = (long) ((double) elapsedTimeNanos / (counter));
     long totalGamesRequired = indexer.size() * parsedArguments.getGames();
     long nanosToTestAllGames = totalGamesRequired * nanosPerGame;
 
+    Logger.log("We estimate being able to test " + totalGamesRequired + " games in "
+        + TimeUnit.MILLISECONDS.convert(nanosToTestAllGames, TimeUnit.NANOSECONDS) + "ms");
+
     // Concurrent calc speedup (assuming perfect concurrency)
     long estimationTimeNanos = (long) ((double) nanosToTestAllGames
         / Math.min(parsedArguments.getThreads(), Runtime.getRuntime().availableProcessors()));
+
+    Logger.log("Assuming " + Runtime.getRuntime().availableProcessors() + " concurrent processors, that can be completed in "
+        + TimeUnit.MILLISECONDS.convert(estimationTimeNanos, TimeUnit.NANOSECONDS) + "ms");
 
     /*
      * // Parrellelizable ExecutorService executor =
@@ -267,7 +276,6 @@ public class MonteCarloExhaustiveOptimizer implements Optimizer<MonteCarloExhaus
      * // TODO: Account for partial results??
      */
 
-    // Do some extrapolation math
     long estimationTimeMs = TimeUnit.MILLISECONDS.convert(estimationTimeNanos, TimeUnit.NANOSECONDS);
     return new MonteCarloExhaustiveResult(estimationTimeMs);
   }

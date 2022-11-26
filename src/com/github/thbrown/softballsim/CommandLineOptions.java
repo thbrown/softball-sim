@@ -39,12 +39,10 @@ public class CommandLineOptions {
   public final static String VERBOSE = "v"; // Should this be 'B' and use 'V' for version?
   public final static String LINEUP = "l";
   public final static String FORCE = "f";
-  public final static String UPDATE_INTERVAL = "u";
   public final static String ESTIMATE_ONLY = "e";
-  public final static String ID = "i";
-  public final static String UPDATE_URL = "r";
-  public final static String UPDATE_API_KEY = "k";
-  public final static String UPDATE_STUFF = "s";
+  public final static String UPDATE_INTERVAL = "i";
+  public final static String UPDATE_URL = "u";
+  public final static String UPDATE_BODY = "b";
 
   public final static String DATA_SOURCE_DEFAULT = "FILE_SYSTEM";
   public final static String TYPE_LINEUP_DEFAULT = "STANDARD";
@@ -117,20 +115,13 @@ public class CommandLineOptions {
         .hasArg(false).required(false).build());
 
     // Options for HTTP post request on update (these should maybe be hidden since
-    // they are confusing if you just want ot run a lineup optimization)
+    // they are confusing if you just want to run a lineup optimization)
     commonOptions
         .add(Option.builder(UPDATE_URL).longOpt("url").desc("URL to make an HTTP POST when an update is available.")
             .hasArg(true).required(false).build());
-    commonOptions.add(Option.builder(UPDATE_API_KEY).longOpt("api-key")
-        .desc("Api key to include in the body of the HTTP POST when an update is available")
+    commonOptions.add(Option.builder(UPDATE_BODY).longOpt("update-body")
+        .desc("JSON string to be sent as the HTTP POST body to the update-url endpoint")
         .hasArg(true).required(false).build());
-    commonOptions.add(Option.builder(UPDATE_STUFF).longOpt("stuff")
-        .desc("Additional information to be sent in the HTTP POST payload")
-        .hasArg(true).required(false).build());
-    commonOptions.add(Option.builder(ID).longOpt("id").desc(DataSourceEnum.GCP_BUCKETS
-        + ": Required. An arbitrary id associated with this request. The same id can be used to query for intermediate results.")
-        .hasArg(true).required(false).build());
-
     return commonOptions;
   }
 

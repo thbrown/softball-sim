@@ -54,15 +54,15 @@ public class GcpFunctionsEntryPointQuery implements HttpFunction {
       map.remove(GcpFunctionsEntryPointStart.PASSWORD_KEY);
 
       // Some error checking for the id
-      String id = map.get(CommandLineOptions.ID);
-      Logger.log("ID " + id + " " + map);
+      String name = map.get(DataSourceGcpBuckets.NAME);
+      Logger.log("NAME " + name + " " + map);
 
-      if (id == null) {
-        CloudUtils.send400Error(response, "Missing required field '" + CommandLineOptions.ID + "' (Id)");
+      if (name == null) {
+        CloudUtils.send400Error(response, "Missing required field '" + DataSourceGcpBuckets.NAME + "' (Name)");
         return;
       }
 
-      String contentString = CloudUtils.readBlob(id, DataSourceGcpBuckets.CACHED_RESULTS_BUCKET);
+      String contentString = CloudUtils.readBlob(name, DataSourceGcpBuckets.CACHED_RESULTS_BUCKET);
       CloudUtils.send200Success(response, contentString);
     } catch (Exception e) {
       // Log stack

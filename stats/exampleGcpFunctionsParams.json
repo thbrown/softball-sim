@@ -1,10 +1,10 @@
 {
   "-o": "0",
-  "-i": "quebec",
+  "-n": "quebec",
   "-l": "Leroy,Roy,Ben,Joe,Oscar,Cheryl,Jessica,Ashley,Chelsea,Brianna",
   "-I": "7",
   "-G": "100",
-  "-u": 5000,
+  "-i": 5000,
   "-f": true,
   "-e": false,
   "PASSWORD": "<your_pwd>",

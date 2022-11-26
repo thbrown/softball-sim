@@ -99,8 +99,8 @@ This CLI tool expects data to be in softball.app JSON format. You can either edi
 # Production Build (Note: this runs tests, formats code, optimizes jar)
 ./gradlew build
 
-# Development Build without running tests (skips test and jar optimizations)
-./gradlew build -x test -x proguard
+# Development Build without optimizing the jar (output jar will work as a command line tool but gcp functions will break) or running tests
+./gradlew build -x proguard -x test
 
 ```
 

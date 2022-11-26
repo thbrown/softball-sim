@@ -35,7 +35,7 @@ public class GcpFunctionsEntryPointCompute implements HttpFunction {
   final String SNAPSHOT_NAME = "optimization-base-2";
 
   public static final String ARGS_KEY = "args";
-  public static final String ID_KEY = "id";
+  public static final String NAME_KEY = "name";
   public static final String ZONES_KEY = "zones";
 
   @Override
@@ -74,17 +74,17 @@ public class GcpFunctionsEntryPointCompute implements HttpFunction {
       Logger.log("Body: " + map.toString());
 
       String args = map.get(ARGS_KEY).replace("\\\"", "\"");
-      String id = map.get(ID_KEY);
+      String name = map.get(NAME_KEY);
       String[] zones = map.get(ZONES_KEY).split(",");
       zones = Arrays.stream(zones).filter(x -> !StringUtils.isBlank(x)).toArray(String[]::new); // Filter empty strings
 
       Logger.log("Args: " + args);
-      Logger.log("Id: " + id);
+      Logger.log("Name: " + name);
       Logger.log("Zones: " + Arrays.toString(zones) + " " + zones.length);
 
       // Don't start a new compute instance if the result is in a terminal state (e.g.
       // COMPLETE, PAUSED, etc...)
-      String resultJson = CloudUtils.readBlob(id, DataSourceGcpBuckets.CACHED_RESULTS_BUCKET);
+      String resultJson = CloudUtils.readBlob(name, DataSourceGcpBuckets.CACHED_RESULTS_BUCKET);
       Result result = gson.fromJson(resultJson, Result.class);
       if (result != null && result.getStatus().isTerminal()) {
         Logger.log("Not starting compute instance, ");
@@ -96,10 +96,10 @@ public class GcpFunctionsEntryPointCompute implements HttpFunction {
       // We've tried all the compute zones? mark the current result as ERROR
       if (zones.length == 0) {
         Logger.log("ERROR - Zones exhausted");
-        String resultJsonOriginal = CloudUtils.readBlob(id, DataSourceGcpBuckets.CACHED_RESULTS_BUCKET);
+        String resultJsonOriginal = CloudUtils.readBlob(name, DataSourceGcpBuckets.CACHED_RESULTS_BUCKET);
         String updatedResult = Result.copyWithNewStatusStringOnly(resultJsonOriginal, ResultStatusEnum.ERROR,
             "Cloud resources unavailable, try again later");
-        CloudUtils.upsertBlob(updatedResult, id, DataSourceGcpBuckets.CACHED_RESULTS_BUCKET);
+        CloudUtils.upsertBlob(updatedResult, name, DataSourceGcpBuckets.CACHED_RESULTS_BUCKET);
         throw new RuntimeException("Zones Exhausted");
       }
 
@@ -110,13 +110,13 @@ public class GcpFunctionsEntryPointCompute implements HttpFunction {
       // 1) lowercased optimization id
       // 2) a random string so unpauses don't fail before the shutdown
       // 3) remaining zones so we can see some basic info about the instance
-      final String intanceName = "opt-" + id.toLowerCase() + "-" + MiscUtils.getRandomString(10) + "-"
+      final String intanceName = "opt-" + name.toLowerCase() + "-" + MiscUtils.getRandomString(10) + "-"
           + futureZones.length;
 
       // TODO: retry on failure?
-      Operation operation = makeInstance(id, nextZone, PROJECT, MACHINE_TYPE, intanceName,
+      Operation operation = makeInstance(name, nextZone, PROJECT, MACHINE_TYPE, intanceName,
           HOME_DIRECTORY, SNAPSHOT_NAME, args, futureZones, pwd);
-      Logger.log(id + " operation: " + operation.getSelfLink());
+      Logger.log(name + " operation: " + operation.getSelfLink());
 
       // Send the response
       CloudUtils.send200Success(response, "Success - sent compute request start command.");
@@ -159,7 +159,7 @@ public class GcpFunctionsEntryPointCompute implements HttpFunction {
 
       JsonObject jsonObject = new JsonObject();
       jsonObject.add(GcpFunctionsEntryPointCompute.ARGS_KEY, new JsonPrimitive(applicationArguments));
-      jsonObject.add(GcpFunctionsEntryPointCompute.ID_KEY, new JsonPrimitive(optimizationId));
+      jsonObject.add(GcpFunctionsEntryPointCompute.NAME_KEY, new JsonPrimitive(optimizationId));
       jsonObject.add(GcpFunctionsEntryPointCompute.ZONES_KEY, new JsonPrimitive(String.join(",", futureZones)));
       jsonObject.add(GcpFunctionsEntryPointStart.PASSWORD_KEY, new JsonPrimitive(pwd)); // TODO: this is pretty sloppy, switch to use service accounts
       Gson gson = GsonAccessor.getInstance().getCustom();

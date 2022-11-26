@@ -40,7 +40,7 @@ public class GcpFunctionsEntryPointStart implements HttpFunction {
   private static final String ZONES = "us-central1-a,us-central1-b,us-central1-c,us-central1-f";
 
   private static final String DATA_KEY = "data";
-  private static final String ID_KEY = "-" + CommandLineOptions.ID;
+  private static final String NAME_KEY = "-" + DataSourceGcpBuckets.NAME;
   private static final String DATA_SOURCE_KEY = "-" + CommandLineOptions.DATA_SOURCE;
   private static final String ESTIMATE_ONLY_KEY = "-" + CommandLineOptions.ESTIMATE_ONLY;
   private static final String OPTIMIZER_KEY = "-" + CommandLineOptions.OPTIMIZER;
@@ -84,14 +84,15 @@ public class GcpFunctionsEntryPointStart implements HttpFunction {
       Logger.log("Map " + map);
 
       // Error checking
-      String id = map.get(ID_KEY);
+      String id = map.get(NAME_KEY);
       if (id == null) {
-        new RuntimeException("Required json field " + ID_KEY + " (id) was not specified in the request body");
+        new RuntimeException("Required json field " + NAME_KEY + " (name) was not specified in the request body");
       }
       int length = id.length();
       if (length < 15 || length > 63) {
         new RuntimeException(
-            "Please provide an Id (-I) that is longer than 15 characters and shorter than 64 characters. Was " + length
+            "Please provide an Name (-n) that is longer than 15 characters and shorter than 64 characters. Was "
+                + length
                 + " characters");
       }
 
@@ -185,7 +186,7 @@ public class GcpFunctionsEntryPointStart implements HttpFunction {
       // Start the job on a compute instance
       JsonObject jsonObject = new JsonObject();
       jsonObject.add(GcpFunctionsEntryPointCompute.ARGS_KEY, new JsonPrimitive(stringArguments));
-      jsonObject.add(GcpFunctionsEntryPointCompute.ID_KEY, new JsonPrimitive(map.get(ID_KEY)));
+      jsonObject.add(GcpFunctionsEntryPointCompute.NAME_KEY, new JsonPrimitive(map.get(NAME_KEY)));
       jsonObject.add(GcpFunctionsEntryPointCompute.ZONES_KEY, new JsonPrimitive(ZONES));
       jsonObject.add(PASSWORD_KEY, new JsonPrimitive(pwd));
       String jsonPayload = gson.toJson(jsonObject);

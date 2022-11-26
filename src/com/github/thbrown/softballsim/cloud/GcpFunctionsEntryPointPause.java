@@ -52,16 +52,16 @@ public class GcpFunctionsEntryPointPause implements HttpFunction {
       map.remove(GcpFunctionsEntryPointStart.PASSWORD_KEY);
 
       // Some error checking for the id
-      String id = map.get(CommandLineOptions.ID);
-      if (id == null) {
+      String name = map.get(DataSourceGcpBuckets.NAME);
+      if (name == null) {
         CloudUtils.send400Error(response,
-            "Required json field " + CommandLineOptions.ID + " was not specified in the body");
+            "Required json field " + DataSourceGcpBuckets.NAME + " was not specified in the body");
         return;
       }
 
       // We'll add flag to the control bucket to indicate that a currently running
       // optimization should stop
-      CloudUtils.upsertBlob("HALT", id, DataSourceGcpBuckets.CONTROL_FLAGS_BUCKET);
+      CloudUtils.upsertBlob("HALT", name, DataSourceGcpBuckets.CONTROL_FLAGS_BUCKET);
 
       // Return success
       CloudUtils.send200Success(response, "Successfully sent pause request");
