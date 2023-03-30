@@ -243,8 +243,9 @@ public class MonteCarloExhaustiveOptimizer implements Optimizer<MonteCarloExhaus
     long estimationTimeNanos = (long) ((double) nanosToTestAllGames
         / Math.min(parsedArguments.getThreads(), Runtime.getRuntime().availableProcessors()));
 
-    Logger.log("Assuming " + Runtime.getRuntime().availableProcessors() + " concurrent processors, that can be completed in "
-        + TimeUnit.MILLISECONDS.convert(estimationTimeNanos, TimeUnit.NANOSECONDS) + "ms");
+    Logger.log(
+        "Assuming " + Runtime.getRuntime().availableProcessors() + " concurrent processors, that can be completed in "
+            + TimeUnit.MILLISECONDS.convert(estimationTimeNanos, TimeUnit.NANOSECONDS) + "ms");
 
     /*
      * // Parrellelizable ExecutorService executor =

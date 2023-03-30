@@ -6,7 +6,7 @@
   "-G": "100",
   "-i": 5000,
   "-f": true,
-  "-e": false,
+  "-e": true,
   "PASSWORD": "<your_pwd>",
   "data": {
     "players": [

@@ -117,4 +117,27 @@ public class CloudUtils {
     return GsonAccessor.getInstance().getDefault().toJson(jsonObject);
   }
 
+  /**
+   * Convert a map of arguments to a string that can be passed into a shell. This function wraps all
+   * flags and values in single quotes and escapes any single quotes within all flags/values, so the
+   * literal values can be passed to a shell without worrying about shell injection.
+   */
+  public static String argMapToShellString(MapWrapper s) {
+    StringBuilder builder = new StringBuilder();
+    for (String key : s.keySet()) {
+      String value = s.get(key);
+      if (value.equalsIgnoreCase("true")) {
+        // Boolean flag set to true, just add the flag
+        builder.append("\'" + BashEscape.SHELL_ESCAPE.escape(key) + "\' ");
+      } else if (value.equalsIgnoreCase("false")) {
+        // Boolean flag set to false, don't add any args
+      } else {
+        // Flag w/ a value, add both flag and value to args
+        builder.append("\'" + BashEscape.SHELL_ESCAPE.escape(key) + "\' ");
+        builder.append("\'" + BashEscape.SHELL_ESCAPE.escape(s.get(key)) + "\' ");
+      }
+    }
+    return builder.toString();
+  }
+
 }

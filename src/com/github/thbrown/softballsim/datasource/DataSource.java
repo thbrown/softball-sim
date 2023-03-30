@@ -150,7 +150,7 @@ public interface DataSource {
     } catch (Exception e) {
       Logger.error("Failed to call update URL");
       Logger.error(e);
-      return false;
+      return true;
     }
   }
 

@@ -27,6 +27,10 @@ public class MapWrapper {
     arguments.put(key, value);
   }
 
+  public boolean containsKey(String key) {
+    return arguments.containsKey(key);
+  }
+
   public void remove(String string) {
     arguments.remove(string);
   }

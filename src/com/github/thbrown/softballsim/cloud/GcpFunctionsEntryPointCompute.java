@@ -24,9 +24,12 @@ import com.google.common.collect.ImmutableList;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 
 /**
- * A GCP function for starting up a preemptible compute instance. Unlike the other functions in this
- * project, this isn't supposed to be called over the public internet. Rather it is called by the
- * start function if the function runtime expires, or by a compute instance shut down script in the
+ * A GCP function for starting up a preemptible compute instance. Unlike the
+ * other functions in this
+ * project, this isn't supposed to be called over the public internet. Rather it
+ * is called by the
+ * start function if the function runtime expires, or by a compute instance shut
+ * down script in the
  * case of preemption.
  */
 public class GcpFunctionsEntryPointCompute implements HttpFunction {
@@ -34,7 +37,6 @@ public class GcpFunctionsEntryPointCompute implements HttpFunction {
   final String MACHINE_TYPE = "e2-highcpu-4";
   final String SNAPSHOT_NAME = "optimization-base-2";
 
-  public static final String ARGS_KEY = "args";
   public static final String NAME_KEY = "name";
   public static final String ZONES_KEY = "zones";
 
@@ -69,18 +71,23 @@ public class GcpFunctionsEntryPointCompute implements HttpFunction {
       if (!pwdHash.equals(PASSWORD_HASH)) {
         throw new RuntimeException("Invalid Password");
       }
-      map.remove(GcpFunctionsEntryPointStart.PASSWORD_KEY);
 
       Logger.log("Body: " + map.toString());
 
-      String args = map.get(ARGS_KEY).replace("\\\"", "\"");
+      // The "-b" flag is a stringified json object. Gson escapes the double quotes,
+      // we don't want it to be stringified here.
+      if (map.containsKey("-b")) {
+        map.put("-b", map.get("-b").replace("\\\"", "\""));
+      }
+
       String name = map.get(NAME_KEY);
       String[] zones = map.get(ZONES_KEY).split(",");
       zones = Arrays.stream(zones).filter(x -> !StringUtils.isBlank(x)).toArray(String[]::new); // Filter empty strings
 
-      Logger.log("Args: " + args);
-      Logger.log("Name: " + name);
-      Logger.log("Zones: " + Arrays.toString(zones) + " " + zones.length);
+      // Remove non-argument keys
+      map.remove(GcpFunctionsEntryPointCompute.NAME_KEY);
+      map.remove(GcpFunctionsEntryPointCompute.ZONES_KEY);
+      map.remove(GcpFunctionsEntryPointStart.PASSWORD_KEY);
 
       // Don't start a new compute instance if the result is in a terminal state (e.g.
       // COMPLETE, PAUSED, etc...)
@@ -110,12 +117,13 @@ public class GcpFunctionsEntryPointCompute implements HttpFunction {
       // 1) lowercased optimization id
       // 2) a random string so unpauses don't fail before the shutdown
       // 3) remaining zones so we can see some basic info about the instance
-      final String intanceName = "opt-" + name.toLowerCase() + "-" + MiscUtils.getRandomString(10) + "-"
+      final String instanceName = "opt-" + name.toLowerCase() + "-" + MiscUtils.getRandomString(10) + "-"
           + futureZones.length;
 
       // TODO: retry on failure?
-      Operation operation = makeInstance(name, nextZone, PROJECT, MACHINE_TYPE, intanceName,
-          HOME_DIRECTORY, SNAPSHOT_NAME, args, futureZones, pwd);
+
+      Operation operation = makeInstance(name, nextZone, PROJECT, MACHINE_TYPE, instanceName,
+          HOME_DIRECTORY, SNAPSHOT_NAME, map, futureZones, pwd);
       Logger.log(name + " operation: " + operation.getSelfLink());
 
       // Send the response
@@ -127,9 +135,10 @@ public class GcpFunctionsEntryPointCompute implements HttpFunction {
   }
 
   private Operation makeInstance(String optimizationId, String zone, String project, String machineType,
-      String instanceName, String homeDirectory, String snapshotName, String applicationArguments, String[] futureZones,
+      String instanceName, String homeDirectory, String snapshotName, MapWrapper args, String[] futureZones,
       String pwd) throws IOException, GeneralSecurityException {
 
+    String stringArgs = CloudUtils.argMapToShellString(args);
     Logger.log("Starting instance: " + instanceName);
 
     // @formatter:off 
@@ -148,8 +157,8 @@ public class GcpFunctionsEntryPointCompute implements HttpFunction {
       .append("done\n")
       .append("echo \"Optimization Id: $OPTIMIZATION_ID\"\n")
       .append("cd $HOME_DIRECTORY\n")
-      .append("echo java -jar softball-sim.jar " + applicationArguments + "\n")
-      .append("java -jar softball-sim.jar " + applicationArguments + "\n")
+      .append("echo java -jar softball-sim.jar " + stringArgs + "\n")
+      .append("java -jar softball-sim.jar " + stringArgs + "\n")
       //.append("gcloud logging write my-test-log \"$(tail java.log)\" --severity=NOTICE") // Log for helpful debug info in case of failure
       .append("echo deleting self" + "\n")
       .append("gcloud --quiet compute instances delete " + instanceName + " --zone=" + zone + "\n") // Delete the instance after job completes
@@ -158,7 +167,9 @@ public class GcpFunctionsEntryPointCompute implements HttpFunction {
       Logger.log("Startup script: " + startupScript);
 
       JsonObject jsonObject = new JsonObject();
-      jsonObject.add(GcpFunctionsEntryPointCompute.ARGS_KEY, new JsonPrimitive(applicationArguments));
+      for (String key : args.keySet()) {
+        jsonObject.add(key, new JsonPrimitive(args.get(key)));
+      }
       jsonObject.add(GcpFunctionsEntryPointCompute.NAME_KEY, new JsonPrimitive(optimizationId));
       jsonObject.add(GcpFunctionsEntryPointCompute.ZONES_KEY, new JsonPrimitive(String.join(",", futureZones)));
       jsonObject.add(GcpFunctionsEntryPointStart.PASSWORD_KEY, new JsonPrimitive(pwd)); // TODO: this is pretty sloppy, switch to use service accounts
@@ -166,6 +177,8 @@ public class GcpFunctionsEntryPointCompute implements HttpFunction {
       String jsonPayload = gson.toJson(jsonObject);
       Logger.log("Payload on shutdown " + jsonPayload);
 
+      // On shutdown, we'll assume the optimization is incomplete and we'll try to start another compute instance to continue
+      // If the optimization is in a terminal state (COMPLETE, ERROR, etc.), this call will not start a new compute instance
       String shutdownScript = new StringBuilder()
       .append("#!/bin/sh\n")
       .append("echo running shutdown script\n")

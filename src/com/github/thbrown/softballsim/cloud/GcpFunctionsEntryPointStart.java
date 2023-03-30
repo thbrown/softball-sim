@@ -32,8 +32,10 @@ import com.google.gson.JsonPrimitive;
 /**
  * This class enables the ability for optimizers to be run via a GCP function.
  * 
- * Flags and data are supplied via the post body. Estimations are run synchronously, normal runs are
- * run async and Results (final and intermediate) are written to a cloud storage bucket.
+ * Flags and data are supplied via the post body. Estimations are run
+ * synchronously, normal runs are
+ * run async and Results (final and intermediate) are written to a cloud storage
+ * bucket.
  */
 public class GcpFunctionsEntryPointStart implements HttpFunction {
 
@@ -81,14 +83,12 @@ public class GcpFunctionsEntryPointStart implements HttpFunction {
       }
       map.remove(PASSWORD_KEY);
 
-      Logger.log("Map " + map);
-
       // Error checking
-      String id = map.get(NAME_KEY);
-      if (id == null) {
+      String name = map.get(NAME_KEY);
+      if (name == null) {
         new RuntimeException("Required json field " + NAME_KEY + " (name) was not specified in the request body");
       }
-      int length = id.length();
+      int length = name.length();
       if (length < 15 || length > 63) {
         new RuntimeException(
             "Please provide an Name (-n) that is longer than 15 characters and shorter than 64 characters. Was "
@@ -104,14 +104,16 @@ public class GcpFunctionsEntryPointStart implements HttpFunction {
 
       // Write the stats data to a cloud storage bucket (application will look for it
       // there)
-      Logger.log(id + " uploading stats");
-      CloudUtils.upsertBlob(data, id, DataSourceGcpBuckets.STATS_DATA_BUCKET);
+      Logger.log(name + " uploading stats");
+      CloudUtils.upsertBlob(data, name, DataSourceGcpBuckets.STATS_DATA_BUCKET);
 
       // Delete flags (un-pause if paused)
-      CloudUtils.deleteBlob(id, DataSourceGcpBuckets.CONTROL_FLAGS_BUCKET);
+      CloudUtils.deleteBlob(name, DataSourceGcpBuckets.CONTROL_FLAGS_BUCKET);
 
       // Set the data source appropriately (GCP_BUCKETS)
       map.put(DATA_SOURCE_KEY, DataSourceEnum.GCP_BUCKETS.name());
+
+      // Logger.log("Map " + map);
 
       // Add all flags and values from the request to the command arguments
       List<String> args = new ArrayList<>();
@@ -133,18 +135,15 @@ public class GcpFunctionsEntryPointStart implements HttpFunction {
       MapWrapper shallowCopy = new MapWrapper(map);
       shallowCopy.remove("-" + CommandLineOptions.FORCE);
 
-      // Get flags/values as string so we can pass it to the compute function
-      String stringArguments = argMapToShellString(shallowCopy);
-
       // If this is an estimate only, run the optimization synchronously
       if (map.get(ESTIMATE_ONLY_KEY) != null && !map.get(ESTIMATE_ONLY_KEY).equalsIgnoreCase("false")) {
         // Run optimization with those command line arguments
-        Logger.log(id + " arguments: " + args.toString());
+        Logger.log(name + " arguments: " + args.toString());
         Result result = SoftballSim.mainInternal(args.toArray(new String[args.size()]));
-        Logger.log(id + " run complete " + result);
+        Logger.log(name + " run complete " + result);
 
         // Return the result
-        Logger.log(id + " returning");
+        Logger.log(name + " returning");
         response.setContentType("application/json");
         response.setStatusCode(200);
         response.getOutputStream().write(gson.toJson(result).getBytes());
@@ -158,7 +157,7 @@ public class GcpFunctionsEntryPointStart implements HttpFunction {
       // TODO: There is a race condition here between the read and the write, we can
       // solve that with gcp
       // "generation" and "pre-conditions"
-      String resultString = CloudUtils.readBlob(id, DataSourceGcpBuckets.CACHED_RESULTS_BUCKET);
+      String resultString = CloudUtils.readBlob(name, DataSourceGcpBuckets.CACHED_RESULTS_BUCKET);
       Logger.log("Result blob is " + resultString);
       Result result = GsonAccessor.getInstance().getCustom().fromJson(resultString, Result.class);
       // Change the status to IN_PROGRESS if it's not already
@@ -168,13 +167,13 @@ public class GcpFunctionsEntryPointStart implements HttpFunction {
         Result emptyResult = new EmptyResult(OptimizerEnum.getEnumFromId(map.get(OPTIMIZER_KEY)),
             ResultStatusEnum.ALLOCATING_RESOURCES);
         String emptyResultString = GsonAccessor.getInstance().getCustom().toJson(emptyResult);
-        CloudUtils.upsertBlob(emptyResultString, id, DataSourceGcpBuckets.CACHED_RESULTS_BUCKET);
+        CloudUtils.upsertBlob(emptyResultString, name, DataSourceGcpBuckets.CACHED_RESULTS_BUCKET);
       } else if (!result.getStatus().isActive()) {
         // This happens if the opt was paused or it error'ed out
         Logger.log("Existing result, changing status from " + result.getStatus() + " to ALLOCATING_RESOURCES");
         String updatedResultString = Result.copyWithNewStatusStringOnly(resultString,
             ResultStatusEnum.ALLOCATING_RESOURCES, null);
-        CloudUtils.upsertBlob(updatedResultString, id, DataSourceGcpBuckets.CACHED_RESULTS_BUCKET);
+        CloudUtils.upsertBlob(updatedResultString, name, DataSourceGcpBuckets.CACHED_RESULTS_BUCKET);
       } else {
         // Don't start the optimization if it is already active based on its status
         // (IN_PROGRESS or
@@ -185,17 +184,23 @@ public class GcpFunctionsEntryPointStart implements HttpFunction {
 
       // Start the job on a compute instance
       JsonObject jsonObject = new JsonObject();
-      jsonObject.add(GcpFunctionsEntryPointCompute.ARGS_KEY, new JsonPrimitive(stringArguments));
       jsonObject.add(GcpFunctionsEntryPointCompute.NAME_KEY, new JsonPrimitive(map.get(NAME_KEY)));
       jsonObject.add(GcpFunctionsEntryPointCompute.ZONES_KEY, new JsonPrimitive(ZONES));
       jsonObject.add(PASSWORD_KEY, new JsonPrimitive(pwd));
+      // The remaining properties are params that should be passed right to the
+      // application, there is no risk of key conflicts because all input args begin
+      // with a "-"
+      for (String key : shallowCopy.keySet()) {
+        jsonObject.add(key, new JsonPrimitive(shallowCopy.get(key)));
+      }
+
       String jsonPayload = gson.toJson(jsonObject);
 
       // TODO: can't we just invoke this directly via some google cloud api? That
       // might simplify
-      Logger.log(id + " sending compute request " + jsonPayload);
+      Logger.log(name + " sending compute request " + jsonPayload);
       int status = this.sendPost(COMPUTE_FUNCTION_ENDPOINT, jsonPayload);
-      Logger.log(id + " compute request status: " + status);
+      Logger.log(name + " compute request status: " + status);
 
       // Send success message as json
       CloudUtils.send200Success(response, "job transferred to compute");
@@ -212,7 +217,8 @@ public class GcpFunctionsEntryPointStart implements HttpFunction {
     } finally {
       // End the function execution, no need to wait for our async timeout
       // this also kills any optimizer threads that may still be running
-      System.exit(0);
+      // Thread.sleep(2000); // Prevent truncated response body
+      // System.exit(0);
     }
   }
 
@@ -230,25 +236,6 @@ public class GcpFunctionsEntryPointStart implements HttpFunction {
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
-  }
-
-  public static String argMapToShellString(MapWrapper s) {
-    StringBuilder builder = new StringBuilder();
-    // TODO: Names can't contains commas
-    for (String key : s.keySet()) {
-      String value = s.get(key);
-      if (value.equalsIgnoreCase("true")) {
-        // Boolean flag set to true, just add the flag
-        builder.append(key + " ");
-      } else if (value.equalsIgnoreCase("false")) {
-        // Boolean flag set to false, don't add any args
-      } else {
-        // Flag w/ a value, add both flag and value to args
-        builder.append(key + " ");
-        builder.append("\"" + BashEscape.SHELL_ESCAPE.escape(s.get(key)) + "\" ");
-      }
-    }
-    return builder.toString();
   }
 
 }
